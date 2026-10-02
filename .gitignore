@@ -1,0 +1,5 @@
+target/
+config.json
+config.json.tmp
+recordings/
+.DS_Store

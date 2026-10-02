@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AutoMA3</title>
+<style>
+  :root {
+    --bg: #0d0f12; --panel: #161a20; --panel2: #1d222a; --line: #2a313b; --text: #e6e9ee; --muted: #8b95a3;
+    --accent: #f5a524; --ok: #3ccf7a; --bad: #ff5c5c; --info: #4ea1ff;
+    --INTRO: #4a6b8a; --GROOVE: #2f8f6b; --BUILD: #d9a21b; --BREAKDOWN: #5a5fc7; --DROP: #e8453c; --PEAK: #c2337a; --OUTRO: #4a6b8a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  header { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  header h1 { font-size: 18px; margin: 0; letter-spacing: .5px; }
+  header .status { color: var(--muted); font-size: 13px; flex: 1; min-width: 200px; }
+  nav { display: flex; gap: 4px; padding: 0 16px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+  nav button { background: none; border: none; color: var(--muted); padding: 10px 14px; cursor: pointer; font-size: 14px; border-bottom: 2px solid transparent; }
+  nav button.active { color: var(--text); border-bottom-color: var(--accent); }
+  main { padding: 16px; max-width: 1400px; margin: 0 auto; }
+  .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; min-width: 0; }
+  .panel h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 0 0 10px; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; background: var(--panel2); border: 1px solid var(--line); }
+  .badge.ok { color: var(--ok); border-color: var(--ok); } .badge.bad { color: var(--bad); border-color: var(--bad); } .badge.warn { color: var(--accent); border-color: var(--accent); }
+  .section-big { font-size: 40px; font-weight: 700; letter-spacing: 1px; }
+  .muted { color: var(--muted); } .small { font-size: 12px; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .meter { height: 8px; background: var(--panel2); border-radius: 4px; overflow: hidden; }
+  .meter > div { height: 100%; background: var(--accent); transition: width .2s; }
+  button.ctl { background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 12px 16px; font-size: 15px; font-weight: 600; cursor: pointer; min-width: 90px; }
+  button.ctl.on { background: var(--ok); color: #04150c; border-color: var(--ok); }
+  button.ctl.warn { background: var(--accent); color: #1a1000; border-color: var(--accent); }
+  button.ctl.danger { border-color: var(--bad); color: var(--bad); }
+  button.ctl:active { transform: scale(.97); }
+  button.small { background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 12px; }
+  button.primary { background: var(--accent); color: #1a1000; border: none; border-radius: 6px; padding: 8px 18px; font-weight: 600; cursor: pointer; }
+  .deck { border: 1px solid var(--line); border-radius: 6px; padding: 8px; margin-bottom: 8px; background: var(--panel2); }
+  .deck.primary { border-color: var(--accent); }
+  .timeline { position: relative; height: 18px; display: flex; border-radius: 3px; overflow: hidden; margin-top: 6px; background: #000; }
+  .timeline > div { height: 100%; border-right: 1px solid rgba(0,0,0,.4); }
+  .timeline .head { position: absolute; top: 0; bottom: 0; width: 2px; background: #fff; box-shadow: 0 0 4px #fff; }
+  .log { font: 12px/1.5 ui-monospace, Menlo, monospace; max-height: 340px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
+  .log .sent { color: var(--text); } .log .unsent { color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 5px 4px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; font-size: 12px; }
+  input, select, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; font: inherit; max-width: 100%; }
+  input[type=number] { width: 70px; } input.w-s { width: 52px; } input.w-m { width: 120px; }
+  .chips { display: grid; grid-template-columns: repeat(4, auto); gap: 3px; min-width: 230px; }
+  .chip { font-size: 11px; padding: 2px 6px; border-radius: 3px; border: 1px solid var(--line); cursor: pointer; user-select: none; color: var(--muted); }
+  .chip.on { color: #fff; border-color: transparent; }
+  .table-wrap { overflow-x: auto; }
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px 16px; }
+  .form-grid label { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; }
+  .form-grid label span { color: var(--muted); }
+  pre.code { background: var(--bg); border: 1px solid var(--line); padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 12px; }
+  .hidden { display: none !important; }
+  .savebar { position: sticky; bottom: 0; background: var(--bg); padding: 10px 0; display: flex; gap: 10px; align-items: center; border-top: 1px solid var(--line); margin-top: 12px; }
+  .kv { display: flex; gap: 6px; margin-bottom: 4px; }
+  @media (max-width: 600px) { main { padding: 10px; } .section-big { font-size: 30px; } button.ctl { flex: 1 1 40%; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>AutoMA3</h1>
+  <span id="srcStatus" class="status">connecting...</span>
+  <span id="dryBadge" class="badge warn hidden">DRY RUN</span>
+  <button class="small" id="dryBtn">Dry run</button>
+  <button class="small" id="recBtn">Record</button>
+</header>
+<nav>
+  <button data-tab="live" class="active">Live</button>
+  <button data-tab="looks">Looks</button>
+  <button data-tab="consoles">Consoles</button>
+  <button data-tab="settings">Settings</button>
+  <button data-tab="setup">MA3 setup</button>
+</nav>
+<main>
+  <!-- LIVE -->
+  <section id="tab-live">
+    <div class="grid">
+      <div class="panel">
+        <h2>Now</h2>
+        <div class="section-big" id="section">-</div>
+        <div class="muted small" id="reason"></div>
+        <div class="row" style="margin-top:8px"><span class="muted">Energy</span><div class="meter" style="flex:1"><div id="energyBar" style="width:0"></div></div><span id="energyVal">0</span></div>
+        <div class="row" style="margin-top:6px"><span class="badge" id="bpm">- BPM</span><span class="badge" id="next">next: -</span><span class="badge" id="player">player -</span></div>
+      </div>
+      <div class="panel">
+        <h2>Operator</h2>
+        <div class="row">
+          <button class="ctl" id="c-auto">AUTO</button>
+          <button class="ctl" id="c-hold">HOLD</button>
+          <button class="ctl warn" id="c-drop">DROP</button>
+          <button class="ctl" id="c-next">NEXT LOOK</button>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="ctl" id="c-strobe">STROBE OK</button>
+          <button class="ctl danger" id="c-arm">SPECIALS</button>
+          <button class="ctl" id="c-release">RELEASE LOCKS</button>
+        </div>
+        <div class="row" style="margin-top:10px"><span class="muted">Calmer</span><input type="range" id="bias" min="0" max="100" value="50" style="flex:1"><span class="muted">Harder</span></div>
+      </div>
+      <div class="panel">
+        <h2>Running looks</h2>
+        <div id="activeLooks" class="small"></div>
+        <div id="locks" class="small" style="margin-top:6px"></div>
+        <div id="consoleState" class="small" style="margin-top:8px"></div>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:12px">
+      <h2>Decks</h2>
+      <div id="decks" class="muted">No players yet.</div>
+    </div>
+    <div class="grid" style="margin-top:12px">
+      <div class="panel"><h2>Decisions</h2><div class="log" id="events"></div></div>
+      <div class="panel"><h2>Commands sent</h2><div class="log" id="commands"></div></div>
+    </div>
+  </section>
+
+  <!-- LOOKS -->
+  <section id="tab-looks" class="hidden">
+    <div class="panel">
+      <h2>Looks (executors)</h2>
+      <p class="muted small">Minimal show: one look per role. Richer show: several looks per role (the engine picks by section and energy, with variety)
+        and extra <b>layers</b> (e.g. two MOVEMENT layers "Spots" and "Washes" run at the same time). Sections empty = any section.
+        <b>Seq</b> = sequence number on that executor (MA3 2.1+): lets the app notice when you touch it and back off.</p>
+      <div class="table-wrap"><table id="looksTable"></table></div>
+      <div class="row" style="margin-top:8px"><button class="small" id="addLook">+ Add look</button></div>
+    </div>
+  </section>
+
+  <!-- CONSOLES -->
+  <section id="tab-consoles" class="hidden">
+    <div class="panel">
+      <h2>Consoles</h2>
+      <p class="muted small">Commands go to every enabled console, each in the syntax of its software version. Unknown versions fall back to the closest profile.
+        Override a command template per console only if a test shows a different syntax.</p>
+      <div id="consolesList"></div>
+      <button class="small" id="addConsole">+ Add console</button>
+    </div>
+    <div class="panel" style="margin-top:12px">
+      <h2>Version profiles</h2>
+      <div id="profiles" class="small"></div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="tab-settings" class="hidden">
+    <div id="settingsForms"></div>
+  </section>
+
+  <!-- SETUP -->
+  <section id="tab-setup" class="hidden">
+    <div class="panel" id="setupText"></div>
+  </section>
+
+  <div class="savebar hidden" id="savebar">
+    <button class="primary" id="saveBtn">Save changes</button>
+    <button class="small" id="revertBtn">Discard</button>
+    <span class="muted small" id="saveMsg"></span>
+  </div>
+</main>
+
+<script>
+const SECTIONS = ["INTRO","GROOVE","BUILD","BREAKDOWN","DROP","PEAK","OUTRO"];
+const ROLES = ["BASE","COLOR","MOVEMENT","EFFECT","RISER","ACCENT","STROBE","BLINDER","BLACKOUT","HAZE","FOG","SPECIAL"];
+const MODES = ["","TOGGLE","FLASH","TEMP","FADER"];
+let state = null, config = null, draft = null, profiles = [], dirty = false;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const api = async (path, opts = {}) => {
+  const r = await fetch(path, opts);
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+};
+const post = (path) => api(path, {method: "POST"});
+
+// ---------- tabs
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("active", x === b));
+  document.querySelectorAll("main > section").forEach(s => s.classList.toggle("hidden", s.id !== "tab-" + b.dataset.tab));
+  if (b.dataset.tab === "setup") renderSetup();
+});
+
+// ---------- live
+async function poll() {
+  try {
+    state = await api("/api/state");
+    renderLive();
+  } catch (e) {
+    $("srcStatus").textContent = "app not reachable: " + e.message;
+  }
+  setTimeout(poll, 300);
+}
+
+function renderLive() {
+  const e = state.engine;
+  $("srcStatus").textContent = state.source.name + ": " + state.source.status;
+  $("dryBadge").classList.toggle("hidden", !state.dryRun);
+  $("dryBtn").textContent = state.dryRun ? "Go live" : "Dry run";
+  $("recBtn").textContent = state.recording ? "Stop recording" : "Record";
+  $("recBtn").style.color = state.recording ? "var(--bad)" : "";
+  $("section").textContent = e.section || "-";
+  $("section").style.color = e.section ? `var(--${e.section})` : "";
+  $("reason").textContent = e.sectionReason || "";
+  $("energyBar").style.width = Math.round(e.energy * 100) + "%";
+  $("energyVal").textContent = e.energy.toFixed(2);
+  $("bpm").textContent = (e.bpm || "-") + " BPM";
+  $("next").textContent = e.nextSection ? `next: ${e.nextSection} in ${Math.ceil(e.beatsToNext / 4)} bars` : "next: -";
+  $("player").textContent = e.primaryPlayer > 0 ? "following player " + e.primaryPlayer : "no deck";
+  setCtl("c-auto", e.auto, "AUTO ON", "AUTO OFF");
+  setCtl("c-hold", e.hold, "HOLDING", "HOLD");
+  setCtl("c-strobe", e.strobeAllowed, "STROBE OK", "STROBE OFF");
+  setCtl("c-arm", e.specialsArmed, "SPECIALS ARMED", "SPECIALS SAFE");
+  if (document.activeElement !== $("bias")) $("bias").value = Math.round((e.energyBias + 0.5) * 100);
+
+  $("activeLooks").innerHTML = Object.entries(e.activeLooks).map(([k, v]) => `<div><span class="muted">${esc(k)}</span> ${esc(v)}</div>`).join("") || '<span class="muted">nothing running</span>';
+  $("locks").innerHTML = Object.entries(e.lockedLayersSec).map(([k, v]) => `<span class="badge warn">${esc(k)} manual ${v}s</span>`).join(" ");
+  const cons = state.consoles.map(c => `<span class="badge ${c.enabled ? (c.verified ? "ok" : "warn") : ""}" title="${esc(c.profile)}">${esc(c.name)} ${esc(c.target)}${c.enabled ? "" : " (off)"}</span>`).join(" ");
+  const oscIn = state.oscInAgeSec < 0 ? "no OSC received yet" : `OSC in ${state.oscInAgeSec}s ago`;
+  const audio = e.audio.running ? `audio: ${e.audio.signal ? (e.audio.kick ? "kick" : "no kick") : "no signal"}` : (state.audioError ? "audio error: " + state.audioError : "audio off");
+  $("consoleState").innerHTML = cons + `<div class="muted" style="margin-top:4px">${esc(oscIn)} · ${esc(audio)}${state.sendError ? ' · <span style="color:var(--bad)">' + esc(state.sendError) + "</span>" : ""}</div>`;
+
+  $("decks").innerHTML = e.decks.length ? e.decks.map(deckHtml).join("") : '<span class="muted">No players yet.</span>';
+  $("events").textContent = e.events.join("\n");
+  $("commands").innerHTML = state.commands.slice().reverse().map(c => {
+    const t = new Date(c.timeMs).toLocaleTimeString();
+    return `<div class="${c.sent ? "sent" : "unsent"}">${t} ${esc(c.command)} <span class="muted">· ${esc(c.reason)}${c.sent ? "" : " (not sent)"}</span></div>`;
+  }).join("");
+}
+
+function setCtl(id, on, onText, offText) {
+  const b = $(id);
+  b.classList.toggle("on", on);
+  b.textContent = on ? onText : offText;
+}
+
+function deckHtml(d) {
+  const total = d.lastBeat || 1;
+  const segs = d.segments.map(s => `<div title="${s.section} (${esc(s.label)})" style="width:${(s.endBeat - s.startBeat) / total * 100}%;background:var(--${s.section})"></div>`).join("");
+  const head = d.beat > 0 && d.segments.length ? `<div class="head" style="left:${Math.min(100, d.beat / total * 100)}%"></div>` : "";
+  return `<div class="deck ${d.primary ? "primary" : ""}">
+    <div class="row"><b>Player ${d.player}</b>
+      ${d.playing ? '<span class="badge ok">playing</span>' : '<span class="badge">stopped</span>'}
+      ${d.onAir ? '<span class="badge ok">on air</span>' : ""}${d.master ? '<span class="badge">master</span>' : ""}
+      ${d.primary ? '<span class="badge warn">driving lights</span>' : ""}
+      <span class="muted">${d.bpm} BPM · beat ${d.beat} · ${esc(d.section || "-")} · analysis: ${esc(d.analysis)}</span></div>
+    <div class="small">${esc(d.title || "")} <span class="muted">${esc(d.artist || "")}</span></div>
+    <div class="timeline">${segs || '<div style="width:100%;background:var(--panel)"></div>'}${head}</div>
+  </div>`;
+}
+
+const ctl = (action, value) => post("/api/control/" + action + (value !== undefined ? "?value=" + value : ""));
+$("c-auto").onclick = () => ctl("auto");
+$("c-hold").onclick = () => ctl("hold");
+$("c-drop").onclick = () => ctl("drop", 1);
+$("c-next").onclick = () => ctl("next", 1);
+$("c-strobe").onclick = () => ctl("strobe");
+$("c-arm").onclick = () => {
+  if (state && !state.engine.specialsArmed && !confirm("Arm specials (CO2, sparkular, confetti...)? They will fire on drops.")) return;
+  ctl("arm");
+};
+$("c-release").onclick = () => ctl("release", 1);
+$("bias").onchange = () => ctl("energy", $("bias").value / 100);
+$("dryBtn").onclick = () => post("/api/dryrun?value=" + !state.dryRun);
+$("recBtn").onclick = () => post(state.recording ? "/api/record/stop" : "/api/record/start");
+
+// ---------- config editing
+async function loadConfig() {
+  config = await api("/api/config");
+  profiles = await api("/api/profiles");
+  draft = JSON.parse(JSON.stringify(config));
+  setDirty(false);
+  renderLooks();
+  renderConsoles();
+  renderSettings();
+}
+
+function setDirty(d) {
+  dirty = d;
+  $("savebar").classList.toggle("hidden", !d);
+  $("saveMsg").textContent = "";
+}
+
+$("saveBtn").onclick = async () => {
+  try {
+    config = await api("/api/config", {method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(draft)});
+    draft = JSON.parse(JSON.stringify(config));
+    setDirty(false);
+    renderLooks(); renderConsoles(); renderSettings();
+  } catch (e) {
+    $("saveMsg").textContent = "Save failed: " + e.message;
+  }
+};
+$("revertBtn").onclick = () => { draft = JSON.parse(JSON.stringify(config)); setDirty(false); renderLooks(); renderConsoles(); renderSettings(); };
+
+function bind(el, obj, key, type) {
+  el.addEventListener(el.type === "checkbox" || el.tagName === "SELECT" ? "change" : "input", () => {
+    let v = el.type === "checkbox" ? el.checked : el.value;
+    if (type === "number") v = v === "" ? 0 : Number(v);
+    if (type === "optnumber") v = v === "" ? null : Number(v);
+    if (type === "optstring") v = v === "" ? null : v;
+    obj[key] = v;
+    setDirty(true);
+  });
+}
+
+function input(obj, key, type = "text", cls = "") {
+  const el = document.createElement("input");
+  el.type = type === "number" || type === "optnumber" ? "number" : type === "bool" ? "checkbox" : "text";
+  if (el.type === "number") el.step = "any";
+  if (cls) el.className = cls;
+  if (type === "bool") el.checked = !!obj[key]; else el.value = obj[key] ?? "";
+  bind(el, obj, key, type);
+  return el;
+}
+
+function select(obj, key, options, type) {
+  const el = document.createElement("select");
+  options.forEach(o => { const op = document.createElement("option"); op.value = o; op.textContent = o || "(default)"; el.appendChild(op); });
+  el.value = obj[key] ?? "";
+  bind(el, obj, key, type);
+  return el;
+}
+
+function td(...children) {
+  const c = document.createElement("td");
+  children.forEach(ch => c.append(ch));
+  return c;
+}
+
+function renderLooks() {
+  const t = $("looksTable");
+  t.innerHTML = "<tr><th>On</th><th>Name</th><th>Role</th><th>Layer</th><th>Page</th><th>Exec</th><th>Mode</th><th>Sections</th><th>Energy</th><th>Weight</th><th>Seq</th><th>Beats</th><th>Level</th><th></th></tr>";
+  draft.looks.forEach((l, i) => {
+    const tr = document.createElement("tr");
+    const chips = document.createElement("div");
+    chips.className = "chips";
+    SECTIONS.forEach(s => {
+      const c = document.createElement("span");
+      const on = (l.sections || []).includes(s);
+      c.className = "chip" + (on ? " on" : "");
+      if (on) c.style.background = `var(--${s})`;
+      c.textContent = s.slice(0, 5);
+      c.title = s;
+      c.onclick = () => {
+        l.sections = l.sections || [];
+        l.sections = l.sections.includes(s) ? l.sections.filter(x => x !== s) : [...l.sections, s];
+        setDirty(true); renderLooks();
+      };
+      chips.append(c);
+    });
+    const energy = document.createElement("span");
+    energy.style.whiteSpace = "nowrap";
+    energy.append(input(l, "energyMin", "number", "w-s"), " - ", input(l, "energyMax", "number", "w-s"));
+    const test = document.createElement("button");
+    test.className = "small"; test.textContent = "Test";
+    test.title = "Fire for 2 s (uses the saved config)";
+    test.onclick = () => post("/api/test/" + l.id);
+    const del = document.createElement("button");
+    del.className = "small"; del.textContent = "✕";
+    del.onclick = () => { draft.looks.splice(i, 1); setDirty(true); renderLooks(); };
+    const layer = input(l, "layer", "optstring", "w-m");
+    layer.placeholder = l.role;
+    tr.append(td(input(l, "enabled", "bool")), td(input(l, "name", "text", "w-m")), td(select(l, "role", ROLES)),
+      td(layer), td(input(l, "page", "number", "w-s")), td(input(l, "exec", "number", "w-s")),
+      td(select(l, "mode", MODES, "optstring")), td(chips), td(energy), td(input(l, "weight", "number", "w-s")),
+      td(input(l, "sequence", "optnumber", "w-s")), td(input(l, "flashBeats", "number", "w-s")), td(input(l, "level", "number", "w-s")),
+      td(test, " ", del));
+    t.append(tr);
+  });
+}
+
+$("addLook").onclick = () => {
+  const maxExec = draft.looks.reduce((m, l) => Math.max(m, l.exec), 100);
+  draft.looks.push({name: "", role: "EFFECT", page: 1, exec: maxExec + 1, sections: [], energyMin: 0, energyMax: 1, weight: 1, level: 100, enabled: true, flashBeats: 0});
+  setDirty(true); renderLooks();
+};
+
+function renderConsoles() {
+  const box = $("consolesList");
+  box.innerHTML = "";
+  draft.consoles.forEach((c, i) => {
+    const d = document.createElement("div");
+    d.className = "deck";
+    const g = document.createElement("div");
+    g.className = "form-grid";
+    const field = (label, el) => { const l = document.createElement("label"); const s = document.createElement("span"); s.textContent = label; l.append(s, el); g.append(l); };
+    field("Enabled", input(c, "enabled", "bool"));
+    field("Name", input(c, "name"));
+    field("IP address", input(c, "host"));
+    field("OSC port", input(c, "port", "number"));
+    field("OSC prefix (optional)", input(c, "prefix"));
+    const ver = input(c, "version");
+    ver.setAttribute("list", "versions");
+    field("MA3 version (e.g. 2.3.1)", ver);
+    const prof = profileFor(c.version);
+    const info = document.createElement("div");
+    info.className = "small muted";
+    info.style.marginTop = "6px";
+    info.innerHTML = `Profile: <b>${esc(prof.label)}</b> ${prof.verified ? '<span class="badge ok">from MA manual</span>' : '<span class="badge warn">unverified: test looks</span>'}<br>${prof.notes.map(esc).join("<br>")}`;
+    const ov = document.createElement("details");
+    ov.innerHTML = "<summary class='small muted'>Command template overrides</summary>";
+    Object.entries(prof.templates).forEach(([k, v]) => {
+      const row = document.createElement("div"); row.className = "kv";
+      const lab = document.createElement("span"); lab.className = "small muted"; lab.style.width = "90px"; lab.textContent = k;
+      const inp = document.createElement("input"); inp.style.flex = "1"; inp.placeholder = v; inp.value = (c.commandOverrides || {})[k] || "";
+      inp.oninput = () => { c.commandOverrides = c.commandOverrides || {}; if (inp.value) c.commandOverrides[k] = inp.value; else delete c.commandOverrides[k]; setDirty(true); };
+      row.append(lab, inp); ov.append(row);
+    });
+    const del = document.createElement("button");
+    del.className = "small"; del.textContent = "Remove console";
+    del.onclick = () => { draft.consoles.splice(i, 1); setDirty(true); renderConsoles(); };
+    d.append(g, info, ov, del);
+    box.append(d);
+  });
+  let dl = $("versions");
+  if (!dl) { dl = document.createElement("datalist"); dl.id = "versions"; document.body.append(dl); }
+  dl.innerHTML = ["1.9", "2.0", "2.1", "2.2", "2.3", "2.4", "2.5", "2.6"].map(v => `<option value="${v}">`).join("");
+  $("profiles").innerHTML = profiles.map(p => `<div style="margin-bottom:8px"><b>${esc(p.label)}</b> ${p.verified ? '<span class="badge ok">verified</span>' : '<span class="badge warn">unverified</span>'}
+    · feedback: ${p.playbackFeedback ? "yes" : "no"} · speed masters: ${p.speedMasterCount}${p.reservedSpeedMasters.length ? " (not " + p.reservedSpeedMasters.join(",") + ")" : ""}
+    <div class="muted">${Object.values(p.templates).map(esc).join(" · ")}</div></div>`).join("");
+}
+
+function profileFor(version) {
+  const v = String(version || "").trim();
+  const exact = profiles.find(p => p.id.toLowerCase() === v.toLowerCase());
+  if (exact) return exact;
+  const m = v.match(/^(\d+)\.?(\d+)?/);
+  if (m) {
+    const maj = +m[1], min = +(m[2] || 0);
+    const ranges = {"1.x": [1, 0, 1, 99], "2.0": [2, 0, 2, 0], "2.1-2.3": [2, 1, 2, 3], "2.4-2.5": [2, 4, 2, 5], "2.6+": [2, 6, 99, 99]};
+    for (const p of profiles) {
+      const r = ranges[p.id]; if (!r) continue;
+      const x = maj * 1000 + min;
+      if (x >= r[0] * 1000 + r[1] && x <= r[2] * 1000 + r[3]) return p;
+    }
+  }
+  return profiles.find(p => p.id === "2.4-2.5") || profiles[0];
+}
+
+$("addConsole").onclick = () => {
+  draft.consoles.push({name: "Console " + (draft.consoles.length + 1), enabled: true, host: "192.168.1.10", port: 8000, prefix: "", version: "2.5", commandOverrides: {}});
+  setDirty(true); renderConsoles();
+};
+
+const SETTINGS = [
+  ["engine", "Engine", {
+    latencyMs: "Send early by (ms) so light lands on the beat", rotateBarsGroove: "Change a look every N bars (groove)", rotateBarsPeak: "Change a look every N bars (drop/peak)",
+    dropBars: "Bars that count as 'drop'", colorPerTrack: "Keep one colour per track", colorChangeOnDrop: "New colour on every drop",
+    preDropBlackout: "Blackout on the beat before a drop", buildStrobeBeats: "Strobe the last N beats of a build", dropStrobeBeats: "Strobe N beats on the drop",
+    dropBlinderEveryBars: "Blinder hit every N bars in a drop", accentBeats: "Drop hit length (beats)", operatorLockBars: "Leave a layer alone after you touch it (bars)",
+    crossfadeOffDelayMs: "Delay before the old look goes off (ms)", releaseOnAutoOff: "Stop auto looks when AUTO goes off", bpmSyncWhenManual: "BPM sync also when AUTO is off"}],
+  ["safety", "Safety", {
+    strobeAllowedAtStart: "Strobe allowed at start", strobeMaxOnSec: "Strobe max on (s)", strobeMinGapSec: "Strobe min gap (s)",
+    strobeMaxDutyPerMinute: "Strobe max share of a minute (0-1)", blinderMaxOnSec: "Blinder max on (s)", blinderMinGapSec: "Blinder min gap (s)"}],
+  ["atmos", "Haze, fog, specials", {
+    hazeEnabled: "Haze on", hazeFadeSec: "Haze fade (s)", fogEnabled: "Fog on", fogLeadBeats: "Fog this many beats before a drop",
+    fogBurstSec: "Fog burst (s)", fogCooldownSec: "Fog cooldown (s)", fogInBreakdown: "Fog in breakdowns (when no drop is known)",
+    specialBurstSec: "Special burst (s)", specialCooldownSec: "Special cooldown (s)", specialMaxPerHour: "Specials max per hour"}],
+  ["speed", "BPM / speed master", {enabled: "Sync BPM to speed master", master: "Speed master number (Master 3.N)", multiplier: "BPM multiplier (0.5 half time, 2 double)", minChange: "Min BPM change to resend"}],
+  ["audio", "Live audio (optional)", {enabled: "Analyse audio input", device: "Input device (part of name)", sampleRate: "Sample rate"}],
+  ["djLink", "CDJs", {enabled: "Pro DJ Link enabled", waveformAnalysis: "Detect sections from waveform when no phrase analysis"}],
+  ["oscIn", "OSC from console", {enabled: "Listen for OSC", port: "Listen port", controlPrefix: "Control address prefix"}],
+];
+
+function renderSettings() {
+  const box = $("settingsForms");
+  box.innerHTML = "";
+  SETTINGS.forEach(([key, title, fields]) => {
+    const p = document.createElement("div");
+    p.className = "panel"; p.style.marginBottom = "12px";
+    p.innerHTML = `<h2>${title}</h2>`;
+    const g = document.createElement("div"); g.className = "form-grid";
+    const obj = draft[key];
+    Object.entries(fields).forEach(([f, label]) => {
+      const l = document.createElement("label");
+      const s = document.createElement("span"); s.textContent = label;
+      const v = obj[f];
+      const el = typeof v === "boolean" ? input(obj, f, "bool") : typeof v === "number" ? input(obj, f, "number") : input(obj, f);
+      if (key === "audio" && f === "device") { el.setAttribute("list", "audioDevices"); loadAudioDevices(); }
+      l.append(s, el); g.append(l);
+    });
+    p.append(g);
+    if (key === "atmos") {
+      const h = document.createElement("div"); h.style.marginTop = "10px";
+      h.innerHTML = '<span class="muted small">Haze level per section (% of the haze look level)</span>';
+      const hg = document.createElement("div"); hg.className = "form-grid";
+      SECTIONS.forEach(s => { const l = document.createElement("label"); const sp = document.createElement("span"); sp.textContent = s; l.append(sp, input(obj.hazeLevels, s, "number")); hg.append(l); });
+      h.append(hg); p.append(h);
+    }
+    if (key === "oscIn") {
+      const h = document.createElement("div"); h.style.marginTop = "10px";
+      h.innerHTML = '<span class="muted small">Control sequences (MA3 2.1+ feedback): sequence number → action (auto, hold, drop, next, strobe, arm, energy, release)</span>';
+      const list = document.createElement("div");
+      const render = () => {
+        list.innerHTML = "";
+        Object.entries(obj.controlSequences).forEach(([seq, act]) => {
+          const row = document.createElement("div"); row.className = "kv";
+          const a = document.createElement("input"); a.value = seq; a.className = "w-s";
+          const b = document.createElement("select");
+          ["auto", "hold", "drop", "next", "strobe", "arm", "energy", "release"].forEach(o => { const op = document.createElement("option"); op.textContent = o; b.append(op); });
+          b.value = act;
+          const x = document.createElement("button"); x.className = "small"; x.textContent = "✕";
+          a.onchange = () => { delete obj.controlSequences[seq]; obj.controlSequences[a.value] = b.value; setDirty(true); render(); };
+          b.onchange = () => { obj.controlSequences[seq] = b.value; setDirty(true); };
+          x.onclick = () => { delete obj.controlSequences[seq]; setDirty(true); render(); };
+          row.append("Seq", a, b, x); list.append(row);
+        });
+        const add = document.createElement("button"); add.className = "small"; add.textContent = "+ Add";
+        add.onclick = () => { let n = 900; while (obj.controlSequences[n]) n++; obj.controlSequences[n] = "auto"; setDirty(true); render(); };
+        list.append(add);
+      };
+      render();
+      h.append(list); p.append(h);
+    }
+    box.append(p);
+  });
+  const p = document.createElement("div");
+  p.className = "panel";
+  p.innerHTML = "<h2>Web UI</h2>";
+  const g = document.createElement("div"); g.className = "form-grid";
+  [["webHost", "Listen address (0.0.0.0 = reachable from tablet, restart needed)"], ["webPort", "Port (restart needed)"]].forEach(([f, label]) => {
+    const l = document.createElement("label"); const s = document.createElement("span"); s.textContent = label;
+    l.append(s, input(draft, f, f === "webPort" ? "number" : "text")); g.append(l);
+  });
+  p.append(g);
+  box.append(p);
+}
+
+let audioLoaded = false;
+async function loadAudioDevices() {
+  if (audioLoaded) return;
+  audioLoaded = true;
+  const devs = await api("/api/audio/devices");
+  const dl = document.createElement("datalist"); dl.id = "audioDevices";
+  dl.innerHTML = devs.map(d => `<option value="${esc(d)}">`).join("");
+  document.body.append(dl);
+}
+
+function renderSetup() {
+  const c = draft || config;
+  if (!c) return;
+  const prefix = c.oscIn.controlPrefix || "/automa3";
+  const port = c.oscIn.port;
+  $("setupText").innerHTML = `
+  <h2>1. OSC in the console (Menu → In &amp; Out → OSC)</h2>
+  <p>Create <b>two</b> lines (MA uses one port per line for send and receive):</p>
+  <table>
+    <tr><th>Line</th><th>Destination IP</th><th>Port</th><th>Mode</th><th>Receive</th><th>Receive Command</th><th>Send</th><th>Send Command</th></tr>
+    <tr><td>1</td><td>-</td><td>${c.consoles[0] ? c.consoles[0].port : 8000}</td><td>UDP</td><td>Yes</td><td><b>Yes</b></td><td>No</td><td>No</td></tr>
+    <tr><td>2</td><td>IP of this Mac</td><td>${port}</td><td>UDP</td><td>No</td><td>No</td><td><b>Yes</b></td><td>No</td></tr>
+  </table>
+  <p class="muted small">Then switch on <b>Enable Input</b> and <b>Enable Output</b>. Line 1 receives the commands from this app (/cmd). Line 2 sends playback feedback
+  (2.1+) and your SendOSC control buttons to this app. If the console uses a Prefix, enter the same prefix for that console on the Consoles tab.
+  If onPC runs on this Mac, use 127.0.0.1 and make sure the two ports differ.</p>
+  <h2>2. Control buttons on the console (any version)</h2>
+  <p>Make a macro for each control (Command line in the macro line) and put the macros on executor buttons:</p>
+  <pre class="code">SendOSC 2 "${prefix}/auto,N"            toggle AUTO
+SendOSC 2 "${prefix}/hold,N"            toggle HOLD
+SendOSC 2 "${prefix}/drop,i,1"          drop on the next bar
+SendOSC 2 "${prefix}/next,i,1"          change a look now
+SendOSC 2 "${prefix}/strobe,N"          toggle strobe allowed
+SendOSC 2 "${prefix}/arm,N"             toggle specials armed
+SendOSC 2 "${prefix}/release,i,1"       give all layers back to auto
+SendOSC 2 "${prefix}/energy,f,0.8"      energy 0..1 (0.5 = neutral)</pre>
+  <p class="muted small">"2" is the OSC line number from step 1. ",N" (no value) toggles. With a value: "${prefix}/auto,i,1" = on, "${prefix}/auto,i,0" = off.
+  On MA3 2.1+ you can instead map a sequence (e.g. a fader for energy) under Settings → OSC from console → Control sequences.</p>
+  <h2>3. Executors</h2>
+  <p>Program your executors and enter page / executor number per look on the Looks tab. Defaults by role:</p>
+  <ul class="small">
+    <li><b>BASE, COLOR, MOVEMENT, EFFECT</b>: sequences that run until switched off (Go+ / Off). One per layer runs at a time.</li>
+    <li><b>RISER</b>: started at the build, its fader master is ramped from 0 to the look level over the build.</li>
+    <li><b>ACCENT, STROBE, BLINDER, BLACKOUT, FOG, SPECIAL</b>: flashed (Flash On / Flash Off) for a number of beats.</li>
+    <li><b>HAZE</b>: only the fader master is set per section (FaderMaster ... Fade).</li>
+    <li>Assign speed master <b>3.${c.speed.master}</b> to your phasers / chases: it follows the DJ's BPM.</li>
+    <li>Enter the <b>sequence number</b> (Seq) of an executor so the app notices when you touch it (2.1+).</li>
+  </ul>
+  <p class="muted small">Use <b>Test</b> on each look before the show. Use <b>Dry run</b> (top right) to watch decisions without sending anything.</p>
+  <h2>4. Network</h2>
+  <p class="small">Connect the Mac by Ethernet to the same switch as the CDJs (Pro DJ Link) and the console. On MA3, the app's console target is the console's IP.
+  Config file: <code>${esc(state ? state.configPath : "")}</code></p>`;
+}
+
+window.addEventListener("beforeunload", e => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+loadConfig();
+poll();
+</script>
+</body>
+</html>

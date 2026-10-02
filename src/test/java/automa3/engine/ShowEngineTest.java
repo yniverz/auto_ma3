@@ -1,0 +1,207 @@
+package automa3.engine;
+
+import automa3.audio.AudioAnalyzer;
+import automa3.config.Config;
+import automa3.config.ConfigStore;
+import automa3.ma3.Ma3Action;
+import automa3.ma3.Ma3Action.Kind;
+import automa3.ma3.OscCodec;
+import automa3.model.Role;
+import automa3.music.BeatEvent;
+import automa3.music.DeckState;
+import automa3.music.SimulatedSource;
+import automa3.music.TrackStructure;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class ShowEngineTest {
+
+    record Sent(long timeNanos, Ma3Action action) {
+    }
+
+    private VirtualScheduler sched;
+    private ConfigStore store;
+    private List<Sent> sent;
+    private ShowEngine engine;
+    private OperatorState op;
+    private final double bpm = 133;
+    private final double periodMs = 60000 / 133.0;
+    /** virtual time (ns) of each played beat number */
+    private final Map<Integer, Long> beatTimes = new HashMap<>();
+
+    @BeforeEach
+    void setUp() throws Exception {
+        Path dir = Files.createTempDirectory("automa3-test");
+        store = new ConfigStore(dir.resolve("config.json")); // default config: one+ look per role
+        sched = new VirtualScheduler();
+        sent = new ArrayList<>();
+        op = new OperatorState();
+        engine = new ShowEngine(store, sched, a -> sent.add(new Sent(sched.nanoTime(), a)), op,
+                () -> AudioAnalyzer.AudioState.OFF, new Random(42));
+    }
+
+    private Config.Look look(Role role) {
+        return store.get().looks.stream().filter(l -> l.role == role).findFirst().orElseThrow();
+    }
+
+    /** Play a track on player 1 from beat 1 to lastBeat with the given structure (or none). */
+    private void play(String key, TrackStructure structure, int lastBeat) {
+        long t = sched.nanoTime() + 100_000_000L;
+        sched.runUntil(t);
+        engine.onDeck(new DeckState(1, "CDJ-3000", true, true, true, true, bpm, 1, 1, key, "Test", "Artist", sched.currentTimeMillis()));
+        if (structure != null) engine.onStructure(1, structure);
+        sched.runUntil(t + 1);
+        long start = t + 50_000_000L;
+        for (int beat = 1; beat <= lastBeat; beat++) {
+            long bt = start + (long) ((beat - 1) * periodMs * 1_000_000L);
+            beatTimes.put(beat, bt);
+            sched.runUntil(bt);
+            if (beat % 8 == 0) {
+                engine.onDeck(new DeckState(1, "CDJ-3000", true, true, true, true, bpm, beat, ((beat - 1) % 4) + 1,
+                        key, "Test", "Artist", sched.currentTimeMillis()));
+            }
+            engine.onBeat(new BeatEvent(1, beat, ((beat - 1) % 4) + 1, bpm, bt));
+            sched.runUntil(bt + 1);
+        }
+        sched.runUntil(sched.nanoTime() + 5_000_000_000L);
+    }
+
+    private List<Sent> commandsFor(Config.Look l, Kind kind) {
+        return sent.stream().filter(s -> s.action.kind() == kind && s.action.page() == l.page && s.action.exec() == l.exec).toList();
+    }
+
+    @Test
+    void fullTrackWithPhraseAnalysis() {
+        SimulatedSource.Template t = SimulatedSource.TEMPLATES.get(0);
+        TrackStructure st = SimulatedSource.exactStructure("track1", t, 64);
+        int lastBeat = t.bars() * 4;
+        play("track1", st, lastBeat);
+
+        int latency = store.get().engine.latencyMs;
+        int firstDrop = st.segments().stream().filter(s -> s.section() == automa3.model.Section.DROP).findFirst().orElseThrow().startBeat();
+
+        // drop hit lands latency ms before the drop beat
+        Config.Look accent = look(Role.ACCENT);
+        List<Sent> hits = commandsFor(accent, Kind.FLASH_ON);
+        assertEquals(2, hits.size(), "one hit per drop");
+        long expected = beatTimes.get(firstDrop) - latency * 1_000_000L;
+        assertEquals(expected, hits.get(0).timeNanos, 2_000_000L, "drop hit timing");
+        assertEquals(1, commandsFor(accent, Kind.FLASH_OFF).stream().filter(s -> s.timeNanos > expected && s.timeNanos < expected + 2_000_000_000L).count());
+
+        // riser starts at the build and ramps with a fade, then stops at the drop
+        Config.Look riser = look(Role.RISER);
+        assertFalse(commandsFor(riser, Kind.GO).isEmpty());
+        assertTrue(commandsFor(riser, Kind.FADER).stream().anyMatch(s -> s.action.fadeSec() > 10), "riser ramp with fade");
+        assertEquals(commandsFor(riser, Kind.GO).size(), commandsFor(riser, Kind.OFF).size());
+
+        // fog 16 beats before the first drop
+        Config.Look fog = look(Role.FOG);
+        List<Sent> fogs = commandsFor(fog, Kind.FLASH_ON);
+        assertFalse(fogs.isEmpty());
+        assertEquals(beatTimes.get(firstDrop - 16) - latency * 1_000_000L, fogs.get(0).timeNanos, 2_000_000L);
+
+        // blackout on the last beat before the drop
+        Config.Look bo = look(Role.BLACKOUT);
+        assertEquals(beatTimes.get(firstDrop - 1) - latency * 1_000_000L, commandsFor(bo, Kind.FLASH_ON).get(0).timeNanos, 2_000_000L);
+
+        // BPM sent to the speed master
+        assertTrue(sent.stream().anyMatch(s -> s.action.kind() == Kind.SPEED_BPM && Math.abs(s.action.bpm() - 133) < 0.01));
+
+        // one continuous strobe from the last 4 beats of each build into the drop (8 beats = 3.6 s at 133 BPM)
+        List<Sent> strobes = commandsFor(look(Role.STROBE), Kind.FLASH_ON);
+        assertEquals(2, strobes.size(), "one strobe burst per drop");
+        assertEquals(beatTimes.get(firstDrop - 4) - latency * 1_000_000L, strobes.get(0).timeNanos, 2_000_000L);
+        long burstMs = (commandsFor(look(Role.STROBE), Kind.FLASH_OFF).get(0).timeNanos - strobes.get(0).timeNanos) / 1_000_000;
+        assertEquals(8 * periodMs, burstMs, 2);
+
+        // every scene layer has exactly one look running at the end
+        assertSceneConsistent();
+        assertStrobeSafe();
+    }
+
+    @Test
+    void trackWithoutAnalysisStillRunsAScene() {
+        play("plain", null, 64 * 4);
+        long gos = sent.stream().filter(s -> s.action.kind() == Kind.GO).count();
+        assertTrue(gos >= 3, "base, colour and movement started");
+        assertSceneConsistent();
+        assertEquals("GROOVE", engine.snapshot().section());
+    }
+
+    @Test
+    void holdFreezesLooks() {
+        op.hold = true;
+        play("held", SimulatedSource.exactStructure("held", SimulatedSource.TEMPLATES.get(1), 64), 200);
+        assertTrue(sent.stream().allMatch(s -> s.action.kind() == Kind.SPEED_BPM), "only BPM sync in HOLD");
+    }
+
+    @Test
+    void operatorTouchLocksLayer() {
+        Config c = ConfigStore.copy(store.get());
+        Config.Look move = c.looks.stream().filter(l -> l.role == Role.MOVEMENT).findFirst().orElseThrow();
+        move.sequence = 55;
+        try {
+            store.replace(c);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        sched.runUntil(sched.nanoTime() + 1);
+        engine.onOsc(new OscCodec.Message("/13.13.1.6.55", List.of("Go+", 1)));
+        sched.runUntil(sched.nanoTime() + 1);
+        assertTrue(op.layerLocks.containsKey("MOVEMENT"));
+        play("t", SimulatedSource.exactStructure("t", SimulatedSource.TEMPLATES.get(0), 64), 32);
+        List<Config.Look> movement = store.get().looks.stream().filter(l -> l.role == Role.MOVEMENT).toList();
+        for (Config.Look l : movement) assertTrue(commandsFor(l, Kind.GO).isEmpty(), "engine keeps off a locked layer");
+    }
+
+    @Test
+    void controlsFromConsole() {
+        engine.onOsc(new OscCodec.Message("/automa3/auto", List.of(0)));
+        engine.onOsc(new OscCodec.Message("/gma3/automa3/strobe", List.of(0)));
+        engine.onOsc(new OscCodec.Message("/automa3/energy", List.of(1.0f)));
+        sched.runUntil(sched.nanoTime() + 1);
+        assertFalse(op.auto);
+        assertFalse(op.strobeAllowed);
+        assertEquals(0.5, op.energyBias, 1e-9);
+    }
+
+    private void assertSceneConsistent() {
+        Map<String, Integer> running = new HashMap<>();
+        for (Sent s : sent) {
+            if (s.action.kind() != Kind.GO && s.action.kind() != Kind.OFF) continue;
+            for (Config.Look l : store.get().looks) {
+                if (!l.role.sceneRole || l.page != s.action.page() || l.exec != s.action.exec()) continue;
+                running.merge(l.layerName(), s.action.kind() == Kind.GO ? 1 : -1, Integer::sum);
+            }
+        }
+        running.forEach((layer, n) -> {
+            if (layer.equals("EFFECT")) assertTrue(n == 0 || n == 1, "effect layer runs at most one look, was " + n);
+            else assertEquals(1, n, "layer " + layer + " should have exactly one running look");
+        });
+    }
+
+    private void assertStrobeSafe() {
+        Config.Look strobe = look(Role.STROBE);
+        List<Sent> on = commandsFor(strobe, Kind.FLASH_ON);
+        List<Sent> off = commandsFor(strobe, Kind.FLASH_OFF);
+        assertEquals(on.size(), off.size());
+        for (int i = 0; i < on.size(); i++) {
+            long durMs = (off.get(i).timeNanos - on.get(i).timeNanos) / 1_000_000;
+            assertTrue(durMs <= store.get().safety.strobeMaxOnSec * 1000 + 1, "strobe burst too long: " + durMs);
+            if (i > 0) {
+                long gap = (on.get(i).timeNanos - off.get(i - 1).timeNanos) / 1_000_000;
+                assertTrue(gap >= store.get().safety.strobeMinGapSec * 1000 - 1, "strobe gap too short: " + gap);
+            }
+        }
+    }
+}
