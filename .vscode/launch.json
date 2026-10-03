@@ -43,13 +43,44 @@
       "env": { "JAVA_HOME": "/opt/homebrew/opt/openjdk@21", "PATH": "/opt/homebrew/opt/openjdk@21/bin:${env:PATH}" },
       "command": "mvn -q package -DskipTests && java -jar target/auto-ma3.jar --dry-run --replay \"$(ls -t recordings/*.jsonl | head -1)\""
     },
+    // ---- Debug modes (Java extension): breakpoints, no jar build
     {
-      "name": "Debug: Simulator (needs Java extension)",
+      "name": "Debug: Simulator (dry run)",
       "type": "java",
       "request": "launch",
       "mainClass": "automa3.Main",
       "projectName": "auto-ma3",
       "args": "--sim --dry-run",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Debug: Simulator 8x fast (dry run)",
+      "type": "java",
+      "request": "launch",
+      "mainClass": "automa3.Main",
+      "projectName": "auto-ma3",
+      "args": "--sim --speed 8 --dry-run",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Debug: Replay the recording open in the editor (dry run)",
+      "type": "java",
+      "request": "launch",
+      "mainClass": "automa3.Main",
+      "projectName": "auto-ma3",
+      "args": ["--dry-run", "--replay", "${file}"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Debug: Live CDJs (dry run)",
+      "type": "java",
+      "request": "launch",
+      "mainClass": "automa3.Main",
+      "projectName": "auto-ma3",
+      "args": "--dry-run",
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal"
     }
