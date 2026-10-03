@@ -26,6 +26,8 @@ java -jar target/auto-ma3.jar --sim       # simulated DJ set, no CDJs needed
 
 Then open http://localhost:8080/.
 
+In VS Code, press **F5**: it rebuilds and starts the mode selected in Run and Debug (simulator, simulator to console, live with recording, replay of the last recording).
+
 Options: `--sim`, `--replay recordings/session-....jsonl`, `--speed 4` (sim/replay speed), `--dry-run` (send nothing), `--record`, `--config FILE`, `--port N`.
 
 Settings live in `config.json` (created on first start) and are edited in the web UI.

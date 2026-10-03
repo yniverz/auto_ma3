@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Read-only view of the engine for the web UI, rebuilt every 100 ms.
+ * Read-only view of the engine for the web UI, rebuilt every 40 ms and on every beat.
  */
 public record EngineSnapshot(boolean auto, boolean hold, boolean strobeAllowed, boolean specialsArmed,
                              double energyBias, int primaryPlayer, String section, String sectionReason,

@@ -188,14 +188,16 @@ document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
 });
 
 // ---------- live
-async function poll() {
-  try {
-    state = await api("/api/state");
+function connect() {
+  // live state is pushed by the app (Server-Sent Events); the browser reconnects automatically
+  const es = new EventSource("/api/stream");
+  es.onmessage = ev => {
+    state = JSON.parse(ev.data);
     renderLive();
-  } catch (e) {
-    $("srcStatus").textContent = "app not reachable: " + e.message;
-  }
-  setTimeout(poll, 300);
+  };
+  es.onerror = () => {
+    $("srcStatus").textContent = "connection to app lost, reconnecting...";
+  };
 }
 
 function renderLive() {
@@ -589,7 +591,7 @@ SendOSC 2 "${prefix}/energy,f,0.8"      energy 0..1 (0.5 = neutral)</pre>
 
 window.addEventListener("beforeunload", e => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
 loadConfig();
-poll();
+connect();
 </script>
 </body>
 </html>

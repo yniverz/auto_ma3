@@ -111,7 +111,7 @@ public class ShowEngine implements MusicListener {
         this.selector = new LookSelector(random);
         op.strobeAllowed = configStore.get().safety.strobeAllowedAtStart;
         configStore.onChange(c -> sched.execute(this::onConfigChanged));
-        sched.scheduleRepeating(this::tick, 100_000_000L);
+        sched.scheduleRepeating(this::tick, 40_000_000L);
     }
 
     public EngineSnapshot snapshot() {
@@ -225,6 +225,7 @@ public class ShowEngine implements MusicListener {
             long at = base + (long) (s.delayMs() * 1_000_000L);
             sched.schedule(() -> send(s), at - now);
         }
+        snapshot = buildSnapshot(cfg); // show the new beat right away
     }
 
     private void send(Step s) {

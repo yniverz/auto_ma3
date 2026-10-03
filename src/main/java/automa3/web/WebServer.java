@@ -38,7 +38,8 @@ public class WebServer {
 
     public void start(String host, int port) throws IOException {
         server = HttpServer.create(new InetSocketAddress(host, port), 0);
-        server.setExecutor(Executors.newFixedThreadPool(4, r -> {
+        // cached pool: each open live stream (SSE) holds one thread
+        server.setExecutor(Executors.newCachedThreadPool(r -> {
             Thread t = new Thread(r, "web");
             t.setDaemon(true);
             return t;
@@ -59,6 +60,8 @@ public class WebServer {
             Map<String, String> query = query(ex.getRequestURI().getRawQuery());
             if (path.equals("/") || path.equals("/index.html")) {
                 staticFile(ex, "/web/index.html", "text/html; charset=utf-8");
+            } else if (path.equals("/api/stream")) {
+                stream(ex);
             } else if (path.equals("/api/state")) {
                 json(ex, 200, state());
             } else if (path.equals("/api/config") && method.equals("GET")) {
@@ -94,6 +97,38 @@ public class WebServer {
         } catch (Exception e) {
             log.warn("Web request failed: {}", e.toString());
             json(ex, 400, Map.of("error", String.valueOf(e.getMessage())));
+        }
+    }
+
+    /**
+     * Live state as Server-Sent Events: one open connection, pushed whenever the state changes
+     * (checked every 40 ms), with a keep-alive comment when nothing changes.
+     */
+    private void stream(HttpExchange ex) throws IOException {
+        ex.getResponseHeaders().set("Content-Type", "text/event-stream");
+        ex.getResponseHeaders().set("Cache-Control", "no-store");
+        ex.sendResponseHeaders(200, 0);
+        try (OutputStream os = ex.getResponseBody()) {
+            String last = null;
+            long lastWrite = 0;
+            while (true) {
+                String json = ConfigStore.JSON.writer().without(com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT)
+                        .writeValueAsString(state());
+                long now = System.currentTimeMillis();
+                if (!json.equals(last)) {
+                    os.write(("data: " + json + "\n\n").getBytes(StandardCharsets.UTF_8));
+                    os.flush();
+                    last = json;
+                    lastWrite = now;
+                } else if (now - lastWrite > 15_000) {
+                    os.write(": keep-alive\n\n".getBytes(StandardCharsets.UTF_8));
+                    os.flush();
+                    lastWrite = now;
+                }
+                Thread.sleep(40);
+            }
+        } catch (IOException | InterruptedException e) {
+            // browser closed the page
         }
     }
 

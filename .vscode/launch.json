@@ -1,0 +1,57 @@
+{
+  // F5 rebuilds the jar and starts AutoMA3. Pick the mode in the Run and Debug dropdown.
+  // "node-terminal" is only used as a built-in way to run a shell command; no extension needed.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Simulator (dry run)",
+      "type": "node-terminal",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "env": { "JAVA_HOME": "/opt/homebrew/opt/openjdk@21", "PATH": "/opt/homebrew/opt/openjdk@21/bin:${env:PATH}" },
+      "command": "mvn -q package -DskipTests && java -jar target/auto-ma3.jar --sim --dry-run"
+    },
+    {
+      "name": "Simulator -> console",
+      "type": "node-terminal",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "env": { "JAVA_HOME": "/opt/homebrew/opt/openjdk@21", "PATH": "/opt/homebrew/opt/openjdk@21/bin:${env:PATH}" },
+      "command": "mvn -q package -DskipTests && java -jar target/auto-ma3.jar --sim"
+    },
+    {
+      "name": "Simulator 8x fast (dry run)",
+      "type": "node-terminal",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "env": { "JAVA_HOME": "/opt/homebrew/opt/openjdk@21", "PATH": "/opt/homebrew/opt/openjdk@21/bin:${env:PATH}" },
+      "command": "mvn -q package -DskipTests && java -jar target/auto-ma3.jar --sim --speed 8 --dry-run"
+    },
+    {
+      "name": "Live CDJs + record",
+      "type": "node-terminal",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "env": { "JAVA_HOME": "/opt/homebrew/opt/openjdk@21", "PATH": "/opt/homebrew/opt/openjdk@21/bin:${env:PATH}" },
+      "command": "mvn -q package -DskipTests && java -jar target/auto-ma3.jar --record"
+    },
+    {
+      "name": "Replay last recording (dry run)",
+      "type": "node-terminal",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "env": { "JAVA_HOME": "/opt/homebrew/opt/openjdk@21", "PATH": "/opt/homebrew/opt/openjdk@21/bin:${env:PATH}" },
+      "command": "mvn -q package -DskipTests && java -jar target/auto-ma3.jar --dry-run --replay \"$(ls -t recordings/*.jsonl | head -1)\""
+    },
+    {
+      "name": "Debug: Simulator (needs Java extension)",
+      "type": "java",
+      "request": "launch",
+      "mainClass": "automa3.Main",
+      "projectName": "auto-ma3",
+      "args": "--sim --dry-run",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    }
+  ]
+}

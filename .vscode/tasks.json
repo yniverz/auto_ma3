@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0",
+  "options": {
+    "env": { "JAVA_HOME": "/opt/homebrew/opt/openjdk@21", "PATH": "/opt/homebrew/opt/openjdk@21/bin:${env:PATH}" }
+  },
+  "tasks": [
+    {
+      "label": "Build jar",
+      "type": "shell",
+      "command": "mvn -q package -DskipTests",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run tests",
+      "type": "shell",
+      "command": "mvn test",
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": []
+    }
+  ]
+}
