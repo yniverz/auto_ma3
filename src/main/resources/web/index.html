@@ -66,6 +66,7 @@
 <header>
   <h1>AutoMA3</h1>
   <span id="srcStatus" class="status">connecting...</span>
+  <span id="setupBadge" class="badge" style="cursor:pointer" title="Saved setups">no saved setup</span>
   <span id="dryBadge" class="badge warn hidden">DRY RUN</span>
   <button class="small" id="dryBtn">Dry run</button>
   <button class="small" id="recBtn">Record</button>
@@ -75,6 +76,7 @@
   <button data-tab="looks">Looks</button>
   <button data-tab="consoles">Consoles</button>
   <button data-tab="settings">Settings</button>
+  <button data-tab="setups">Setups</button>
   <button data-tab="setup">MA3 setup</button>
 </nav>
 <main>
@@ -150,6 +152,32 @@
   <!-- SETTINGS -->
   <section id="tab-settings" class="hidden">
     <div id="settingsForms"></div>
+  </section>
+
+  <!-- SETUPS -->
+  <section id="tab-setups" class="hidden">
+    <div class="panel">
+      <h2>Saved setups</h2>
+      <p class="muted small">A setup is the whole configuration: looks, consoles and settings. Save one per venue or rented console and load it when you get there.
+        The app always starts with the setup that was running last.</p>
+      <div class="row" style="margin-bottom:10px">
+        <span class="muted">Running:</span> <b id="setupActive">-</b> <span id="setupModified" class="badge warn hidden">unsaved changes</span>
+      </div>
+      <div class="row">
+        <input id="setupName" placeholder="Setup name, e.g. Club X - MA3 2.3" style="flex:1; min-width:200px">
+        <button class="primary" id="setupSave">Save as</button>
+      </div>
+      <div class="table-wrap" style="margin-top:12px"><table id="setupList"></table></div>
+    </div>
+    <div class="panel" style="margin-top:12px">
+      <h2>Files</h2>
+      <div class="row">
+        <a class="small" href="/api/configs/download" download><button class="small">Download running setup</button></a>
+        <label class="small" style="cursor:pointer"><span class="badge">Upload setup file…</span>
+          <input type="file" id="setupUpload" accept=".json,application/json" class="hidden"></label>
+        <span id="setupMsg" class="muted small"></span>
+      </div>
+    </div>
   </section>
 
   <!-- SETUP -->
@@ -281,6 +309,7 @@ async function loadConfig() {
   renderLooks();
   renderConsoles();
   renderSettings();
+  loadSetups();
 }
 
 function setDirty(d) {
@@ -289,12 +318,17 @@ function setDirty(d) {
   $("saveMsg").textContent = "";
 }
 
+async function saveDraft() {
+  config = await api("/api/config", {method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(draft)});
+  draft = JSON.parse(JSON.stringify(config));
+  setDirty(false);
+  renderLooks(); renderConsoles(); renderSettings();
+  loadSetups();
+}
+
 $("saveBtn").onclick = async () => {
   try {
-    config = await api("/api/config", {method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(draft)});
-    draft = JSON.parse(JSON.stringify(config));
-    setDirty(false);
-    renderLooks(); renderConsoles(); renderSettings();
+    await saveDraft();
   } catch (e) {
     $("saveMsg").textContent = "Save failed: " + e.message;
   }
@@ -588,6 +622,87 @@ SendOSC 2 "${prefix}/energy,f,0.8"      energy 0..1 (0.5 = neutral)</pre>
   <p class="small">Connect the Mac by Ethernet to the same switch as the CDJs (Pro DJ Link) and the console. On MA3, the app's console target is the console's IP.
   Config file: <code>${esc(state ? state.configPath : "")}</code></p>`;
 }
+
+// ---------- saved setups
+let setups = {active: null, modified: false, setups: []};
+
+async function loadSetups() {
+  setups = await api("/api/configs");
+  const label = setups.active ? setups.active + (setups.modified ? " *" : "") : "no saved setup";
+  $("setupBadge").textContent = "Setup: " + label;
+  $("setupBadge").classList.toggle("warn", !!setups.modified);
+  $("setupActive").textContent = setups.active || "(not saved yet)";
+  $("setupModified").classList.toggle("hidden", !setups.modified);
+  if (!$("setupName").value && setups.active) $("setupName").value = setups.active;
+  const t = $("setupList");
+  t.innerHTML = setups.setups.length ? "<tr><th>Name</th><th>Saved</th><th></th></tr>" : '<tr><td class="muted">No saved setups yet.</td></tr>';
+  setups.setups.forEach(e => {
+    const tr = document.createElement("tr");
+    const name = document.createElement("td");
+    name.innerHTML = `<b>${esc(e.name)}</b>` + (e.name === setups.active ? ' <span class="badge ok">running</span>' : "");
+    const when = document.createElement("td");
+    when.className = "muted small";
+    when.textContent = new Date(e.modifiedMs).toLocaleString();
+    const actions = document.createElement("td");
+    const btn = (text, fn) => { const b = document.createElement("button"); b.className = "small"; b.textContent = text; b.onclick = fn; actions.append(b, " "); };
+    btn("Load", () => loadSetup(e.name));
+    btn("Download", () => { location.href = "/api/configs/download?name=" + encodeURIComponent(e.name); });
+    btn("Delete", async () => {
+      if (!confirm(`Delete setup "${e.name}"? The running config is not affected.`)) return;
+      await post("/api/configs/delete?name=" + encodeURIComponent(e.name));
+      loadSetups();
+    });
+    tr.append(name, when, actions);
+    t.append(tr);
+  });
+}
+
+async function loadSetup(name) {
+  if ((dirty || setups.modified) && !confirm(`Load "${name}"? Unsaved changes of the running setup will be lost.`)) return;
+  try {
+    await post("/api/configs/load?name=" + encodeURIComponent(name));
+    $("setupName").value = name;
+    await loadConfig();
+    setupMsg(`Loaded "${name}".`);
+  } catch (e) {
+    setupMsg("Load failed: " + e.message);
+  }
+}
+
+function setupMsg(text) {
+  $("setupMsg").textContent = text;
+}
+
+$("setupSave").onclick = async () => {
+  const name = $("setupName").value.trim();
+  if (!name) { $("setupName").focus(); return; }
+  if (setups.setups.some(e => e.name === name) && name !== setups.active && !confirm(`Overwrite setup "${name}"?`)) return;
+  try {
+    if (dirty) await saveDraft();
+    const r = await post("/api/configs/save?name=" + encodeURIComponent(name));
+    $("setupName").value = r.name;
+    await loadSetups();
+    setupMsg(`Saved as "${r.name}".`);
+  } catch (e) {
+    setupMsg("Save failed: " + e.message);
+  }
+};
+
+$("setupUpload").onchange = async ev => {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const name = file.name.replace(/\.json$/i, "");
+  try {
+    const r = await api("/api/configs/upload?name=" + encodeURIComponent(name), {method: "POST", body: await file.text()});
+    await loadSetups();
+    setupMsg(`Imported "${r.name}". Press Load to use it.`);
+  } catch (e) {
+    setupMsg("Upload failed: " + e.message);
+  }
+  ev.target.value = "";
+};
+
+$("setupBadge").onclick = () => document.querySelector('nav button[data-tab="setups"]').click();
 
 window.addEventListener("beforeunload", e => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
 loadConfig();

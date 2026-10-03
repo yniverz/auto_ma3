@@ -2,6 +2,7 @@ package automa3;
 
 import automa3.audio.AudioAnalyzer;
 import automa3.config.Config;
+import automa3.config.ConfigLibrary;
 import automa3.config.ConfigStore;
 import automa3.engine.OperatorState;
 import automa3.engine.ShowEngine;
@@ -25,6 +26,7 @@ import java.util.Random;
 public class App {
 
     private final ConfigStore config;
+    private final ConfigLibrary library;
     private final ConsoleHub hub;
     private final TaskScheduler scheduler = new TaskScheduler.Real();
     private final ShowEngine engine;
@@ -36,6 +38,7 @@ public class App {
 
     public App(ConfigStore config, MusicSource source, Path recordingsDir) throws Exception {
         this.config = config;
+        this.library = new ConfigLibrary(config, config.path().toAbsolutePath().getParent().resolve("configs"));
         this.source = source;
         this.hub = new ConsoleHub(config);
         this.recorder = new SessionRecorder(recordingsDir);
@@ -97,6 +100,10 @@ public class App {
 
     public ConfigStore config() {
         return config;
+    }
+
+    public ConfigLibrary library() {
+        return library;
     }
 
     public ConsoleHub hub() {

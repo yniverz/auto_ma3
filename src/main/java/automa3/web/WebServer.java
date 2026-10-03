@@ -70,6 +70,30 @@ public class WebServer {
                 Config c = ConfigStore.JSON.readValue(ex.getRequestBody(), Config.class);
                 app.config().replace(c);
                 json(ex, 200, app.config().get());
+            } else if (path.equals("/api/configs") && method.equals("GET")) {
+                json(ex, 200, app.library().status());
+            } else if (path.equals("/api/configs/save") && method.equals("POST")) {
+                json(ex, 200, Map.of("name", app.library().save(query.get("name"))));
+            } else if (path.equals("/api/configs/load") && method.equals("POST")) {
+                app.library().load(query.get("name"));
+                json(ex, 200, app.config().get());
+            } else if (path.equals("/api/configs/delete") && method.equals("POST")) {
+                app.library().delete(query.get("name"));
+                json(ex, 200, Map.of("ok", true));
+            } else if (path.equals("/api/configs/upload") && method.equals("POST")) {
+                json(ex, 200, Map.of("name", app.library().importSetup(query.get("name"), ex.getRequestBody().readAllBytes())));
+            } else if (path.equals("/api/configs/download")) {
+                String name = query.get("name");
+                byte[] body = name == null || name.isBlank()
+                        ? ConfigStore.JSON.writeValueAsBytes(app.config().get())
+                        : app.library().export(name);
+                String file = (name == null || name.isBlank() ? "automa3-config" : name).replaceAll("[^A-Za-z0-9._-]", "_") + ".json";
+                ex.getResponseHeaders().set("Content-Type", "application/json");
+                ex.getResponseHeaders().set("Content-Disposition", "attachment; filename=\"" + file + "\"");
+                ex.sendResponseHeaders(200, body.length);
+                try (OutputStream os = ex.getResponseBody()) {
+                    os.write(body);
+                }
             } else if (path.equals("/api/profiles")) {
                 json(ex, 200, profiles());
             } else if (path.equals("/api/dryrun") && method.equals("POST")) {

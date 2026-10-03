@@ -40,6 +40,22 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <!-- The VS Code / Eclipse Java extension (m2e) builds in the background. Give it its own
+             output folder so it never writes into target/ while Maven is building there. -->
+        <profile>
+            <id>ide</id>
+            <activation>
+                <property>
+                    <name>m2e.version</name>
+                </property>
+            </activation>
+            <build>
+                <directory>${project.basedir}/target-ide</directory>
+            </build>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
             <plugin>

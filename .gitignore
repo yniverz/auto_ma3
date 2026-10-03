@@ -2,4 +2,6 @@ target/
 config.json
 config.json.tmp
 recordings/
+configs/
 .DS_Store
+target-ide/
