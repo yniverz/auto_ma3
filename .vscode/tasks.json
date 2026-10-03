@@ -7,14 +7,14 @@
     {
       "label": "Build jar",
       "type": "shell",
-      "command": "mvn -q package -DskipTests",
+      "command": "mvn -q clean package -DskipTests",
       "group": { "kind": "build", "isDefault": true },
       "problemMatcher": []
     },
     {
       "label": "Run tests",
       "type": "shell",
-      "command": "mvn test",
+      "command": "mvn clean test",
       "group": { "kind": "test", "isDefault": true },
       "problemMatcher": []
     }

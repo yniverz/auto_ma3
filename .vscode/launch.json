@@ -9,7 +9,7 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "env": { "JAVA_HOME": "/opt/homebrew/opt/openjdk@21", "PATH": "/opt/homebrew/opt/openjdk@21/bin:${env:PATH}" },
-      "command": "mvn -q package -DskipTests && java -jar target/auto-ma3.jar --sim --dry-run"
+      "command": "mvn -q clean package -DskipTests && java -jar target/auto-ma3.jar --sim --dry-run"
     },
     {
       "name": "Simulator -> console",
@@ -17,7 +17,7 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "env": { "JAVA_HOME": "/opt/homebrew/opt/openjdk@21", "PATH": "/opt/homebrew/opt/openjdk@21/bin:${env:PATH}" },
-      "command": "mvn -q package -DskipTests && java -jar target/auto-ma3.jar --sim"
+      "command": "mvn -q clean package -DskipTests && java -jar target/auto-ma3.jar --sim"
     },
     {
       "name": "Simulator 8x fast (dry run)",
@@ -25,7 +25,7 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "env": { "JAVA_HOME": "/opt/homebrew/opt/openjdk@21", "PATH": "/opt/homebrew/opt/openjdk@21/bin:${env:PATH}" },
-      "command": "mvn -q package -DskipTests && java -jar target/auto-ma3.jar --sim --speed 8 --dry-run"
+      "command": "mvn -q clean package -DskipTests && java -jar target/auto-ma3.jar --sim --speed 8 --dry-run"
     },
     {
       "name": "Live CDJs + record",
@@ -33,7 +33,7 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "env": { "JAVA_HOME": "/opt/homebrew/opt/openjdk@21", "PATH": "/opt/homebrew/opt/openjdk@21/bin:${env:PATH}" },
-      "command": "mvn -q package -DskipTests && java -jar target/auto-ma3.jar --record"
+      "command": "mvn -q clean package -DskipTests && java -jar target/auto-ma3.jar --record"
     },
     {
       "name": "Replay last recording (dry run)",
@@ -41,7 +41,7 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "env": { "JAVA_HOME": "/opt/homebrew/opt/openjdk@21", "PATH": "/opt/homebrew/opt/openjdk@21/bin:${env:PATH}" },
-      "command": "mvn -q package -DskipTests && java -jar target/auto-ma3.jar --dry-run --replay \"$(ls -t recordings/*.jsonl | head -1)\""
+      "command": "mvn -q clean package -DskipTests && java -jar target/auto-ma3.jar --dry-run --replay \"$(ls -t recordings/*.jsonl | head -1)\""
     },
     // ---- Debug modes (Java extension): breakpoints, no jar build
     {
