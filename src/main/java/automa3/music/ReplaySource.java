@@ -17,13 +17,15 @@ public class ReplaySource implements MusicSource {
 
     private final Path file;
     private final double speed;
+    private final int dropBeats;
     private volatile boolean running;
     private volatile String status = "idle";
     private Thread thread;
 
-    public ReplaySource(Path file, double speed) {
+    public ReplaySource(Path file, double speed, int dropBeats) {
         this.file = file;
         this.speed = speed <= 0 ? 1 : speed;
+        this.dropBeats = dropBeats;
     }
 
     @Override
@@ -62,8 +64,16 @@ public class ReplaySource implements MusicSource {
                         BeatEvent b = JSON.treeToValue(data, BeatEvent.class);
                         listener.onBeat(new BeatEvent(b.player(), b.beatNumber(), b.beatWithinBar(), b.bpm(), System.nanoTime()));
                     }
-                    case "structure" -> listener.onStructure(data.get("player").asInt(),
-                            JSON.treeToValue(data.get("structure"), TrackStructure.class));
+                    case "structure" -> {
+                        TrackStructure st = JSON.treeToValue(data.get("structure"), TrackStructure.class);
+                        // re-run the current waveform analysis so tuning changes apply to old recordings
+                        if ("waveform".equals(st.source()) && !st.beatBands().isEmpty()) {
+                            st = WaveformAnalyzer.analyzeBeats(st.trackKey(), st.beatBands(), st.firstDownbeat(), dropBeats);
+                        } else if ("waveform".equals(st.source()) && !st.bands().isEmpty()) {
+                            st = WaveformAnalyzer.analyze(st.trackKey(), st.bands(), st.firstDownbeat(), dropBeats);
+                        }
+                        listener.onStructure(data.get("player").asInt(), st);
+                    }
                     default -> {
                     }
                 }

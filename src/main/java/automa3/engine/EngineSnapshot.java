@@ -16,7 +16,7 @@ public record EngineSnapshot(boolean auto, boolean hold, boolean strobeAllowed, 
                              List<Deck> decks, List<String> events, AudioState audio) {
 
     public record Deck(int player, String device, boolean playing, boolean onAir, boolean master, boolean primary,
-                       double bpm, int beat, String title, String artist, String section, String analysis,
+                       double bpm, int beat, String title, String artist, String trackKey, String section, String analysis,
                        List<TrackStructure.Segment> segments, int lastBeat) {
     }
 

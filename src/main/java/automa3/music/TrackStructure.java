@@ -14,9 +14,12 @@ import java.util.List;
  * @param segments ordered, non-overlapping; endBeat is exclusive
  * @param barEnergy optional relative energy (0..1) per bar index from the waveform, may be empty
  * @param firstDownbeat beat number of the first bar's downbeat (for bar energy lookup)
+ * @param bands raw low / mid / high level per bar from the waveform (for tuning and re-analysis), may be empty
+ * @param beatBands raw low / mid / high level per beat (index 0 = beat 1) for display and re-analysis, may be empty
  */
 public record TrackStructure(String trackKey, String source, List<Segment> segments, List<Double> barEnergy,
-                             int firstDownbeat) {
+                             int firstDownbeat, List<WaveformAnalyzer.BarBands> bands,
+                             List<WaveformAnalyzer.BarBands> beatBands) {
 
     public record Segment(int startBeat, int endBeat, Section section, String label) {
         public int lengthBeats() {
@@ -27,6 +30,21 @@ public record TrackStructure(String trackKey, String source, List<Segment> segme
     public TrackStructure {
         segments = List.copyOf(segments);
         barEnergy = barEnergy == null ? List.of() : List.copyOf(barEnergy);
+        bands = bands == null ? List.of() : List.copyOf(bands);
+        beatBands = beatBands == null ? List.of() : List.copyOf(beatBands);
+    }
+
+    public TrackStructure(String trackKey, String source, List<Segment> segments, List<Double> barEnergy, int firstDownbeat) {
+        this(trackKey, source, segments, barEnergy, firstDownbeat, List.of(), List.of());
+    }
+
+    public TrackStructure(String trackKey, String source, List<Segment> segments, List<Double> barEnergy, int firstDownbeat,
+                          List<WaveformAnalyzer.BarBands> bands) {
+        this(trackKey, source, segments, barEnergy, firstDownbeat, bands, List.of());
+    }
+
+    public TrackStructure withBeatBands(List<WaveformAnalyzer.BarBands> beats) {
+        return new TrackStructure(trackKey, source, segments, barEnergy, firstDownbeat, bands, beats);
     }
 
     public Segment segmentAt(int beat) {

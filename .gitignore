@@ -3,5 +3,6 @@ config.json
 config.json.tmp
 recordings/
 configs/
+analysis/
 .DS_Store
 target-ide/

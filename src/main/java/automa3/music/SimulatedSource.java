@@ -170,7 +170,7 @@ public class SimulatedSource implements MusicSource {
                 deck.key, deck.track.name(), "AutoMA3 Simulator", System.currentTimeMillis()));
         TrackStructure structure = switch (deck.source) {
             case "phrase" -> exactStructure(deck.key, deck.track, dropBeats);
-            case "waveform" -> WaveformAnalyzer.analyze(deck.key, syntheticWaveform(deck.track, random), 1, dropBeats);
+            case "waveform" -> WaveformAnalyzer.analyzeBeats(deck.key, perBeat(syntheticWaveform(deck.track, random), random), 1, dropBeats);
             default -> null;
         };
         if (structure != null) listener.onStructure(deck.player, structure);
@@ -184,6 +184,18 @@ public class SimulatedSource implements MusicSource {
             beat += p.bars() * 4;
         }
         return new TrackStructure(key, "phrase", TrackStructure.normalize(segs, dropBeats), List.of(), 1);
+    }
+
+    /** Spread bar levels over four beats with a little variation, like a real per-beat waveform. */
+    static List<WaveformAnalyzer.BarBands> perBeat(List<WaveformAnalyzer.BarBands> bars, Random random) {
+        List<WaveformAnalyzer.BarBands> beats = new ArrayList<>();
+        for (WaveformAnalyzer.BarBands b : bars) {
+            for (int i = 0; i < 4; i++) {
+                double v = 1 + random.nextGaussian() * 0.05;
+                beats.add(new WaveformAnalyzer.BarBands(b.low() * v, b.mid() * v, b.high() * v));
+            }
+        }
+        return beats;
     }
 
     /** Bar band energies a real waveform of this template would roughly have. */

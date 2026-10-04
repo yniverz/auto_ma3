@@ -9,74 +9,193 @@ import java.util.List;
 /**
  * Finds sections from the full-track waveform when a track has no rekordbox phrase analysis.
  *
- * <p>Works per bar on low / mid / high band energy (CDJ-3000 three-band or NXS2 colour waveform):
- * bars without kick (low band missing) are breakdowns / intro / outro, rising highs at the end
- * of a breakdown are a build, and the kick returning after a long breakdown is a drop. This is
- * reliable for techno and most four-on-the-floor electronic music, and it gives look-ahead
- * because the whole waveform is known when the track is loaded.</p>
+ * <p>Works per bar on low / mid / high band levels (CDJ-3000 three-band or NXS2 colour waveform),
+ * each normalised to the track's own loud parts. Every bar gets an energy level:
+ * <ul>
+ *   <li>HIGH: full energy with bass (drops, peak parts)</li>
+ *   <li>MID: bass / kick running but clearly below the loudest parts (grooves, builds with kick)</li>
+ *   <li>LOW: no bass (breakdowns, quiet intros and outros)</li>
+ * </ul>
+ * Runs of equal level are snapped to the 4-bar phrase grid. A HIGH run that starts with a clear
+ * energy jump over the bars before it is a DROP, and what leads into a drop becomes a BUILD.
+ * This catches drops in house / EDM where the kick keeps running through the build, as well as
+ * techno drops where the kick returns after a breakdown.</p>
  */
 public final class WaveformAnalyzer {
 
     public record BarBands(double low, double mid, double high) {
     }
 
-    /** Low band level (relative to the track's loud bars) above which a bar counts as kicking. */
-    static final double KICK_THRESHOLD = 0.55;
-    static final int MIN_RUN_BARS = 4;
+    /** Bass level (relative to the track's loud bars) from which a bar counts as having bass / kick. */
+    static final double BASS_THRESHOLD = 0.5;
+    /** Energy (relative to the track's loudest bars) from which a bar with bass counts as HIGH. */
+    static final double HIGH_THRESHOLD = 0.82;
+    /** Energy increase over the preceding bars that makes a HIGH run a drop. */
+    static final double DROP_JUMP = 0.12;
+    /** Increase of bass + mids (two bars after vs. two bars before) that marks a drop. */
+    static final double BODY_JUMP = 0.35;
+    /** Runs shorter than this many bars are merged into a neighbour. */
+    static final int MIN_RUN_BARS = 2;
+
+    static final int LOW = 0, MID = 1, HIGH = 2;
+
+    private record Run(int start, int end, int level) {
+        int len() {
+            return end - start;
+        }
+    }
 
     private WaveformAnalyzer() {
     }
 
+    /** Average per-beat bands (index 0 = beat 1) into bars starting at the first downbeat. */
+    public static List<BarBands> barsFromBeats(List<BarBands> beats, int firstDownbeat) {
+        List<BarBands> bars = new ArrayList<>();
+        for (int b = firstDownbeat - 1; b + 4 <= beats.size(); b += 4) {
+            double lo = 0, mid = 0, hi = 0;
+            for (int i = b; i < b + 4; i++) {
+                lo += beats.get(i).low();
+                mid += beats.get(i).mid();
+                hi += beats.get(i).high();
+            }
+            bars.add(new BarBands(lo / 4, mid / 4, hi / 4));
+        }
+        return bars;
+    }
+
+    /** Analyse per-beat waveform bands; the result keeps them for display. */
+    public static TrackStructure analyzeBeats(String trackKey, List<BarBands> beats, int firstDownbeat, int dropBeats) {
+        return analyze(trackKey, barsFromBeats(beats, firstDownbeat), firstDownbeat, dropBeats).withBeatBands(beats);
+    }
+
     public static TrackStructure analyze(String trackKey, List<BarBands> bars, int firstDownbeat, int dropBeats) {
         int n = bars.size();
-        if (n == 0) return new TrackStructure(trackKey, "waveform", List.of(), List.of(), firstDownbeat);
+        if (n == 0) return new TrackStructure(trackKey, "waveform", List.of(), List.of(), firstDownbeat, bars);
 
         double[] low = normalize(bars.stream().mapToDouble(BarBands::low).toArray());
         double[] mid = normalize(bars.stream().mapToDouble(BarBands::mid).toArray());
         double[] high = normalize(bars.stream().mapToDouble(BarBands::high).toArray());
+        double[] energy = new double[n];
+        for (int i = 0; i < n; i++) energy[i] = 0.5 * low[i] + 0.3 * mid[i] + 0.2 * high[i];
+        double eRef = percentile(energy, 0.95);
+        if (eRef <= 1e-9) eRef = 1;
+        for (int i = 0; i < n; i++) energy[i] = Math.min(1, energy[i] / eRef);
 
-        boolean[] kick = new boolean[n];
-        for (int i = 0; i < n; i++) kick[i] = low[i] >= KICK_THRESHOLD;
-        kick = majority(kick);
+        int[] level = new int[n];
+        for (int i = 0; i < n; i++) {
+            boolean bass = low[i] >= BASS_THRESHOLD;
+            level[i] = !bass ? LOW : energy[i] >= HIGH_THRESHOLD ? HIGH : MID;
+        }
+        level = median3(level);
 
-        // runs of kick / no kick, snapped to 4 bar phrases
-        List<int[]> runs = runs(kick); // {startBar, endBar(excl), kick?1:0}
-        runs = mergeShortRuns(runs, MIN_RUN_BARS);
-        runs = snap(runs, n);
+        List<Run> runs = new ArrayList<>(snapToPhrases(mergeShort(runs(level), energy), n));
 
-        List<Double> energy = new ArrayList<>(n);
-        for (int i = 0; i < n; i++) energy.add(clamp01(0.5 * low[i] + 0.3 * mid[i] + 0.2 * high[i]));
-
-        List<TrackStructure.Segment> segs = new ArrayList<>();
-        for (int r = 0; r < runs.size(); r++) {
-            int[] run = runs.get(r);
-            int start = run[0], end = run[1];
-            boolean isKick = run[2] == 1;
-            int sb = firstDownbeat + start * 4, eb = firstDownbeat + end * 4;
-            if (!isKick) {
-                if (r == 0) {
-                    segs.add(new TrackStructure.Segment(sb, eb, Section.INTRO, "no kick (start)"));
-                } else if (r == runs.size() - 1) {
-                    segs.add(new TrackStructure.Segment(sb, eb, Section.OUTRO, "no kick (end)"));
-                } else {
-                    int len = end - start;
-                    int buildBars = len >= 8 && risingHighs(mid, high, start, end) ? Math.min(8, len / 2 / 4 * 4) : 0;
-                    if (buildBars > 0) {
-                        int split = firstDownbeat + (end - buildBars) * 4;
-                        segs.add(new TrackStructure.Segment(sb, split, Section.BREAKDOWN, "no kick"));
-                        segs.add(new TrackStructure.Segment(split, eb, Section.BUILD, "rising highs"));
-                    } else {
-                        segs.add(new TrackStructure.Segment(sb, eb, Section.BREAKDOWN, "no kick"));
-                    }
+        // pass 1: which HIGH runs are drops
+        boolean[] drop = new boolean[runs.size()];
+        for (int r = 1; r < runs.size(); r++) {
+            Run run = runs.get(r);
+            if (run.level != HIGH || runs.get(r - 1).level == HIGH) continue;
+            double after = mean(energy, run.start, Math.min(n, run.start + 2));
+            double before = mean(energy, Math.max(0, run.start - 4), run.start);
+            // the phrase-grid snap can move a boundary by a bar, so also look one bar either side
+            double body = Math.max(bodyJump(low, mid, run.start),
+                    Math.max(bodyJump(low, mid, run.start - 1), bodyJump(low, mid, run.start + 1)));
+            drop[r] = after - before >= DROP_JUMP || body >= BODY_JUMP;
+        }
+        // Builds get loud a few bars early (kick comes in, snare rolls, risers). The drop itself is where
+        // bass AND mids jump together, so put each drop there. Highs are ignored: they rise in builds.
+        for (int r = 1; r < runs.size(); r++) {
+            if (!drop[r]) continue;
+            Run prev = runs.get(r - 1), run = runs.get(r);
+            int best = run.start;
+            double bestJump = bodyJump(low, mid, run.start);
+            for (int b = Math.max(prev.start + 1, run.start - 4); b <= Math.min(run.end - 1, run.start + 4); b++) {
+                double j = bodyJump(low, mid, b);
+                if (j > bestJump + 1e-9) {
+                    bestJump = j;
+                    best = b;
                 }
-            } else {
-                boolean afterBreak = r > 0 && runs.get(r - 1)[2] == 0 && r - 1 != 0
-                        && runs.get(r - 1)[1] - runs.get(r - 1)[0] >= 8;
-                Section s = afterBreak ? Section.DROP : Section.GROOVE;
-                segs.add(new TrackStructure.Segment(sb, eb, s, afterBreak ? "kick returns" : "kick"));
+            }
+            // prefer the 4-bar phrase grid when it is nearly as good
+            int grid = Math.round(best / 4f) * 4;
+            if (grid != best && grid > prev.start && grid < run.end && bodyJump(low, mid, grid) >= 0.8 * bestJump) best = grid;
+            if (best != run.start) {
+                runs.set(r - 1, new Run(prev.start, best, prev.level));
+                runs.set(r, new Run(best, run.end, run.level));
             }
         }
-        return new TrackStructure(trackKey, "waveform", TrackStructure.normalize(segs, dropBeats), energy, firstDownbeat);
+
+        // pass 2: label
+        List<Double> energyList = new ArrayList<>(n);
+        for (double e : energy) energyList.add(e);
+        List<TrackStructure.Segment> segs = new ArrayList<>();
+        for (int r = 0; r < runs.size(); r++) {
+            Run run = runs.get(r);
+            boolean first = r == 0, last = r == runs.size() - 1;
+            boolean beforeDrop = r + 1 < runs.size() && drop[r + 1];
+            int sb = firstDownbeat + run.start * 4, eb = firstDownbeat + run.end * 4;
+            switch (run.level) {
+                case HIGH -> segs.add(new TrackStructure.Segment(sb, eb,
+                        drop[r] ? Section.DROP : first ? Section.GROOVE : Section.PEAK,
+                        drop[r] ? "energy jump" : "full energy"));
+                case MID -> {
+                    if (beforeDrop && !first && run.len() <= 16) {
+                        segs.add(new TrackStructure.Segment(sb, eb, Section.BUILD, "lead-in to drop"));
+                    } else if (beforeDrop && run.len() > 8) {
+                        int split = firstDownbeat + buildStart(mid, high, run.start, run.end) * 4;
+                        segs.add(new TrackStructure.Segment(sb, split, first ? Section.INTRO : Section.GROOVE, "bass running"));
+                        segs.add(new TrackStructure.Segment(split, eb, Section.BUILD, "lead-in to drop"));
+                    } else {
+                        segs.add(new TrackStructure.Segment(sb, eb,
+                                first ? Section.INTRO : last ? Section.OUTRO : Section.GROOVE, "bass running"));
+                    }
+                }
+                default -> {
+                    if (first) {
+                        segs.add(new TrackStructure.Segment(sb, eb, Section.INTRO, "no bass (start)"));
+                    } else if (last) {
+                        segs.add(new TrackStructure.Segment(sb, eb, Section.OUTRO, "no bass (end)"));
+                    } else {
+                        int buildBars = beforeDrop && run.len() >= 8 && risingHighs(mid, high, run.start, run.end)
+                                ? Math.min(8, run.len() / 2 / 4 * 4) : 0;
+                        if (buildBars > 0) {
+                            int split = firstDownbeat + (run.end - buildBars) * 4;
+                            segs.add(new TrackStructure.Segment(sb, split, Section.BREAKDOWN, "no bass"));
+                            segs.add(new TrackStructure.Segment(split, eb, Section.BUILD, "rising highs"));
+                        } else {
+                            segs.add(new TrackStructure.Segment(sb, eb, Section.BREAKDOWN, "no bass"));
+                        }
+                    }
+                }
+            }
+        }
+        return new TrackStructure(trackKey, "waveform", TrackStructure.normalize(segs, dropBeats), energyList,
+                firstDownbeat, bars);
+    }
+
+    /**
+     * Where the build starts inside a run with bass that leads into a drop: the earliest 4-bar block
+     * (within the last 16 bars) from which mids / highs stay clearly above the run's earlier level.
+     * Falls back to the last 8 bars.
+     */
+    static int buildStart(double[] mid, double[] high, int start, int end) {
+        int maxLen = Math.min(16, (end - start - 4) / 4 * 4); // keep at least 4 bars as baseline
+        int searchFrom = end - maxLen;
+        if (searchFrom - start < 4) return Math.max(start, end - 8);
+        double base = 0;
+        for (int i = start; i < searchFrom; i++) base += mid[i] * 0.4 + high[i] * 0.6;
+        base /= searchFrom - start;
+        double threshold = base * 1.15 + 0.03;
+        for (int b = searchFrom; b <= end - 4; b += 4) {
+            boolean allAbove = true;
+            for (int k = b; k + 4 <= end && allAbove; k += 4) {
+                double block = 0;
+                for (int i = k; i < k + 4; i++) block += mid[i] * 0.4 + high[i] * 0.6;
+                allAbove = block / 4 > threshold;
+            }
+            if (allAbove) return b;
+        }
+        return Math.max(start, end - 8);
     }
 
     private static boolean risingHighs(double[] mid, double[] high, int start, int end) {
@@ -90,61 +209,81 @@ public final class WaveformAnalyzer {
         return last > first * 1.15 + 0.03;
     }
 
+    /** Scale so the track's loud parts (95th percentile) are 1. */
     static double[] normalize(double[] v) {
-        double[] sorted = v.clone();
-        Arrays.sort(sorted);
-        double ref = sorted[Math.min(sorted.length - 1, (int) Math.floor(sorted.length * 0.9))];
+        double ref = percentile(v, 0.95);
         if (ref <= 1e-9) ref = 1;
         double[] out = new double[v.length];
-        for (int i = 0; i < v.length; i++) out[i] = clamp01(v[i] / ref);
+        for (int i = 0; i < v.length; i++) out[i] = Math.max(0, Math.min(1, v[i] / ref));
         return out;
     }
 
-    private static boolean[] majority(boolean[] in) {
-        boolean[] out = in.clone();
+    static double percentile(double[] v, double p) {
+        if (v.length == 0) return 0;
+        double[] sorted = v.clone();
+        Arrays.sort(sorted);
+        return sorted[Math.min(sorted.length - 1, (int) Math.floor(sorted.length * p))];
+    }
+
+    /** Bass + mid level of the two bars from {@code bar} minus the two bars before it. */
+    static double bodyJump(double[] low, double[] mid, int bar) {
+        if (bar <= 0 || bar >= low.length) return 0;
+        int to = Math.min(low.length, bar + 2), from = Math.max(0, bar - 2);
+        return mean(low, bar, to) - mean(low, from, bar) + mean(mid, bar, to) - mean(mid, from, bar);
+    }
+
+    private static double mean(double[] v, int from, int to) {
+        if (to <= from) return 0;
+        double s = 0;
+        for (int i = from; i < to; i++) s += v[i];
+        return s / (to - from);
+    }
+
+    /** Remove single-bar blips. */
+    private static int[] median3(int[] in) {
+        int[] out = in.clone();
         for (int i = 1; i < in.length - 1; i++) {
-            int c = (in[i - 1] ? 1 : 0) + (in[i] ? 1 : 0) + (in[i + 1] ? 1 : 0);
-            out[i] = c >= 2;
+            int a = in[i - 1], b = in[i], c = in[i + 1];
+            out[i] = Math.max(Math.min(a, b), Math.min(Math.max(a, b), c));
         }
         return out;
     }
 
-    private static List<int[]> runs(boolean[] kick) {
-        List<int[]> runs = new ArrayList<>();
+    private static List<Run> runs(int[] level) {
+        List<Run> runs = new ArrayList<>();
         int start = 0;
-        for (int i = 1; i <= kick.length; i++) {
-            if (i == kick.length || kick[i] != kick[start]) {
-                runs.add(new int[]{start, i, kick[start] ? 1 : 0});
+        for (int i = 1; i <= level.length; i++) {
+            if (i == level.length || level[i] != level[start]) {
+                runs.add(new Run(start, i, level[start]));
                 start = i;
             }
         }
         return runs;
     }
 
-    private static List<int[]> mergeShortRuns(List<int[]> runs, int minBars) {
-        List<int[]> list = new ArrayList<>();
-        for (int[] r : runs) list.add(r.clone());
+    /** Merge runs shorter than MIN_RUN_BARS into the neighbour with the closer energy. */
+    private static List<Run> mergeShort(List<Run> in, double[] energy) {
+        List<Run> list = new ArrayList<>(in);
         boolean changed = true;
         while (changed && list.size() > 1) {
             changed = false;
             for (int i = 0; i < list.size(); i++) {
-                int[] r = list.get(i);
-                if (r[1] - r[0] >= minBars) continue;
-                // absorb into the longer neighbour
-                int[] prev = i > 0 ? list.get(i - 1) : null;
-                int[] next = i + 1 < list.size() ? list.get(i + 1) : null;
-                int[] target = prev == null ? next : next == null ? prev
-                        : (prev[1] - prev[0] >= next[1] - next[0] ? prev : next);
-                if (target == prev) prev[1] = r[1];
-                else next[0] = r[0];
+                Run r = list.get(i);
+                if (r.len() >= MIN_RUN_BARS) continue;
+                Run prev = i > 0 ? list.get(i - 1) : null;
+                Run next = i + 1 < list.size() ? list.get(i + 1) : null;
+                double e = mean(energy, r.start, r.end);
+                boolean toPrev = next == null || (prev != null
+                        && Math.abs(mean(energy, prev.start, prev.end) - e) <= Math.abs(mean(energy, next.start, next.end) - e));
+                if (toPrev) list.set(i - 1, new Run(prev.start, r.end, prev.level));
+                else list.set(i + 1, new Run(r.start, next.end, next.level));
                 list.remove(i);
                 changed = true;
                 break;
             }
-            // join equal neighbours
             for (int i = list.size() - 1; i > 0; i--) {
-                if (list.get(i)[2] == list.get(i - 1)[2]) {
-                    list.get(i - 1)[1] = list.get(i)[1];
+                if (list.get(i).level == list.get(i - 1).level) {
+                    list.set(i - 1, new Run(list.get(i - 1).start, list.get(i).end, list.get(i).level));
                     list.remove(i);
                     changed = true;
                 }
@@ -153,19 +292,29 @@ public final class WaveformAnalyzer {
         return list;
     }
 
-    private static List<int[]> snap(List<int[]> runs, int n) {
-        List<int[]> out = new ArrayList<>();
+    /** Move boundaries that are at most one bar off the 4-bar phrase grid onto it. */
+    private static List<Run> snapToPhrases(List<Run> runs, int n) {
+        List<Run> out = new ArrayList<>();
+        int start = 0;
         for (int i = 0; i < runs.size(); i++) {
-            int[] r = runs.get(i).clone();
-            if (i > 0) r[0] = out.get(out.size() - 1)[1];
-            if (i < runs.size() - 1) r[1] = Math.max(r[0] + 1, Math.min(n, Math.round(r[1] / 4f) * 4));
-            else r[1] = n;
-            if (r[1] > r[0]) out.add(r);
+            Run r = runs.get(i);
+            int end = r.end;
+            if (i < runs.size() - 1) {
+                int nearest = Math.round(end / 4f) * 4;
+                if (Math.abs(nearest - end) <= 1) end = nearest;
+                end = Math.max(start + 1, Math.min(n, end));
+            } else {
+                end = n;
+            }
+            if (end > start) {
+                if (!out.isEmpty() && out.get(out.size() - 1).level == r.level) {
+                    out.set(out.size() - 1, new Run(out.get(out.size() - 1).start, end, r.level));
+                } else {
+                    out.add(new Run(start, end, r.level));
+                }
+            }
+            start = end;
         }
         return out;
-    }
-
-    private static double clamp01(double v) {
-        return Math.max(0, Math.min(1, v));
     }
 }

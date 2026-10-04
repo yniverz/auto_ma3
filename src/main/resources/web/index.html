@@ -41,6 +41,9 @@
   .timeline { position: relative; height: 18px; display: flex; border-radius: 3px; overflow: hidden; margin-top: 6px; background: #000; }
   .timeline > div { height: 100%; border-right: 1px solid rgba(0,0,0,.4); }
   .timeline .head { position: absolute; top: 0; bottom: 0; width: 2px; background: #fff; box-shadow: 0 0 4px #fff; }
+  .wave { display: block; width: 100%; height: 48px; margin-top: 3px; background: #07090c; border-radius: 3px; }
+  .wave-legend { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .wave-legend b { font-weight: 500; }
   .log { font: 12px/1.5 ui-monospace, Menlo, monospace; max-height: 340px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
   .log .sent { color: var(--text); } .log .unsent { color: var(--muted); }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -282,7 +285,47 @@ function deckHtml(d) {
       <span class="muted">${d.bpm} BPM · beat ${d.beat} · ${esc(d.section || "-")} · analysis: ${esc(d.analysis)}</span></div>
     <div class="small">${esc(d.title || "")} <span class="muted">${esc(d.artist || "")}</span></div>
     <div class="timeline">${segs || '<div style="width:100%;background:var(--panel)"></div>'}${head}</div>
+    ${waveSvg(d, total)}
   </div>`;
+}
+
+// ---------- waveform bands per bar (what the analysis sees)
+const analysisCache = {};  // player -> {key, data}
+
+function wantAnalysis(d) {
+  const key = d.trackKey + "|" + d.analysis + "|" + d.segments.length;
+  const c = analysisCache[d.player];
+  if (c && c.key === key) return c.data;
+  analysisCache[d.player] = {key, data: null};
+  api("/api/analysis?player=" + d.player).then(data => { if (analysisCache[d.player].key === key) analysisCache[d.player].data = data; }).catch(() => {});
+  return null;
+}
+
+function waveSvg(d, total) {
+  const a = wantAnalysis(d);
+  // per beat if available (index 0 = beat 1), else per bar
+  const perBeat = a && a.beatBands && a.beatBands.length;
+  const pts = !a ? [] : perBeat ? a.beatBands : (a.bands || []);
+  if (!pts.length) return "";
+  const step = perBeat ? 1 : 4;
+  const beatOf = i => perBeat ? i + 1 : a.firstDownbeat + i * 4;
+  const pct = (v, p) => { const s = v.slice().sort((x, y) => x - y); return Math.max(1e-9, s[Math.floor((s.length - 1) * p)]); };
+  const mx = {low: pct(pts.map(b => b.low), 0.98), mid: pct(pts.map(b => b.mid), 0.98), high: pct(pts.map(b => b.high), 0.98)};
+  const H = 46;
+  const y = (v, k) => (H - Math.min(1, v / mx[k]) * (H - 4)).toFixed(1);
+  const x = i => ((beatOf(i) - 1) / total * 1000).toFixed(2);
+  const w = (step / total * 1000).toFixed(3);
+  const line = k => pts.map((b, i) => `${x(i)},${y(b[k], k)}`).join(" ");
+  const bars = pts.map((b, i) => {
+    const beat = beatOf(i);
+    const bar = Math.floor((beat - a.firstDownbeat) / 4) + 1;
+    return `<rect x="${x(i)}" y="${y(b.low, "low")}" width="${w}" height="${(H - y(b.low, "low")).toFixed(1)}" fill="#2f5fbf"><title>beat ${beat} · bar ${bar} · low ${b.low.toFixed(1)} mid ${b.mid.toFixed(1)} high ${b.high.toFixed(1)}</title></rect>`;
+  }).join("");
+  const head = d.beat > 0 ? `<line x1="${(d.beat / total * 1000).toFixed(1)}" x2="${(d.beat / total * 1000).toFixed(1)}" y1="0" y2="${H}" stroke="#fff" stroke-width="2"/>` : "";
+  return `<svg class="wave" viewBox="0 0 1000 ${H}" preserveAspectRatio="none">${bars}
+      <polyline points="${line("mid")}" fill="none" stroke="#f5a524" stroke-width="1.2" vector-effect="non-scaling-stroke"/>
+      <polyline points="${line("high")}" fill="none" stroke="#e6e9ee" stroke-width="1" vector-effect="non-scaling-stroke"/>${head}</svg>
+    <div class="wave-legend"><b style="color:#5b8cff">■ bass</b> · <b style="color:var(--accent)">— mid</b> · <b style="color:var(--text)">— high</b> per ${perBeat ? "beat" : "bar"} (hover for values)${d.analysis === "waveform" ? ' · <span style="color:var(--accent)">no rekordbox phrase analysis found for this track: using the waveform</span>' : ""}</div>`;
 }
 
 const ctl = (action, value) => post("/api/control/" + action + (value !== undefined ? "?value=" + value : ""));

@@ -94,6 +94,9 @@ public class WebServer {
                 try (OutputStream os = ex.getResponseBody()) {
                     os.write(body);
                 }
+            } else if (path.equals("/api/analysis")) {
+                var st = app.engine().structure(Integer.parseInt(query.getOrDefault("player", "0")));
+                json(ex, st == null ? 404 : 200, st == null ? Map.of("error", "no analysis") : st);
             } else if (path.equals("/api/profiles")) {
                 json(ex, 200, profiles());
             } else if (path.equals("/api/dryrun") && method.equals("POST")) {

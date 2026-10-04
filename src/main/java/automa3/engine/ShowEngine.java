@@ -59,7 +59,8 @@ public class ShowEngine implements MusicListener {
 
     // music state
     private final Map<Integer, DeckState> decks = new HashMap<>();
-    private final Map<Integer, TrackStructure> structures = new HashMap<>();
+    /** Concurrent: also read by the web UI. */
+    private final Map<Integer, TrackStructure> structures = new java.util.concurrent.ConcurrentHashMap<>();
     private final Map<Integer, Integer> lastBeatNumber = new HashMap<>();
     private final Map<Integer, Long> lastBeatMs = new HashMap<>();
     private int primary = -1;
@@ -118,6 +119,11 @@ public class ShowEngine implements MusicListener {
         return snapshot;
     }
 
+    /** Full analysis (sections, energy and waveform bands) of the track on a player, for the UI. */
+    public TrackStructure structure(int player) {
+        return structures.get(player);
+    }
+
     public OperatorState operator() {
         return op;
     }
@@ -156,7 +162,7 @@ public class ShowEngine implements MusicListener {
         List<DeckState> candidates = new ArrayList<>();
         for (DeckState d : decks.values()) {
             boolean fresh = now - d.updatedMs() < 3000 || now - lastBeatMs.getOrDefault(d.player(), 0L) < 3000;
-            if (d.playing() && fresh && (!onAirKnown || d.onAir())) candidates.add(d);
+            if (isPlaying(d, now) && fresh && (!onAirKnown || d.onAir())) candidates.add(d);
         }
         if (candidates.isEmpty()) return;
         DeckState current = decks.get(primary);
@@ -174,6 +180,11 @@ public class ShowEngine implements MusicListener {
         DeckState pick = candidates.stream().filter(DeckState::tempoMaster).findFirst()
                 .orElse(candidates.stream().min((a, b) -> Integer.compare(a.player(), b.player())).orElseThrow());
         setPrimary(pick.player(), current == null ? "first deck playing" : "player " + primary + " stopped / off air");
+    }
+
+    /** Playing per the status flag, or beats arrived recently (beat packets are only sent while playing). */
+    private boolean isPlaying(DeckState d, long nowMs) {
+        return d.playing() || nowMs - lastBeatMs.getOrDefault(d.player(), Long.MIN_VALUE / 2) < 2000;
     }
 
     private void setPrimary(int player, String why) {
@@ -202,7 +213,7 @@ public class ShowEngine implements MusicListener {
     private void handleBeat(BeatEvent b) {
         lastBeatMs.put(b.player(), sched.currentTimeMillis());
         if (b.beatNumber() > 0) lastBeatNumber.put(b.player(), b.beatNumber());
-        if (primary < 0 || decks.get(primary) == null || !decks.get(primary).playing()) choosePrimary();
+        if (primary < 0 || decks.get(primary) == null || !isPlaying(decks.get(primary), sched.currentTimeMillis())) choosePrimary();
         if (primary < 0 && decks.isEmpty()) primary = b.player();
         if (b.player() != primary) return;
         globalBeat++;
@@ -783,21 +794,21 @@ public class ShowEngine implements MusicListener {
     }
 
     private EngineSnapshot buildSnapshot(Config cfg) {
+        long now = sched.currentTimeMillis();
         List<EngineSnapshot.Deck> deckList = new ArrayList<>();
         decks.values().stream().sorted((x, y) -> Integer.compare(x.player(), y.player())).forEach(d -> {
             TrackStructure st = structureFor(d.player());
             Integer beat = lastBeatNumber.get(d.player());
             Section s = sectionOf(d.player());
-            deckList.add(new EngineSnapshot.Deck(d.player(), d.deviceName(), d.playing(), d.onAir(), d.tempoMaster(),
+            deckList.add(new EngineSnapshot.Deck(d.player(), d.deviceName(), isPlaying(d, now), d.onAir(), d.tempoMaster(),
                     d.player() == primary, Math.round(d.bpm() * 10) / 10.0, beat == null ? -1 : beat,
-                    d.title(), d.artist(), s == null ? null : s.name(), st == null ? "none" : st.source(),
+                    d.title(), d.artist(), d.trackKey(), s == null ? null : s.name(), st == null ? "none" : st.source(),
                     st == null ? List.of() : st.segments(), st == null ? 0 : st.lastBeat()));
         });
         Map<String, String> activeLabels = new LinkedHashMap<>();
         active.forEach((k, v) -> activeLabels.put(k, v.label()));
         if (activeRiser != null) activeLabels.put("RISER", activeRiser.label());
         Map<String, Long> locks = new LinkedHashMap<>();
-        long now = sched.currentTimeMillis();
         op.layerLocks.forEach((k, v) -> locks.put(k, Math.max(0, (v - now) / 1000)));
         return new EngineSnapshot(op.auto, op.hold, op.strobeAllowed, op.specialsArmed, op.energyBias,
                 primary, currentSection == null ? null : currentSection.name(), sectionReason,

@@ -27,7 +27,7 @@ public final class Main {
     public static void main(String[] args) throws Exception {
         Path configPath = Path.of("config.json");
         boolean sim = false, dryRun = false, record = false;
-        Path replay = null;
+        Path replay = null, analyze = null;
         double speed = 1;
         Integer port = null;
         for (int i = 0; i < args.length; i++) {
@@ -35,6 +35,7 @@ public final class Main {
                 case "--config" -> configPath = Path.of(args[++i]);
                 case "--sim" -> sim = true;
                 case "--replay" -> replay = Path.of(args[++i]);
+                case "--analyze" -> analyze = Path.of(args[++i]);
                 case "--speed" -> speed = Double.parseDouble(args[++i]);
                 case "--dry-run" -> dryRun = true;
                 case "--record" -> record = true;
@@ -46,6 +47,7 @@ public final class Main {
                               (no args)          live: CDJs over Pro DJ Link (Ethernet)
                               --sim              simulated DJ set (no CDJs needed)
                               --replay FILE      replay a recorded session (recordings/*.jsonl)
+                              --analyze FILE     print the waveform analysis of a track (analysis/*.json)
                               --speed X          playback speed for --sim / --replay
                               --config FILE      config file (default ./config.json)
                               --dry-run          do not send anything to consoles
@@ -61,15 +63,21 @@ public final class Main {
             }
         }
 
+        if (analyze != null) {
+            automa3.music.AnalysisDump.printAnalysis(analyze, 16 * 4);
+            return;
+        }
+
         ConfigStore store = new ConfigStore(configPath);
         Config cfg = store.get();
         int webPort = port != null ? port : cfg.webPort;
         MusicSource source;
-        if (replay != null) source = new ReplaySource(replay, speed);
+        Path base = configPath.toAbsolutePath().getParent();
+        if (replay != null) source = new ReplaySource(replay, speed, cfg.engine.dropBars * 4);
         else if (sim) source = new SimulatedSource(speed, cfg.engine.dropBars * 4);
-        else source = new ProDjLinkSource(store);
+        else source = new ProDjLinkSource(store, base.resolve("analysis"));
 
-        Path recordings = configPath.toAbsolutePath().getParent().resolve("recordings");
+        Path recordings = base.resolve("recordings");
         App app = new App(store, source, recordings);
         app.hub().setDryRun(dryRun);
         app.start(webPort);

@@ -30,6 +30,12 @@ public final class PhraseMapper {
 
     public static TrackStructure map(String trackKey, Mood mood, List<Phrase> phrases, int endBeat,
                                      List<Double> barEnergy, int firstDownbeat, int dropBeats) {
+        return map(trackKey, mood, phrases, endBeat, barEnergy, firstDownbeat, dropBeats, List.of());
+    }
+
+    public static TrackStructure map(String trackKey, Mood mood, List<Phrase> phrases, int endBeat,
+                                     List<Double> barEnergy, int firstDownbeat, int dropBeats,
+                                     List<WaveformAnalyzer.BarBands> bands) {
         List<TrackStructure.Segment> raw = new ArrayList<>();
         for (int i = 0; i < phrases.size(); i++) {
             Phrase p = phrases.get(i);
@@ -65,6 +71,6 @@ public final class PhraseMapper {
                 raw.add(new TrackStructure.Segment(p.beat, end, Section.GROOVE, label));
             }
         }
-        return new TrackStructure(trackKey, "phrase", TrackStructure.normalize(raw, dropBeats), barEnergy, firstDownbeat);
+        return new TrackStructure(trackKey, "phrase", TrackStructure.normalize(raw, dropBeats), barEnergy, firstDownbeat, bands);
     }
 }
