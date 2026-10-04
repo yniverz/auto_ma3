@@ -15,6 +15,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson.version>2.18.2</jackson.version>
         <javafx.version>21.0.12</javafx.version>
+        <!-- version the app reports; CI passes -Dapp.version=1.0.<build number> -->
+        <app.version>${project.version}</app.version>
     </properties>
 
     <dependencies>
@@ -75,6 +77,23 @@
     </profiles>
 
     <build>
+        <resources>
+            <!-- only version.properties gets ${...} filled in: the web UI's JavaScript uses ${...} itself -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>version.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>version.properties</exclude>
+                </excludes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

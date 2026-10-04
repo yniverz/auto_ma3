@@ -5,85 +5,159 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AutoMA3</title>
 <style>
+  /*
+   * Design: neutral graphite surfaces (no blue tint), depth from lightness steps instead of borders and shadows,
+   * one accent (amber) for "active / important", colour otherwise only where it carries meaning (sections,
+   * status). Section colours follow the Radix Colors dark scale (step 9). Spacing on a 4 px grid.
+   */
   :root {
-    --bg: #0d0f12; --panel: #161a20; --panel2: #1d222a; --line: #2a313b; --text: #e6e9ee; --muted: #8b95a3;
-    --accent: #f5a524; --ok: #3ccf7a; --bad: #ff5c5c; --info: #4ea1ff;
-    --INTRO: #4a6b8a; --GROOVE: #2f8f6b; --BUILD: #d9a21b; --BREAKDOWN: #5a5fc7; --DROP: #e8453c; --PEAK: #c2337a; --OUTRO: #4a6b8a;
+    --bg: #111111;        /* app background */
+    --panel: #191919;     /* cards */
+    --panel2: #222222;    /* controls, nested surfaces */
+    --hover: #2a2a2a;
+    --line: #2e2e2e;      /* hairlines and input borders */
+    --text: #ededed;      /* primary text */
+    --muted: #a0a0a0;     /* secondary text */
+    --faint: #6f6f6f;     /* labels, tertiary text */
+    --accent: #f5a524; --ok: #46a758; --bad: #e5484d; --info: #3e63dd;
+    --INTRO: #696e77; --GROOVE: #12a594; --BUILD: #f5a524; --BREAKDOWN: #5b5bd6; --DROP: #e5484d; --PEAK: #d6409f; --OUTRO: #696e77;
+    --radius: 8px;
   }
   * { box-sizing: border-box; }
-  /* -apple-system / BlinkMacSystemFont are only known to Safari and Chrome; the Mac app's WebView skips them,
-     so name real installed fonts next (Helvetica Neue is on every Mac) */
+  /* The Mac system font (San Francisco): -apple-system / BlinkMacSystemFont in Safari and Chrome, "System" in the
+     Mac app's WebView (it does not know the other two, and its "Helvetica Neue" renders as the thin Light cut) */
   body { margin: 0; background: var(--bg); color: var(--text);
-         font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif; }
+         font: 14px/1.45 -apple-system, BlinkMacSystemFont, "System", Helvetica, Arial, sans-serif;
+         font-variant-numeric: tabular-nums; }
   /* form controls do not inherit the page font by default (the WebView then falls back to a serif font) */
   button, input, select, textarea { font-family: inherit; }
-  header { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
-  header h1 { font-size: 18px; margin: 0; letter-spacing: .5px; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; border: 2px solid var(--bg); }
+  ::-webkit-scrollbar-track { background: transparent; }
+
+  /* ---- header and tabs */
+  header { display: flex; align-items: center; gap: 8px; padding: 10px 20px; flex-wrap: wrap; min-height: 52px; }
+  header h1 { font-size: 15px; font-weight: 700; margin: 0 8px 0 0; letter-spacing: 0; }
   header .status { color: var(--muted); font-size: 13px; flex: 1; min-width: 200px; }
-  nav { display: flex; gap: 4px; padding: 0 16px; border-bottom: 1px solid var(--line); overflow-x: auto; }
-  nav button { background: none; border: none; color: var(--muted); padding: 10px 14px; cursor: pointer; font-size: 14px; border-bottom: 2px solid transparent; }
+  header label { display: inline-flex; align-items: center; gap: 8px; }
+  nav { display: flex; gap: 2px; padding: 0 20px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+  nav button { background: none; border: none; color: var(--muted); padding: 10px 12px; cursor: pointer; font-size: 13px;
+               font-weight: 500; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  nav button:hover { color: var(--text); }
   nav button.active { color: var(--text); border-bottom-color: var(--accent); }
-  main { padding: 16px; max-width: 1400px; margin: 0 auto; }
-  .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; min-width: 0; }
-  .panel h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 0 0 10px; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; background: var(--panel2); border: 1px solid var(--line); }
-  .badge.ok { color: var(--ok); border-color: var(--ok); } .badge.bad { color: var(--bad); border-color: var(--bad); } .badge.warn { color: var(--accent); border-color: var(--accent); }
-  .section-big { font-size: 40px; font-weight: 700; letter-spacing: 1px; }
-  .muted { color: var(--muted); } .small { font-size: 12px; }
+
+  /* ---- layout */
+  main { padding: 20px; max-width: 1440px; margin: 0 auto; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .panel { background: var(--panel); border-radius: var(--radius); padding: 16px; min-width: 0; }
+  /* the WebView has no semi-bold: small labels are bold so they do not render thin */
+  .panel h2 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 12px; }
+  .panel p { margin: 0 0 12px; }
   .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .meter { height: 8px; background: var(--panel2); border-radius: 4px; overflow: hidden; }
+  .muted { color: var(--muted); } .small { font-size: 12px; }
+
+  /* ---- status pills */
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px; line-height: 18px;
+           background: rgba(255,255,255,.06); color: var(--muted); border: 1px solid transparent; white-space: nowrap; }
+  .badge.ok { color: #63c174; background: rgba(70,167,88,.14); }
+  .badge.bad { color: #ff6369; background: rgba(229,72,77,.14); }
+  .badge.warn { color: var(--accent); background: rgba(245,165,36,.14); }
+
+  /* ---- now */
+  .section-big { font-size: 44px; font-weight: 700; letter-spacing: .01em; line-height: 1.1; margin: 4px 0 6px; }
+  .meter { height: 6px; background: var(--panel2); border-radius: 3px; overflow: hidden; }
   .meter > div { height: 100%; background: var(--accent); transition: width .2s; }
-  button.ctl { background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 12px 16px; font-size: 15px; font-weight: 700; cursor: pointer; min-width: 90px; }
-  button.ctl.on { background: var(--ok); color: #04150c; border-color: var(--ok); }
-  button.ctl.warn { background: var(--accent); color: #1a1000; border-color: var(--accent); }
-  button.ctl.danger { border-color: var(--bad); color: var(--bad); }
-  button.ctl:active { transform: scale(.97); }
-  button.small { background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 12px; }
-  button.primary { background: var(--accent); color: #1a1000; border: none; border-radius: 6px; padding: 8px 18px; font-weight: 700; cursor: pointer; }
-  .deck { border: 1px solid var(--line); border-radius: 6px; padding: 8px; margin-bottom: 8px; background: var(--panel2); }
-  .deck.primary { border-color: var(--accent); }
-  .timeline { position: relative; height: 18px; display: flex; border-radius: 3px; overflow: hidden; margin-top: 6px; background: #000; }
-  .timeline > div { height: 100%; border-right: 1px solid rgba(0,0,0,.4); }
-  .timeline .head { position: absolute; top: 0; bottom: 0; width: 2px; background: #fff; box-shadow: 0 0 4px #fff; }
-  .wave { display: block; width: 100%; height: 48px; margin-top: 3px; background: #07090c; border-radius: 3px; }
-  .wave-legend { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ---- buttons */
+  button.ctl { background: var(--panel2); color: var(--text); border: 1px solid transparent; border-radius: var(--radius);
+               padding: 0 16px; height: 44px; font-size: 14px; font-weight: 700; letter-spacing: .02em; cursor: pointer; min-width: 96px; }
+  button.ctl:hover { background: var(--hover); }
+  button.ctl.on { background: var(--ok); color: #fff; }
+  button.ctl.warn { background: var(--accent); color: #1a1100; }
+  button.ctl.danger { color: #ff6369; background: rgba(229,72,77,.12); }
+  button.ctl.danger.on { background: var(--bad); color: #fff; }
+  button.ctl:active { transform: scale(.98); }
+  button.small { background: var(--panel2); color: var(--text); border: 1px solid transparent; border-radius: 6px;
+                 height: 28px; padding: 0 10px; cursor: pointer; font-size: 12px; font-weight: 500; }
+  button.small:hover { background: var(--hover); }
+  .btn-like { display: inline-flex; align-items: center; height: 28px; padding: 0 10px; border-radius: 6px;
+              background: var(--panel2); color: var(--text); font-size: 12px; font-weight: 500; }
+  .btn-like:hover { background: var(--hover); }
+  /* buttons on a nested surface need one more step of contrast */
+  .deck button.small { background: var(--hover); }
+  .deck button.small:hover { background: #333; }
+  button.primary { background: var(--accent); color: #1a1100; border: none; border-radius: 6px; height: 32px; padding: 0 16px;
+                   font-weight: 700; cursor: pointer; }
+  button.primary:hover { filter: brightness(1.08); }
+  button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  /* ---- decks */
+  .deck { border-radius: var(--radius); padding: 12px; margin-bottom: 8px; background: var(--panel2); }
+  .deck:last-child { margin-bottom: 0; }
+  .deck.primary { box-shadow: inset 3px 0 0 var(--accent); }
+  .timeline { position: relative; height: 16px; display: flex; border-radius: 4px; overflow: hidden; margin-top: 8px; background: #0c0c0c; }
+  .timeline > div { height: 100%; border-right: 1px solid rgba(0,0,0,.35); }
+  .timeline .head { position: absolute; top: -2px; bottom: -2px; width: 2px; background: #fff; border: none; }
+  .wave { display: block; width: 100%; height: 48px; margin-top: 4px; background: #0c0c0c; border-radius: 4px; }
+  .wave-legend { font-size: 11px; color: var(--faint); margin-top: 4px; }
   .wave-legend b { font-weight: 500; }
-  .log { font: 12px/1.5 ui-monospace, "SF Mono", Menlo, Monaco, monospace; max-height: 340px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
-  .log .sent { color: var(--text); } .log .unsent { color: var(--muted); }
+
+  /* ---- logs */
+  .log { font: 12px/1.6 ui-monospace, "SF Mono", Menlo, Monaco, monospace; max-height: 340px; overflow: auto;
+         white-space: pre-wrap; word-break: break-word; color: var(--muted); }
+  .log .sent { color: var(--text); } .log .unsent { color: var(--faint); }
+
+  /* ---- tables and forms */
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th, td { padding: 5px 4px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
-  th { color: var(--muted); font-weight: 500; font-size: 12px; }
-  input, select, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; font: inherit; max-width: 100%; }
+  th, td { padding: 6px 6px; border-bottom: 1px solid rgba(255,255,255,.05); text-align: left; vertical-align: top; }
+  th { color: var(--muted); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  input, select, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 6px;
+                            padding: 4px 8px; min-height: 28px; font: inherit; font-size: 13px; max-width: 100%; }
+  /* checkboxes drawn here: the WebView ignores accent-color and draws bright native boxes */
+  input[type=checkbox] { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; min-height: 0; padding: 0;
+                         margin: 0; border: 1px solid #444; border-radius: 4px; background: var(--bg); cursor: pointer;
+                         vertical-align: middle; flex: none; }
+  input[type=checkbox]:checked { border-color: var(--accent); background: var(--accent) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='10'><path d='M1 5l3.5 3.5L11 1' fill='none' stroke='%231a1100' stroke-width='2'/></svg>") no-repeat center; }
+  input[type=range] { accent-color: var(--accent); border: none; background: none; padding: 0; }
   /* draw dropdowns ourselves: the WebView's native ones look dated */
-  select { -webkit-appearance: none; appearance: none; padding: 4px 26px 4px 8px; cursor: pointer;
-           background: var(--bg) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M1 1l4 4 4-4' fill='none' stroke='%238b95a3' stroke-width='1.5'/></svg>") no-repeat right 9px center; }
+  select { -webkit-appearance: none; appearance: none; padding: 4px 28px 4px 8px; cursor: pointer;
+           background: var(--bg) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M1 1l4 4 4-4' fill='none' stroke='%23a0a0a0' stroke-width='1.5'/></svg>") no-repeat right 10px center; }
   select:focus, input:focus, textarea:focus { outline: none; border-color: var(--accent); }
-  .icon-btn { display: inline-flex; align-items: center; justify-content: center; padding: 4px 8px; }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; padding: 0 8px; }
   .icon-btn svg { width: 14px; height: 14px; }
   /* no spin arrows: they take the space of the digits in narrow fields */
   input[type=number] { width: 70px; -moz-appearance: textfield; }
   input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   input.w-s { width: 58px; } input.w-m { width: 120px; }
-  .chips { display: grid; grid-template-columns: repeat(4, auto); gap: 3px; min-width: 230px; }
-  .chip { font-size: 11px; padding: 2px 6px; border-radius: 3px; border: 1px solid var(--line); cursor: pointer; user-select: none; color: var(--muted); }
-  .chip.on { color: #fff; border-color: transparent; }
+  .chips { display: grid; grid-template-columns: repeat(4, auto); gap: 4px; min-width: 230px; }
+  .chip { font-size: 11px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,.05); cursor: pointer;
+          user-select: none; color: var(--faint); text-align: center; }
+  .chip:hover { color: var(--muted); }
+  .chip.on { color: #fff; }
   .table-wrap { overflow-x: auto; }
-  .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px 16px; }
-  .form-grid label { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; }
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px 24px; }
+  .form-grid label { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; min-height: 32px; }
   .form-grid label span { color: var(--muted); }
-  pre.code { font-family: ui-monospace, "SF Mono", Menlo, Monaco, monospace; background: var(--bg); border: 1px solid var(--line); padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 12px; }
+  pre.code { font-family: ui-monospace, "SF Mono", Menlo, Monaco, monospace; background: var(--bg); padding: 12px;
+             border-radius: 6px; overflow-x: auto; font-size: 12px; line-height: 1.6; }
+  details summary { cursor: pointer; margin: 8px 0; }
+  ul { padding-left: 20px; } li { margin: 4px 0; }
+  code { font-family: ui-monospace, "SF Mono", Menlo, Monaco, monospace; font-size: 12px; background: var(--panel2); padding: 1px 4px; border-radius: 4px; }
+
+  /* ---- state */
   .hidden { display: none !important; }
   body.offline main { opacity: .45; pointer-events: none; }
   body.offline #srcStatus { color: var(--bad); }
-  .savebar { position: sticky; bottom: 0; background: var(--bg); padding: 10px 0; display: flex; gap: 10px; align-items: center; border-top: 1px solid var(--line); margin-top: 12px; }
-  .kv { display: flex; gap: 6px; margin-bottom: 4px; }
-  @media (max-width: 600px) { main { padding: 10px; } .section-big { font-size: 30px; } button.ctl { flex: 1 1 40%; } }
+  .savebar { position: sticky; bottom: 0; background: rgba(17,17,17,.96); padding: 12px 0; display: flex; gap: 12px;
+             align-items: center; border-top: 1px solid var(--line); margin-top: 16px; }
+  .kv { display: flex; gap: 8px; margin-bottom: 4px; align-items: center; }
+  @media (max-width: 600px) { main { padding: 12px; } header, nav { padding-left: 12px; padding-right: 12px; }
+    .section-big { font-size: 32px; } button.ctl { flex: 1 1 40%; } }
 </style>
 </head>
 <body>
 <header>
-  <h1>AutoMA3</h1>
+  <h1>AutoMA3 <span id="appVersion" class="small muted" style="font-weight:400"></span></h1>
   <span id="srcStatus" class="status">connecting...</span>
   <label class="small muted" title="Which track analysis drives the show">Analysis
     <select id="modeSel">
@@ -199,7 +273,7 @@
       <h2>Files</h2>
       <div class="row">
         <button class="small" id="downloadRunning">Download running setup</button>
-        <label class="small" style="cursor:pointer"><span class="badge">Upload setup file…</span>
+        <label class="small" style="cursor:pointer"><span class="btn-like">Upload setup file…</span>
           <input type="file" id="setupUpload" accept=".json,application/json" class="hidden"></label>
         <span id="setupMsg" class="muted small"></span>
       </div>
@@ -284,6 +358,7 @@ setInterval(() => { if (es && es.readyState === EventSource.OPEN && Date.now() -
 function renderLive() {
   const e = state.engine;
   $("srcStatus").textContent = state.source.name + ": " + state.source.status;
+  $("appVersion").textContent = state.version && state.version !== "dev" ? "v" + state.version : "";
   $("dryBadge").classList.toggle("hidden", !state.dryRun);
   if (document.activeElement !== $("modeSel") && state.analysisMode) $("modeSel").value = state.analysisMode;
   $("dryBtn").textContent = state.dryRun ? "Go live" : "Dry run";
@@ -374,13 +449,13 @@ function waveSvg(d, total) {
   const bars = pts.map((b, i) => {
     const beat = beatOf(i);
     const bar = Math.floor((beat - a.firstDownbeat) / 4) + 1;
-    return `<rect x="${x(i)}" y="${y(b.low, "low")}" width="${w}" height="${(H - y(b.low, "low")).toFixed(1)}" fill="#2f5fbf"><title>beat ${beat} · bar ${bar} · low ${b.low.toFixed(1)} mid ${b.mid.toFixed(1)} high ${b.high.toFixed(1)}</title></rect>`;
+    return `<rect x="${x(i)}" y="${y(b.low, "low")}" width="${w}" height="${(H - y(b.low, "low")).toFixed(1)}" fill="#3e63dd"><title>beat ${beat} · bar ${bar} · low ${b.low.toFixed(1)} mid ${b.mid.toFixed(1)} high ${b.high.toFixed(1)}</title></rect>`;
   }).join("");
   const head = d.beat > 0 ? `<line x1="${(d.beat / total * 1000).toFixed(1)}" x2="${(d.beat / total * 1000).toFixed(1)}" y1="0" y2="${H}" stroke="#fff" stroke-width="2"/>` : "";
   return `<svg class="wave" viewBox="0 0 1000 ${H}" preserveAspectRatio="none">${bars}
       <polyline points="${line("mid")}" fill="none" stroke="#f5a524" stroke-width="1.2" vector-effect="non-scaling-stroke"/>
-      <polyline points="${line("high")}" fill="none" stroke="#e6e9ee" stroke-width="1" vector-effect="non-scaling-stroke"/>${head}</svg>
-    <div class="wave-legend"><b style="color:#5b8cff">■ bass</b> · <b style="color:var(--accent)">— mid</b> · <b style="color:var(--text)">— high</b> per ${perBeat ? "beat" : "bar"} (hover for values)${!d.availableAnalyses.includes("phrase") && d.availableAnalyses.length ? ' · <span style="color:var(--accent)">no rekordbox phrase analysis for this track</span>' : ""}</div>`;
+      <polyline points="${line("high")}" fill="none" stroke="#ededed" stroke-width="1" vector-effect="non-scaling-stroke"/>${head}</svg>
+    <div class="wave-legend"><b style="color:#849dff">■ bass</b> · <b style="color:var(--accent)">— mid</b> · <b style="color:var(--text)">— high</b> per ${perBeat ? "beat" : "bar"} (hover for values)${!d.availableAnalyses.includes("phrase") && d.availableAnalyses.length ? ' · <span style="color:var(--accent)">no rekordbox phrase analysis for this track</span>' : ""}</div>`;
 }
 
 const ctl = (action, value) => post("/api/control/" + action + (value !== undefined ? "?value=" + value : ""));

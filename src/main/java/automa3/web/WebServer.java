@@ -210,6 +210,7 @@ public class WebServer {
         s.put("sendError", app.hub().lastSendError());
         s.put("dryRun", app.hub().isDryRun());
         s.put("analysisMode", app.config().get().djLink.analysisMode);
+        s.put("version", automa3.Version.current());
         s.put("recording", app.recorder().isRecording() ? String.valueOf(app.recorder().file()) : null);
         s.put("audioError", app.audio() == null ? null : app.audio().error());
         s.put("configPath", app.config().path().toAbsolutePath().toString());

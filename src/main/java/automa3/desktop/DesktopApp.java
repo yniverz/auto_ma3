@@ -9,7 +9,9 @@ import javafx.concurrent.Worker;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -20,6 +22,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
@@ -52,11 +55,12 @@ public class DesktopApp extends Application {
     private final ToggleGroup sourceGroup = new ToggleGroup();
     /** Called from the page's JavaScript; must stay strongly referenced. */
     private final Bridge bridge = new Bridge();
+    private final Updater updater = new Updater();
 
     @Override
     public void start(Stage stage) {
         this.stage = stage;
-        stage.setTitle("AutoMA3");
+        stage.setTitle("AutoMA3 " + automa3.Version.current());
         Label loading = new Label("Starting AutoMA3…");
         loading.setStyle("-fx-text-fill: #8b95a3; -fx-font-size: 16px;");
         StackPane splash = new StackPane(loading);
@@ -65,6 +69,8 @@ public class DesktopApp extends Application {
         stage.setScene(new Scene(splash, 1400, 900));
         stage.show();
 
+        log.info("AutoMA3 {} starting ({})", automa3.Version.current(),
+                Updater.appBundle() == null ? "not an installed app" : "app: " + Updater.appBundle());
         Thread starter = new Thread(() -> {
             try {
                 Path dataDir = DesktopMain.dataDir();
@@ -109,6 +115,7 @@ public class DesktopApp extends Application {
         menu.setUseSystemMenuBar(true);
         root.setTop(menu);
         stage.setScene(new Scene(root, stage.getScene().getWidth(), stage.getScene().getHeight()));
+        if (Updater.appBundle() != null) checkForUpdates(false); // only the installed app updates itself
     }
 
     private MenuBar buildMenu() {
@@ -121,7 +128,10 @@ public class DesktopApp extends Application {
         data.setOnAction(e -> open(DesktopMain.dataDir().toFile()));
         MenuItem logItem = new MenuItem("Open Log");
         logItem.setOnAction(e -> open(logFile().toFile()));
-        Menu view = new Menu("View", null, reload, new SeparatorMenuItem(), browser, data, logItem);
+        MenuItem updates = new MenuItem("Check for Updates…");
+        updates.setOnAction(e -> checkForUpdates(true));
+        Menu view = new Menu("View", null, reload, new SeparatorMenuItem(), browser, data, logItem,
+                new SeparatorMenuItem(), updates);
 
         Menu source = new Menu("Source");
         RadioMenuItem live = sourceItem("Live CDJs (Pro DJ Link)", () -> App.liveSource(app.config()));
@@ -160,6 +170,89 @@ public class DesktopApp extends Application {
                 Platform.runLater(() -> error("Switching source failed", ex.getMessage()));
             }
         }, "switch-source");
+        t.setDaemon(true);
+        t.start();
+    }
+
+    // ------------------------------------------------------------------ updates
+
+    /** Look for a newer release on GitHub; {@code manual} also reports "up to date" and errors. */
+    private void checkForUpdates(boolean manual) {
+        Thread t = new Thread(() -> {
+            try {
+                var latest = updater.latest();
+                Platform.runLater(() -> {
+                    if (latest.isPresent() && Updater.isNewer(latest.get())) {
+                        offerUpdate(latest.get());
+                    } else if (manual) {
+                        info(Updater.appBundle() == null
+                                ? "This is version " + automa3.Version.current() + " started from the project, not the installed app. "
+                                + "Updates are installed by the app itself (Build: Mac app)."
+                                : "AutoMA3 " + automa3.Version.current() + " is the latest version.");
+                    }
+                });
+            } catch (Exception e) {
+                log.info("Update check failed: {}", e.toString());
+                if (manual) Platform.runLater(() -> error("Could not check for updates", e.getMessage()));
+            }
+        }, "update-check");
+        t.setDaemon(true);
+        t.start();
+    }
+
+    private void offerUpdate(Updater.Release r) {
+        Path app = Updater.appBundle();
+        boolean canInstall = Updater.appBundle() != null && Updater.canReplace(app);
+        String notes = r.notes() == null ? "" : r.notes().strip();
+        if (notes.length() > 600) notes = notes.substring(0, 600) + "…";
+        ButtonType update = new ButtonType(canInstall ? "Update and restart" : "Open download page", ButtonBar.ButtonData.OK_DONE);
+        ButtonType later = new ButtonType("Later", ButtonBar.ButtonData.CANCEL_CLOSE);
+        Alert a = new Alert(Alert.AlertType.CONFIRMATION, "", update, later);
+        a.initOwner(stage);
+        a.setTitle("Update available");
+        a.setHeaderText("AutoMA3 " + r.version() + " is available (you have " + automa3.Version.current() + ")");
+        a.setContentText((notes.isEmpty() ? "" : notes + "\n\n") + (canInstall
+                ? "The app downloads the new version, quits and starts again. The show stops for a moment, so do it between sets."
+                : "This copy cannot replace itself (e.g. it runs from the disk image). Download the new version and copy it to Applications."));
+        if (a.showAndWait().orElse(later) != update) return;
+        if (!canInstall) {
+            open(URI.create(r.pageUrl()));
+            return;
+        }
+        installUpdate(r, app);
+    }
+
+    private void installUpdate(Updater.Release r, Path app) {
+        ProgressBar bar = new ProgressBar(0);
+        bar.setPrefWidth(320);
+        Label label = new Label("Downloading AutoMA3 " + r.version() + "…");
+        VBox box = new VBox(12, label, bar);
+        box.setStyle("-fx-padding: 20; -fx-background-color: #191919;");
+        label.setStyle("-fx-text-fill: #ededed;");
+        Stage progress = new Stage();
+        progress.initOwner(stage);
+        progress.initModality(javafx.stage.Modality.WINDOW_MODAL);
+        progress.setTitle("Updating AutoMA3");
+        progress.setScene(new Scene(box));
+        progress.setOnCloseRequest(e -> e.consume());
+        progress.show();
+        Thread t = new Thread(() -> {
+            try {
+                updater.prepareInstall(r, app, DesktopMain.dataDir().resolve("logs").resolve("update.log"),
+                        f -> Platform.runLater(() -> bar.setProgress(f)));
+                Platform.runLater(() -> {
+                    label.setText("Restarting…");
+                    Platform.exit(); // stop() shuts the backend down; the helper then swaps the app and restarts it
+                });
+            } catch (Exception e) {
+                log.warn("Update failed: {}", e.toString());
+                Platform.runLater(() -> {
+                    progress.close();
+                    error("Update failed", e.getMessage() + "\n\nThe current version keeps running. You can also download the "
+                            + "new version from " + r.pageUrl());
+                });
+            }
+        }, "update");
         t.setDaemon(true);
         t.start();
     }

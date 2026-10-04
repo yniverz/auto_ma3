@@ -10,7 +10,9 @@ cd "$(dirname "$0")/.."
 JAVA_HOME="${JAVA_HOME:-/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home}"
 [ -x "$JAVA_HOME/bin/jpackage" ] || JAVA_HOME="$JAVA_HOME/libexec/openjdk.jdk/Contents/Home"
 export JAVA_HOME
-VERSION=$(sed -n 's:.*<version>\([0-9][0-9.]*\)</version>.*:\1:p' pom.xml | head -1)
+# version: APP_VERSION from CI (1.0.<build number>), otherwise the one in pom.xml
+VERSION="${APP_VERSION:-$(sed -n 's:.*<version>\([0-9][0-9.]*\)</version>.*:\1:p' pom.xml | head -1)}"
+ARCH=$([ "$(uname -m)" = "arm64" ] && echo arm64 || echo x64)
 DIST=target/dist
 # build outside the project: folders synced by iCloud (e.g. ~/Documents) add Finder metadata that
 # code signing rejects ("resource fork, Finder information, or similar detritus not allowed")
@@ -19,7 +21,7 @@ trap 'rm -rf "$WORK"' EXIT
 APP="$WORK/AutoMA3.app"
 
 echo "Building AutoMA3 $VERSION ($(uname -m)) with $JAVA_HOME"
-mvn -q clean package -DskipTests
+mvn -q clean package -DskipTests -Dapp.version="$VERSION"
 
 rm -rf "$DIST"
 mkdir -p "$DIST" "$WORK/input"
@@ -52,10 +54,13 @@ codesign --force --deep --sign - "$APP"
 codesign --verify --deep "$APP"
 
 hdiutil create -quiet -volname "AutoMA3" -srcfolder "$APP" -ov -format UDZO "$WORK/AutoMA3-$VERSION.dmg"
+# zip of the app for the in-app updater (ditto keeps the bundle and its signature intact)
+ditto -c -k --keepParent "$APP" "$WORK/AutoMA3-$VERSION-mac-$ARCH.zip"
 ditto "$APP" "$DIST/AutoMA3.app"
-cp "$WORK/AutoMA3-$VERSION.dmg" "$DIST/"
+cp "$WORK/AutoMA3-$VERSION.dmg" "$WORK/AutoMA3-$VERSION-mac-$ARCH.zip" "$DIST/"
 
 echo
 echo "Done:"
 echo "  $DIST/AutoMA3.app"
 echo "  $DIST/AutoMA3-$VERSION.dmg"
+echo "  $DIST/AutoMA3-$VERSION-mac-$ARCH.zip"

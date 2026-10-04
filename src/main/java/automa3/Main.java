@@ -81,7 +81,7 @@ public final class Main {
         Runtime.getRuntime().addShutdownHook(new Thread(app::stop, "shutdown"));
 
         String host = cfg.webHost.equals("0.0.0.0") ? "localhost" : cfg.webHost;
-        System.out.println("AutoMA3 running (" + source.name() + (dryRun ? ", DRY RUN" : "") + ")");
+        System.out.println("AutoMA3 " + automa3.Version.current() + " running (" + source.name() + (dryRun ? ", DRY RUN" : "") + ")");
         System.out.println("Open http://" + host + ":" + app.webPort() + "/   (Ctrl+C to quit)");
         Thread.currentThread().join();
     }

@@ -45,6 +45,21 @@ Settings live in `config.json` (created on first start) and are edited in the we
   account: on another Mac open it the first time with right-click → Open (or allow it in System Settings →
   Privacy & Security). macOS asks once for local network access: allow it, the CDJs need it.
 
+## Releases and updates
+
+Pushing to the branch `release` (e.g. merging `main` into it) makes GitHub build the Mac app
+(`.github/workflows/release.yml`): tests, then `AutoMA3.app`, published as a GitHub Release with the `.dmg`
+(first install) and `AutoMA3-<version>-mac-arm64.zip` (for the updater). Versions are `major.minor` from
+`pom.xml` plus the build number, e.g. `1.0.7`. Raise `major.minor` in `pom.xml` for bigger steps.
+
+```bash
+git checkout release && git merge main && git push && git checkout main
+```
+
+The installed app checks for a newer release when it starts (and on View → Check for Updates…) and asks
+before updating. On "Update and restart" it downloads the new version, quits, swaps itself and starts again.
+A copy that cannot replace itself (e.g. started from the disk image) opens the download page instead.
+
 ## Setup on the console
 
 The **MA3 setup** tab in the web UI shows the exact steps for your settings. In short:
