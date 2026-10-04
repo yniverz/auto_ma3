@@ -17,7 +17,6 @@ import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 /**
  * Sends actions to every enabled console (each with its own version profile) via OSC "/cmd",
@@ -35,7 +34,6 @@ public class ConsoleHub {
     private DatagramSocket receiveSocket;
     private Thread receiveThread;
     private final Deque<LogEntry> recent = new ArrayDeque<>();
-    private final List<Consumer<LogEntry>> logListeners = new CopyOnWriteArrayList<>();
     private final List<BiConsumer<OscCodec.Message, InetAddress>> oscListeners = new CopyOnWriteArrayList<>();
     private volatile long lastReceiveMs;
     private volatile String lastSendError;
@@ -90,17 +88,12 @@ public class ConsoleHub {
             while (recent.size() > 300) recent.removeFirst();
         }
         log.debug("{} -> {} ({})", entry.target(), entry.command(), entry.reason());
-        for (Consumer<LogEntry> l : logListeners) l.accept(entry);
     }
 
     public List<LogEntry> recent() {
         synchronized (recent) {
             return new ArrayList<>(recent);
         }
-    }
-
-    public void onLog(Consumer<LogEntry> listener) {
-        logListeners.add(listener);
     }
 
     public void onOsc(BiConsumer<OscCodec.Message, InetAddress> listener) {

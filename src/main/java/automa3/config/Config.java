@@ -199,7 +199,6 @@ public class Config {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class DjLinkConfig {
-        public boolean enabled = true;
         /**
          * Which track analysis drives the show: "auto" (rekordbox phrases when the track has them, else the
          * waveform), "phrase" (rekordbox phrases, waveform only as fallback) or "waveform" (own waveform analysis,

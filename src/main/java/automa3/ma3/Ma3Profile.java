@@ -40,8 +40,6 @@ public final class Ma3Profile {
     public final boolean verified;
     /** Console sends OSC playback feedback for pool objects (needed for operator touch detection). */
     public final boolean playbackFeedback;
-    /** Address of sequence X in the OSC feedback, "%d" = sequence number. */
-    public final String sequenceFeedbackAddress;
     public final int speedMasterCount;
     /** Speed masters the app must not drive (e.g. the audio BPM master). */
     public final List<Integer> reservedSpeedMasters;
@@ -60,7 +58,6 @@ public final class Ma3Profile {
         this.maxMinor = maxMinor;
         this.verified = verified;
         this.playbackFeedback = playbackFeedback;
-        this.sequenceFeedbackAddress = "/13.13.1.6.%d";
         this.speedMasterCount = speedMasterCount;
         this.reservedSpeedMasters = reservedSpeedMasters;
         this.maxBpm = 225;

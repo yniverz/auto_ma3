@@ -317,12 +317,6 @@ public class DesktopApp extends Application {
             t.start();
         }
 
-        public void reload() {
-            Platform.runLater(DesktopApp.this::reload);
-        }
 
-        public void log(String message) {
-            log.info("page: {}", message);
-        }
     }
 }

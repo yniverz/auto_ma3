@@ -16,21 +16,25 @@ It sends grandMA3 command-line commands over OSC (`/cmd`). You program the looks
 
 ## Run
 
-Requires Java 21 (`brew install openjdk@21 maven`).
+The easiest way is the Mac app (see below). From the source (Java 21 and Maven: `brew install openjdk@21 maven`):
 
 ```bash
-mvn package
+mvn clean package
 java -jar target/auto-ma3.jar             # live with CDJs (Mac on the Pro DJ Link network by Ethernet)
 java -jar target/auto-ma3.jar --sim       # simulated DJ set, no CDJs needed
 ```
 
 Then open http://localhost:8080/.
 
-In VS Code, press **F5**: it rebuilds and starts the mode selected in Run and Debug (simulator, simulator to console, live with recording, replay of the last recording).
+Options: `--sim`, `--replay recordings/session-....jsonl`, `--speed 4` (sim/replay speed), `--dry-run` (send nothing),
+`--record`, `--config FILE`, `--port N`, `--analyze analysis/<track>.json` (print the waveform analysis of a track).
 
-Options: `--sim`, `--replay recordings/session-....jsonl`, `--speed 4` (sim/replay speed), `--dry-run` (send nothing), `--record`, `--config FILE`, `--port N`.
+Run from the source, settings live in `config.json` next to where it is started (created on first start); the Mac
+app keeps them in `~/Library/Application Support/AutoMA3`. Everything is edited in the UI.
 
-Settings live in `config.json` (created on first start) and are edited in the web UI.
+In VS Code, **F5** runs the entry selected in Run and Debug: **App** (the desktop window), **Build** (Mac app +
+dmg, or jar + tests), **Terminal** (simulator, live with recording, replay of the last recording in the browser UI)
+and **Debug** (breakpoints, needs the Java extension).
 
 ## Exchanging looks with other tools
 
@@ -42,12 +46,13 @@ Format and API: [docs/looks-format.md](docs/looks-format.md).
 
 ## Mac app
 
-`packaging/build-mac-app.sh` (or the VS Code task "Build Mac app") builds `target/dist/AutoMA3.app` and
-`target/dist/AutoMA3-<version>.dmg`. The app contains its own Java runtime: the target Mac needs nothing else.
+`packaging/build-mac-app.sh` (or F5 → "Build: Mac app + dmg") builds `target/dist/AutoMA3.app`,
+`target/dist/AutoMA3-<version>.dmg` and the updater zip. The app contains its own Java runtime: the target Mac
+needs nothing else. Releases are built by GitHub (see below).
 
 - One window, backend inside: closing the window (or Cmd+Q) stops everything.
 - Menu **Source**: Live CDJs, Simulator, Replay Recording…; menu **View**: Reload (Cmd+R), Open in Browser,
-  Open Data Folder, Open Log. The ⟳ button in the page reloads too.
+  Open Data Folder, Open Log, Check for Updates…. The reload button in the page header reloads too.
 - Settings, setups, recordings, analyses and the log live in `~/Library/Application Support/AutoMA3`.
 - Built for the CPU of the building Mac (Apple Silicon). The app is signed ad hoc, not by an Apple developer
   account: on another Mac open it the first time with right-click → Open (or allow it in System Settings →
@@ -98,19 +103,32 @@ The executor commands (`Go+`, `Off`, `Flash On/Off`, `Temp On/Off`, `FaderMaster
 
 ## How sections are found
 
-1. **rekordbox phrase analysis** (PSSI). Down/Bridge → breakdown. Up before a Chorus → build. Chorus after a lull → drop (then peak). Verse → groove.
-2. **Waveform** (CDJ-3000 three-band or NXS2 colour) when there is no phrase analysis: bars without a kick are breakdowns, rising highs are builds, and the kick returning after 8+ bars is a drop.
+1. **rekordbox phrase analysis** (PSSI, analyse with *Phrase* enabled and export to the USB). Repeated phrases are
+   merged; Down/Bridge → breakdown, Up before a Chorus → build, Chorus after an Intro/Up/Down/Bridge → drop (then
+   peak), Verse → groove. The waveform adds detail inside long phrases (where the build really starts, groove vs.
+   breakdown).
+2. **Waveform** (CDJ-3000 three-band or NXS2 colour), analysed per beat: every bar gets an energy level (no bass /
+   bass / full). A drop is where bass **and** mids jump together (builds get loud early from snare rolls and
+   risers, so the highs are ignored), the build is where mids and highs start rising before it, bars without bass
+   are breakdowns. Boundaries snap to the 4-bar phrase grid.
 3. **Live audio** (optional): if the kick disappears for 2 bars (filter, EQ, cut), it's treated as a breakdown, and the kick returning after a long lull counts as a drop.
 4. No analysis at all: groove with look rotation every 32 bars.
+
+The **Analysis** dropdown in the header picks what drives the show: *Auto* (rekordbox phrases when the track has
+them), *rekordbox phrases* or *Waveform*. Both analyses are kept per track, so switching is instant. Each deck
+shows a per-beat graph of what the waveform analysis sees.
 
 ## Development
 
 ```bash
-mvn test
+mvn clean test
 ```
 
-The tests cover OSC encoding, version profiles, phrase and waveform analysis, and full engine runs on virtual time (drop timing, riser, fog lead, strobe safety, hold, operator locks, console controls).
+The tests cover OSC encoding, version profiles, phrase and waveform analysis (including real CDJ-3000 / rekordbox
+data of tracks in `src/test/resources/tracks`), full engine runs on virtual time (drop timing, riser, fog lead,
+strobe safety, hold, operator locks, console controls, analysis mode), look export/import and the updater.
 `--sim` runs three synthetic tracks that cycle through phrase / waveform / no analysis, with DJ-style overlaps.
-Use `--record` at a gig and `--replay` afterwards to debug with the real data.
+Use `--record` at a gig and `--replay` afterwards to debug with the real data; every analysed track is also saved
+to `analysis/` and can be inspected with `--analyze`.
 
 Built on [beat-link](https://github.com/Deep-Symmetry/beat-link) by Deep Symmetry, the library behind Beat Link Trigger.

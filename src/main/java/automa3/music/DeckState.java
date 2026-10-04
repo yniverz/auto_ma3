@@ -11,8 +11,4 @@ package automa3.music;
 public record DeckState(int player, String deviceName, boolean playing, boolean onAir, boolean onAirKnown,
                         boolean tempoMaster, double bpm, int beatNumber, int beatWithinBar,
                         String trackKey, String title, String artist, long updatedMs) {
-
-    public boolean hasTrack() {
-        return trackKey != null && !trackKey.isEmpty();
-    }
 }

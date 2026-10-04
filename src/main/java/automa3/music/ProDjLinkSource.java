@@ -49,7 +49,7 @@ public class ProDjLinkSource implements MusicSource {
         t.setDaemon(true);
         return t;
     });
-    /** player -> signature of the last structure sent, to avoid duplicates. */
+    /** "player|source" -> signature of the last structure sent, to avoid duplicates. */
     private final Map<String, String> sentStructure = new ConcurrentHashMap<>();
     private final Map<Integer, String> trackKeys = new ConcurrentHashMap<>();
     /** Track keys for which rekordbox phrase analysis was sent. */

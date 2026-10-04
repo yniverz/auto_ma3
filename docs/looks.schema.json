@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/yniverz/auto_ma3/blob/main/docs/looks.schema.json",
+  "title": "AutoMA3 look file",
+  "description": "Looks (grandMA3 executors) and how AutoMA3 uses them. Format 'automa3-looks', version 1. See docs/looks-format.md. Import is lenient: AutoMA3 ignores unknown fields, and every look field except a location for new looks is optional.",
+  "type": "object",
+  "required": ["format", "looks"],
+  "properties": {
+    "format": { "const": "automa3-looks" },
+    "version": { "type": "integer", "minimum": 1, "default": 1, "description": "Format version. Files with a newer version are imported with a note; unknown fields are ignored." },
+    "exportedBy": { "type": "string", "description": "Program that wrote the file, e.g. 'AutoMA3 1.0.7'. Informational." },
+    "exportedAt": { "type": "string", "format": "date-time", "description": "ISO 8601 time of writing. Informational." },
+    "context": { "$ref": "#/$defs/context" },
+    "looks": { "type": "array", "items": { "$ref": "#/$defs/look" } }
+  },
+  "$defs": {
+    "role": {
+      "enum": ["BASE", "COLOR", "MOVEMENT", "EFFECT", "RISER", "ACCENT", "STROBE", "BLINDER", "BLACKOUT", "HAZE", "FOG", "SPECIAL"],
+      "description": "Case-insensitive on import."
+    },
+    "mode": {
+      "enum": ["TOGGLE", "FLASH", "TEMP", "FADER"],
+      "description": "Case-insensitive on import. TOGGLE = Go+ / Off, FLASH = Flash On / Flash Off, TEMP = Temp On / Temp Off, FADER = FaderMaster level only."
+    },
+    "section": {
+      "enum": ["INTRO", "GROOVE", "BUILD", "BREAKDOWN", "DROP", "PEAK", "OUTRO"],
+      "description": "Case-insensitive on import; unknown values are dropped with a note."
+    },
+    "look": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Stable id. On import it matches an existing look; new looks keep it unless it is already taken." },
+        "name": { "type": "string" },
+        "description": { "type": "string", "description": "What the look does (free text)." },
+        "role": { "$ref": "#/$defs/role" },
+        "layer": { "type": "string", "description": "Scene roles keep one running look per layer. Empty or equal to the role name = the role's default layer." },
+        "ma3": {
+          "type": "object",
+          "description": "Location in grandMA3. page/exec/sequence may also be given at the top level of the look.",
+          "properties": {
+            "page": { "type": "integer", "minimum": 1, "default": 1 },
+            "exec": { "type": "integer", "minimum": 1, "description": "Executor number on the page (e.g. 101, 201). Required for a new look." },
+            "sequence": { "type": ["integer", "null"], "minimum": 1, "description": "Sequence on that executor; enables operator-touch detection (MA3 2.1+)." }
+          }
+        },
+        "page": { "type": "integer", "minimum": 1, "description": "Alternative to ma3.page." },
+        "exec": { "type": "integer", "minimum": 1, "description": "Alternative to ma3.exec." },
+        "sequence": { "type": ["integer", "null"], "minimum": 1, "description": "Alternative to ma3.sequence." },
+        "mode": { "$ref": "#/$defs/mode" },
+        "sections": { "type": "array", "items": { "$ref": "#/$defs/section" }, "description": "Sections the look may be used in. Empty = any." },
+        "energy": {
+          "type": "object",
+          "properties": {
+            "min": { "type": "number", "minimum": 0, "maximum": 1, "default": 0 },
+            "max": { "type": "number", "minimum": 0, "maximum": 1, "default": 1 }
+          }
+        },
+        "energyMin": { "type": "number", "minimum": 0, "maximum": 1, "description": "Alternative to energy.min." },
+        "energyMax": { "type": "number", "minimum": 0, "maximum": 1, "description": "Alternative to energy.max." },
+        "weight": { "type": "number", "exclusiveMinimum": 0, "default": 1 },
+        "flashBeats": { "type": "number", "minimum": 0, "default": 0, "description": "Flash looks: beats to stay on, 0 = AutoMA3's default for the role." },
+        "level": { "type": "integer", "minimum": 0, "maximum": 100, "default": 100 },
+        "enabled": { "type": "boolean", "default": true },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "meta": { "type": "object", "description": "Free data for other tools; AutoMA3 keeps it untouched and exports it again." }
+      }
+    },
+    "context": {
+      "type": "object",
+      "description": "How the show connects to AutoMA3. Only applied on import when asked for.",
+      "properties": {
+        "speedMaster": { "type": "integer", "minimum": 1, "maximum": 16, "description": "Speed master AutoMA3 sets to the DJ's BPM (Master 3.N)." },
+        "controlPrefix": { "type": "string", "description": "OSC address prefix of the operator controls, e.g. '/automa3'." },
+        "oscInPort": { "type": "integer", "minimum": 1, "maximum": 65535, "description": "UDP port AutoMA3 listens on for console feedback and controls." },
+        "controlSequences": {
+          "type": "object",
+          "description": "Sequence number (as string) -> control action, using MA3 playback feedback (2.1+).",
+          "additionalProperties": { "enum": ["auto", "hold", "drop", "next", "strobe", "arm", "energy", "release"] }
+        }
+      }
+    }
+  }
+}

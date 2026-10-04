@@ -19,7 +19,7 @@
     --text: #ededed;      /* primary text */
     --muted: #a0a0a0;     /* secondary text */
     --faint: #6f6f6f;     /* labels, tertiary text */
-    --accent: #f5a524; --ok: #46a758; --bad: #e5484d; --info: #3e63dd;
+    --accent: #f5a524; --ok: #46a758; --bad: #e5484d;
     --INTRO: #696e77; --GROOVE: #12a594; --BUILD: #f5a524; --BREAKDOWN: #5b5bd6; --DROP: #e5484d; --PEAK: #d6409f; --OUTRO: #696e77;
     --radius: 8px;
   }
@@ -60,7 +60,6 @@
   .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px; line-height: 18px;
            background: rgba(255,255,255,.06); color: var(--muted); border: 1px solid transparent; white-space: nowrap; }
   .badge.ok { color: #63c174; background: rgba(70,167,88,.14); }
-  .badge.bad { color: #ff6369; background: rgba(229,72,77,.14); }
   .badge.warn { color: var(--accent); background: rgba(245,165,36,.14); }
 
   /* ---- now */
@@ -352,7 +351,6 @@ function connect() {
   if (es) es.close();
   es = new EventSource("/api/stream");
   es.onopen = () => {
-    if (window.automa3Desktop) window.automa3Desktop.log("live connection open");
     attempts = 0;
     lastMessage = Date.now();
     document.body.classList.remove("offline");
@@ -813,7 +811,7 @@ const SETTINGS = [
     specialBurstSec: "Special burst (s)", specialCooldownSec: "Special cooldown (s)", specialMaxPerHour: "Specials max per hour"}],
   ["speed", "BPM / speed master", {enabled: "Sync BPM to speed master", master: "Speed master number (Master 3.N)", multiplier: "BPM multiplier (0.5 half time, 2 double)", minChange: "Min BPM change to resend"}],
   ["audio", "Live audio (optional)", {enabled: "Analyse audio input", device: "Input device (part of name)", sampleRate: "Sample rate"}],
-  ["djLink", "CDJs", {enabled: "Pro DJ Link enabled", waveformAnalysis: "Detect sections from waveform when no phrase analysis",
+  ["djLink", "CDJs", {waveformAnalysis: "Detect sections from waveform when no phrase analysis",
     readUsbFiles: "Read rekordbox files off the USB over the network (restart needed; can fail with rekordbox 7)"}],
   ["oscIn", "OSC from console", {enabled: "Listen for OSC", port: "Listen port", controlPrefix: "Control address prefix"}],
 ];
