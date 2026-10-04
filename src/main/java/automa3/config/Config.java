@@ -200,6 +200,12 @@ public class Config {
          * rekordbox phrases only as fallback).
          */
         public String analysisMode = "auto";
+        /**
+         * Read rekordbox data straight off the players' USB media over the network (beat-link "Crate Digger").
+         * Off: everything is requested from the players directly. Some rekordbox 7 exports make the file route
+         * fail with retries (several seconds delay per track), so it is off by default.
+         */
+        public boolean readUsbFiles = false;
         /** Use the waveform to detect sections when a track has no rekordbox phrase analysis. */
         public boolean waveformAnalysis = true;
     }

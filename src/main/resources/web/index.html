@@ -591,7 +591,8 @@ const SETTINGS = [
     specialBurstSec: "Special burst (s)", specialCooldownSec: "Special cooldown (s)", specialMaxPerHour: "Specials max per hour"}],
   ["speed", "BPM / speed master", {enabled: "Sync BPM to speed master", master: "Speed master number (Master 3.N)", multiplier: "BPM multiplier (0.5 half time, 2 double)", minChange: "Min BPM change to resend"}],
   ["audio", "Live audio (optional)", {enabled: "Analyse audio input", device: "Input device (part of name)", sampleRate: "Sample rate"}],
-  ["djLink", "CDJs", {enabled: "Pro DJ Link enabled", waveformAnalysis: "Detect sections from waveform when no phrase analysis"}],
+  ["djLink", "CDJs", {enabled: "Pro DJ Link enabled", waveformAnalysis: "Detect sections from waveform when no phrase analysis",
+    readUsbFiles: "Read rekordbox files off the USB over the network (restart needed; can fail with rekordbox 7)"}],
   ["oscIn", "OSC from console", {enabled: "Listen for OSC", port: "Listen port", controlPrefix: "Control address prefix"}],
 ];
 

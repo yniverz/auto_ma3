@@ -92,7 +92,8 @@ public class ProDjLinkSource implements MusicSource {
                 if (VirtualCdj.getInstance().start()) {
                     startFinders();
                     status = "connected via " + VirtualCdj.getInstance().getLocalAddress().getHostAddress()
-                            + " as player " + VirtualCdj.getInstance().getDeviceNumber();
+                            + " (this Mac joins the DJ Link network as virtual player "
+                            + VirtualCdj.getInstance().getDeviceNumber() + ")";
                     log.info("Pro DJ Link: {}", status);
                     return;
                 }
@@ -110,12 +111,16 @@ public class ProDjLinkSource implements MusicSource {
     }
 
     private void startFinders() throws Exception {
-        VirtualCdj.getInstance().addUpdateListener(this::onUpdate);
         BeatFinder.getInstance().start();
         BeatFinder.getInstance().addBeatListener(this::onBeatPacket);
 
         MetadataFinder.getInstance().start();
-        CrateDigger.getInstance().start();
+        if (configStore.get().djLink.readUsbFiles) {
+            // reads export database and analysis files straight off the USB over the network; fails with some
+            // rekordbox 7 exports (looks up a date as file name), so off by default: everything is then asked
+            // from the players directly, which also delivers phrases and three-band waveforms
+            CrateDigger.getInstance().start();
+        }
         BeatGridFinder.getInstance().start();
         WaveformFinder.getInstance().setFindDetails(true);
         WaveformFinder.getInstance().setPreferredStyle(WaveformFinder.WaveformStyle.THREE_BAND);
@@ -136,6 +141,8 @@ public class ProDjLinkSource implements MusicSource {
             }
         });
         AnalysisTagFinder.getInstance().addAnalysisTagListener(u -> scheduleAnalysis(u.player), ".EXT", "PSSI");
+        // only now: status updates trigger track analysis, which needs all finders running
+        VirtualCdj.getInstance().addUpdateListener(this::onUpdate);
     }
 
     private boolean mixerPresent() {
@@ -239,6 +246,7 @@ public class ProDjLinkSource implements MusicSource {
         if (l == null || key == null) return;
         int dropBeats = configStore.get().engine.dropBars * 4;
 
+        if (!BeatGridFinder.getInstance().isRunning() || !AnalysisTagFinder.getInstance().isRunning()) return;
         BeatGrid grid = BeatGridFinder.getInstance().getLatestBeatGridFor(player);
         if (grid == null || grid.beatCount < 8) return;
         int firstDownbeat = 1;
