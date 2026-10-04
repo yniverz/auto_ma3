@@ -12,6 +12,12 @@
       "problemMatcher": []
     },
     {
+      "label": "Build Mac app (.app + .dmg)",
+      "type": "shell",
+      "command": "packaging/build-mac-app.sh",
+      "problemMatcher": []
+    },
+    {
       "label": "Run tests",
       "type": "shell",
       "command": "mvn clean test",

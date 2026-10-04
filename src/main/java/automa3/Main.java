@@ -3,9 +3,6 @@ package automa3;
 import automa3.config.Config;
 import automa3.config.ConfigStore;
 import automa3.music.MusicSource;
-import automa3.music.ProDjLinkSource;
-import automa3.music.ReplaySource;
-import automa3.music.SimulatedSource;
 
 import java.nio.file.Path;
 
@@ -72,12 +69,11 @@ public final class Main {
         Config cfg = store.get();
         int webPort = port != null ? port : cfg.webPort;
         MusicSource source;
-        Path base = configPath.toAbsolutePath().getParent();
-        if (replay != null) source = new ReplaySource(replay, speed, cfg.engine.dropBars * 4);
-        else if (sim) source = new SimulatedSource(speed, cfg.engine.dropBars * 4);
-        else source = new ProDjLinkSource(store, base.resolve("analysis"));
+        if (replay != null) source = App.replay(store, replay, speed);
+        else if (sim) source = App.simulator(store, speed);
+        else source = App.liveSource(store);
 
-        Path recordings = base.resolve("recordings");
+        Path recordings = App.dataDir(store).resolve("recordings");
         App app = new App(store, source, recordings);
         app.hub().setDryRun(dryRun);
         app.start(webPort);
@@ -86,7 +82,7 @@ public final class Main {
 
         String host = cfg.webHost.equals("0.0.0.0") ? "localhost" : cfg.webHost;
         System.out.println("AutoMA3 running (" + source.name() + (dryRun ? ", DRY RUN" : "") + ")");
-        System.out.println("Open http://" + host + ":" + webPort + "/   (Ctrl+C to quit)");
+        System.out.println("Open http://" + host + ":" + app.webPort() + "/   (Ctrl+C to quit)");
         Thread.currentThread().join();
     }
 }

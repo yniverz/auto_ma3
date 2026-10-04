@@ -36,8 +36,22 @@ public class WebServer {
         this.app = app;
     }
 
+    private int port;
+
+    /** Start on the given port, or the next free one (up to +10) if it is taken. */
     public void start(String host, int port) throws IOException {
-        server = HttpServer.create(new InetSocketAddress(host, port), 0);
+        IOException last = null;
+        for (int p = port; p <= port + 10; p++) {
+            try {
+                server = HttpServer.create(new InetSocketAddress(host, p), 0);
+                this.port = p;
+                break;
+            } catch (java.net.BindException e) {
+                last = e;
+                log.warn("Port {} is in use, trying {}", p, p + 1);
+            }
+        }
+        if (server == null) throw last;
         // cached pool: each open live stream (SSE) holds one thread
         server.setExecutor(Executors.newCachedThreadPool(r -> {
             Thread t = new Thread(r, "web");
@@ -46,7 +60,11 @@ public class WebServer {
         }));
         server.createContext("/", this::handle);
         server.start();
-        log.info("Web UI: http://{}:{}/", host.equals("0.0.0.0") ? "localhost" : host, port);
+        log.info("Web UI: http://{}:{}/", host.equals("0.0.0.0") ? "localhost" : host, this.port);
+    }
+
+    public int port() {
+        return port;
     }
 
     public void stop() {

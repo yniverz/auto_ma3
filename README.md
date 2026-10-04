@@ -32,6 +32,19 @@ Options: `--sim`, `--replay recordings/session-....jsonl`, `--speed 4` (sim/repl
 
 Settings live in `config.json` (created on first start) and are edited in the web UI.
 
+## Mac app
+
+`packaging/build-mac-app.sh` (or the VS Code task "Build Mac app") builds `target/dist/AutoMA3.app` and
+`target/dist/AutoMA3-<version>.dmg`. The app contains its own Java runtime: the target Mac needs nothing else.
+
+- One window, backend inside: closing the window (or Cmd+Q) stops everything.
+- Menu **Source**: Live CDJs, Simulator, Replay Recording…; menu **View**: Reload (Cmd+R), Open in Browser,
+  Open Data Folder, Open Log. The ⟳ button in the page reloads too.
+- Settings, setups, recordings, analyses and the log live in `~/Library/Application Support/AutoMA3`.
+- Built for the CPU of the building Mac (Apple Silicon). The app is signed ad hoc, not by an Apple developer
+  account: on another Mac open it the first time with right-click → Open (or allow it in System Settings →
+  Privacy & Security). macOS asks once for local network access: allow it, the CDJs need it.
+
 ## Setup on the console
 
 The **MA3 setup** tab in the web UI shows the exact steps for your settings. In short:

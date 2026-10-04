@@ -735,6 +735,21 @@ public class ShowEngine implements MusicListener {
         event("Config updated");
     }
 
+    /** Forget all players (the music source changed). Running looks stay until the next decision. */
+    public void clearDecks(String why) {
+        sched.execute(() -> {
+            decks.clear();
+            structures.clear();
+            lastBeatNumber.clear();
+            lastBeatMs.clear();
+            primary = -1;
+            currentTrackKey = null;
+            lastSource = null;
+            needsRefresh = true;
+            event(why);
+        });
+    }
+
     /** Fire a look briefly so the operator can verify the executor mapping. */
     public void testLook(String id) {
         sched.execute(() -> {

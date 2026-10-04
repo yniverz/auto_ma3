@@ -6,7 +6,7 @@
 
     <groupId>automa3</groupId>
     <artifactId>auto-ma3</artifactId>
-    <version>0.1.0</version>
+    <version>1.0.0</version>
     <name>AutoMA3</name>
     <description>Automatic grandMA3 lighting driven by Pioneer CDJs (Pro DJ Link)</description>
 
@@ -14,6 +14,7 @@
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson.version>2.18.2</jackson.version>
+        <javafx.version>21.0.12</javafx.version>
     </properties>
 
     <dependencies>
@@ -21,6 +22,17 @@
             <groupId>org.deepsymmetry</groupId>
             <artifactId>beat-link</artifactId>
             <version>8.0.0</version>
+        </dependency>
+        <!-- desktop window (WebView showing the web UI); the platform jar matches the build machine -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>${javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

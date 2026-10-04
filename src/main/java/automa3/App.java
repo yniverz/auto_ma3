@@ -30,7 +30,8 @@ public class App {
     private final ConsoleHub hub;
     private final TaskScheduler scheduler = new TaskScheduler.Real();
     private final ShowEngine engine;
-    private final MusicSource source;
+    private volatile MusicSource source;
+    private MusicListener musicListener;
     private final SessionRecorder recorder;
     private final WebServer web;
     private volatile AudioAnalyzer audio;
@@ -53,7 +54,7 @@ public class App {
         Config cfg = config.get();
         hub.startReceiver();
         updateAudio();
-        source.start(new MusicListener() {
+        musicListener = new MusicListener() {
             @Override
             public void onDeck(DeckState deck) {
                 engine.onDeck(deck);
@@ -71,8 +72,17 @@ public class App {
                 engine.onStructure(player, structure);
                 recorder.onStructure(player, structure);
             }
-        });
+        };
+        source.start(musicListener);
         web.start(cfg.webHost, webPort);
+    }
+
+    /** Replace the music source while running (live CDJs / simulator / replay). */
+    public synchronized void switchSource(MusicSource newSource) throws Exception {
+        source.stop();
+        engine.clearDecks("Source: " + newSource.name());
+        source = newSource;
+        source.start(musicListener);
     }
 
     private synchronized void updateAudio() {
@@ -96,6 +106,27 @@ public class App {
         if (audio != null) audio.stop();
         hub.stop();
         scheduler.shutdown();
+    }
+
+    /** Folder holding config.json, configs/, recordings/ and analysis/. */
+    public static Path dataDir(ConfigStore store) {
+        return store.path().toAbsolutePath().getParent();
+    }
+
+    public static MusicSource liveSource(ConfigStore store) {
+        return new automa3.music.ProDjLinkSource(store, dataDir(store).resolve("analysis"));
+    }
+
+    public static MusicSource simulator(ConfigStore store, double speed) {
+        return new automa3.music.SimulatedSource(speed, store.get().engine.dropBars * 4);
+    }
+
+    public static MusicSource replay(ConfigStore store, Path file, double speed) {
+        return new automa3.music.ReplaySource(file, speed, store.get().engine.dropBars * 4);
+    }
+
+    public int webPort() {
+        return web.port();
     }
 
     public ConfigStore config() {

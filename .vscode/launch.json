@@ -1,49 +1,105 @@
 {
-  // F5 rebuilds the jar and starts AutoMA3. Pick the mode in the Run and Debug dropdown.
+  // F5 runs the entry selected in the Run and Debug dropdown. Grouped: App, Build, Terminal (web UI in the
+  // browser), Debug (breakpoints, needs the Java extension).
   // "node-terminal" is only used as a built-in way to run a shell command; no extension needed.
   "version": "0.2.0",
   "configurations": [
+    // ---- App: the desktop window (backend inside, closes together with the window)
     {
-      "name": "Simulator (dry run)",
+      "name": "App: Desktop window",
       "type": "node-terminal",
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "env": { "JAVA_HOME": "/opt/homebrew/opt/openjdk@21", "PATH": "/opt/homebrew/opt/openjdk@21/bin:${env:PATH}" },
-      "command": "mvn -q clean package -DskipTests && java -jar target/auto-ma3.jar --sim --dry-run"
+      "command": "mvn -q clean package -DskipTests && java -cp target/auto-ma3.jar automa3.desktop.DesktopMain",
+      "presentation": { "group": "1 App", "order": 1 }
+    },
+
+    // ---- Build: self-contained Mac app (own Java runtime inside) + .dmg in target/dist
+    {
+      "name": "Build: Mac app + dmg",
+      "type": "node-terminal",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "command": "packaging/build-mac-app.sh && open target/dist",
+      "presentation": { "group": "2 Build", "order": 1 }
     },
     {
-      "name": "Simulator -> console",
+      "name": "Build: Mac app + dmg, then start the app",
+      "type": "node-terminal",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "command": "packaging/build-mac-app.sh && open target/dist/AutoMA3.app",
+      "presentation": { "group": "2 Build", "order": 2 }
+    },
+    {
+      "name": "Build: jar + run all tests",
       "type": "node-terminal",
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "env": { "JAVA_HOME": "/opt/homebrew/opt/openjdk@21", "PATH": "/opt/homebrew/opt/openjdk@21/bin:${env:PATH}" },
-      "command": "mvn -q clean package -DskipTests && java -jar target/auto-ma3.jar --sim"
+      "command": "mvn clean package",
+      "presentation": { "group": "2 Build", "order": 3 }
     },
+
+    // ---- Terminal: backend in the terminal, web UI in the browser (http://127.0.0.1:8080/)
     {
-      "name": "Simulator 8x fast (dry run)",
+      "name": "Terminal: Simulator (dry run)",
       "type": "node-terminal",
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "env": { "JAVA_HOME": "/opt/homebrew/opt/openjdk@21", "PATH": "/opt/homebrew/opt/openjdk@21/bin:${env:PATH}" },
-      "command": "mvn -q clean package -DskipTests && java -jar target/auto-ma3.jar --sim --speed 8 --dry-run"
+      "command": "mvn -q clean package -DskipTests && java -jar target/auto-ma3.jar --sim --dry-run",
+      "presentation": { "group": "3 Terminal", "order": 1 }
     },
     {
-      "name": "Live CDJs + record",
+      "name": "Terminal: Simulator -> console",
       "type": "node-terminal",
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "env": { "JAVA_HOME": "/opt/homebrew/opt/openjdk@21", "PATH": "/opt/homebrew/opt/openjdk@21/bin:${env:PATH}" },
-      "command": "mvn -q clean package -DskipTests && java -jar target/auto-ma3.jar --record"
+      "command": "mvn -q clean package -DskipTests && java -jar target/auto-ma3.jar --sim",
+      "presentation": { "group": "3 Terminal", "order": 2 }
     },
     {
-      "name": "Replay last recording (dry run)",
+      "name": "Terminal: Simulator 8x fast (dry run)",
       "type": "node-terminal",
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "env": { "JAVA_HOME": "/opt/homebrew/opt/openjdk@21", "PATH": "/opt/homebrew/opt/openjdk@21/bin:${env:PATH}" },
-      "command": "mvn -q clean package -DskipTests && java -jar target/auto-ma3.jar --dry-run --replay \"$(ls -t recordings/*.jsonl | head -1)\""
+      "command": "mvn -q clean package -DskipTests && java -jar target/auto-ma3.jar --sim --speed 8 --dry-run",
+      "presentation": { "group": "3 Terminal", "order": 3 }
     },
-    // ---- Debug modes (Java extension): breakpoints, no jar build
+    {
+      "name": "Terminal: Live CDJs + record",
+      "type": "node-terminal",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "env": { "JAVA_HOME": "/opt/homebrew/opt/openjdk@21", "PATH": "/opt/homebrew/opt/openjdk@21/bin:${env:PATH}" },
+      "command": "mvn -q clean package -DskipTests && java -jar target/auto-ma3.jar --record",
+      "presentation": { "group": "3 Terminal", "order": 4 }
+    },
+    {
+      "name": "Terminal: Replay last recording (dry run)",
+      "type": "node-terminal",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "env": { "JAVA_HOME": "/opt/homebrew/opt/openjdk@21", "PATH": "/opt/homebrew/opt/openjdk@21/bin:${env:PATH}" },
+      "command": "mvn -q clean package -DskipTests && java -jar target/auto-ma3.jar --dry-run --replay \"$(ls -t recordings/*.jsonl | head -1)\"",
+      "presentation": { "group": "3 Terminal", "order": 5 }
+    },
+
+    // ---- Debug: run from the code with breakpoints (Java extension), no jar build
+    {
+      "name": "Debug: Desktop window",
+      "type": "java",
+      "request": "launch",
+      "mainClass": "automa3.desktop.DesktopMain",
+      "projectName": "auto-ma3",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "presentation": { "group": "4 Debug", "order": 1 }
+    },
     {
       "name": "Debug: Simulator (dry run)",
       "type": "java",
@@ -52,7 +108,8 @@
       "projectName": "auto-ma3",
       "args": "--sim --dry-run",
       "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
+      "presentation": { "group": "4 Debug", "order": 2 }
     },
     {
       "name": "Debug: Simulator 8x fast (dry run)",
@@ -62,7 +119,8 @@
       "projectName": "auto-ma3",
       "args": "--sim --speed 8 --dry-run",
       "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
+      "presentation": { "group": "4 Debug", "order": 3 }
     },
     {
       "name": "Debug: Replay the recording open in the editor (dry run)",
@@ -72,7 +130,8 @@
       "projectName": "auto-ma3",
       "args": ["--dry-run", "--replay", "${file}"],
       "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
+      "presentation": { "group": "4 Debug", "order": 4 }
     },
     {
       "name": "Debug: Live CDJs (dry run)",
@@ -82,7 +141,8 @@
       "projectName": "auto-ma3",
       "args": "--dry-run",
       "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
+      "presentation": { "group": "4 Debug", "order": 5 }
     }
   ]
 }

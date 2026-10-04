@@ -11,7 +11,12 @@
     --INTRO: #4a6b8a; --GROOVE: #2f8f6b; --BUILD: #d9a21b; --BREAKDOWN: #5a5fc7; --DROP: #e8453c; --PEAK: #c2337a; --OUTRO: #4a6b8a;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  /* -apple-system / BlinkMacSystemFont are only known to Safari and Chrome; the Mac app's WebView skips them,
+     so name real installed fonts next (Helvetica Neue is on every Mac) */
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  /* form controls do not inherit the page font by default (the WebView then falls back to a serif font) */
+  button, input, select, textarea { font-family: inherit; }
   header { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
   header h1 { font-size: 18px; margin: 0; letter-spacing: .5px; }
   header .status { color: var(--muted); font-size: 13px; flex: 1; min-width: 200px; }
@@ -29,13 +34,13 @@
   .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .meter { height: 8px; background: var(--panel2); border-radius: 4px; overflow: hidden; }
   .meter > div { height: 100%; background: var(--accent); transition: width .2s; }
-  button.ctl { background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 12px 16px; font-size: 15px; font-weight: 600; cursor: pointer; min-width: 90px; }
+  button.ctl { background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 12px 16px; font-size: 15px; font-weight: 700; cursor: pointer; min-width: 90px; }
   button.ctl.on { background: var(--ok); color: #04150c; border-color: var(--ok); }
   button.ctl.warn { background: var(--accent); color: #1a1000; border-color: var(--accent); }
   button.ctl.danger { border-color: var(--bad); color: var(--bad); }
   button.ctl:active { transform: scale(.97); }
   button.small { background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 12px; }
-  button.primary { background: var(--accent); color: #1a1000; border: none; border-radius: 6px; padding: 8px 18px; font-weight: 600; cursor: pointer; }
+  button.primary { background: var(--accent); color: #1a1000; border: none; border-radius: 6px; padding: 8px 18px; font-weight: 700; cursor: pointer; }
   .deck { border: 1px solid var(--line); border-radius: 6px; padding: 8px; margin-bottom: 8px; background: var(--panel2); }
   .deck.primary { border-color: var(--accent); }
   .timeline { position: relative; height: 18px; display: flex; border-radius: 3px; overflow: hidden; margin-top: 6px; background: #000; }
@@ -44,13 +49,22 @@
   .wave { display: block; width: 100%; height: 48px; margin-top: 3px; background: #07090c; border-radius: 3px; }
   .wave-legend { font-size: 11px; color: var(--muted); margin-top: 2px; }
   .wave-legend b { font-weight: 500; }
-  .log { font: 12px/1.5 ui-monospace, Menlo, monospace; max-height: 340px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
+  .log { font: 12px/1.5 ui-monospace, "SF Mono", Menlo, Monaco, monospace; max-height: 340px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
   .log .sent { color: var(--text); } .log .unsent { color: var(--muted); }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th, td { padding: 5px 4px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
   th { color: var(--muted); font-weight: 500; font-size: 12px; }
   input, select, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; font: inherit; max-width: 100%; }
-  input[type=number] { width: 70px; } input.w-s { width: 52px; } input.w-m { width: 120px; }
+  /* draw dropdowns ourselves: the WebView's native ones look dated */
+  select { -webkit-appearance: none; appearance: none; padding: 4px 26px 4px 8px; cursor: pointer;
+           background: var(--bg) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M1 1l4 4 4-4' fill='none' stroke='%238b95a3' stroke-width='1.5'/></svg>") no-repeat right 9px center; }
+  select:focus, input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; padding: 4px 8px; }
+  .icon-btn svg { width: 14px; height: 14px; }
+  /* no spin arrows: they take the space of the digits in narrow fields */
+  input[type=number] { width: 70px; -moz-appearance: textfield; }
+  input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  input.w-s { width: 58px; } input.w-m { width: 120px; }
   .chips { display: grid; grid-template-columns: repeat(4, auto); gap: 3px; min-width: 230px; }
   .chip { font-size: 11px; padding: 2px 6px; border-radius: 3px; border: 1px solid var(--line); cursor: pointer; user-select: none; color: var(--muted); }
   .chip.on { color: #fff; border-color: transparent; }
@@ -58,7 +72,7 @@
   .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px 16px; }
   .form-grid label { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; }
   .form-grid label span { color: var(--muted); }
-  pre.code { background: var(--bg); border: 1px solid var(--line); padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 12px; }
+  pre.code { font-family: ui-monospace, "SF Mono", Menlo, Monaco, monospace; background: var(--bg); border: 1px solid var(--line); padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 12px; }
   .hidden { display: none !important; }
   body.offline main { opacity: .45; pointer-events: none; }
   body.offline #srcStatus { color: var(--bad); }
@@ -79,6 +93,7 @@
     </select></label>
   <span id="setupBadge" class="badge" style="cursor:pointer" title="Saved setups">no saved setup</span>
   <span id="dryBadge" class="badge warn hidden">DRY RUN</span>
+  <button class="small icon-btn" id="reloadBtn" title="Reload the page"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9"/><path d="M13.6 2.2v3.2h-3.2"/></svg></button>
   <button class="small" id="dryBtn">Dry run</button>
   <button class="small" id="recBtn">Record</button>
 </header>
@@ -183,7 +198,7 @@
     <div class="panel" style="margin-top:12px">
       <h2>Files</h2>
       <div class="row">
-        <a class="small" href="/api/configs/download" download><button class="small">Download running setup</button></a>
+        <button class="small" id="downloadRunning">Download running setup</button>
         <label class="small" style="cursor:pointer"><span class="badge">Upload setup file…</span>
           <input type="file" id="setupUpload" accept=".json,application/json" class="hidden"></label>
         <span id="setupMsg" class="muted small"></span>
@@ -235,6 +250,7 @@ function connect() {
   if (es) es.close();
   es = new EventSource("/api/stream");
   es.onopen = () => {
+    if (window.automa3Desktop) window.automa3Desktop.log("live connection open");
     attempts = 0;
     lastMessage = Date.now();
     document.body.classList.remove("offline");
@@ -379,6 +395,18 @@ $("c-arm").onclick = () => {
 };
 $("c-release").onclick = () => ctl("release", 1);
 $("bias").onchange = () => ctl("energy", $("bias").value / 100);
+$("reloadBtn").onclick = () => {
+  if (dirty && !confirm("Reload? Unsaved changes will be lost.")) return;
+  dirty = false;
+  location.reload();
+};
+
+// downloads: inside the Mac app the page has no download support, the app saves the file instead
+function download(path, name) {
+  if (window.automa3Desktop) window.automa3Desktop.download(path, name);
+  else location.href = path;
+}
+
 $("modeSel").onchange = async () => {
   const mode = $("modeSel").value;
   await post("/api/analysis-mode?value=" + mode);
@@ -498,6 +526,7 @@ function renderLooks() {
       td(select(l, "mode", MODES, "optstring")), td(chips), td(energy), td(input(l, "weight", "number", "w-s")),
       td(input(l, "sequence", "optnumber", "w-s")), td(input(l, "flashBeats", "number", "w-s")), td(input(l, "level", "number", "w-s")),
       td(test, " ", del));
+    tr.lastChild.style.whiteSpace = "nowrap";
     t.append(tr);
   });
 }
@@ -737,7 +766,7 @@ async function loadSetups() {
     const actions = document.createElement("td");
     const btn = (text, fn) => { const b = document.createElement("button"); b.className = "small"; b.textContent = text; b.onclick = fn; actions.append(b, " "); };
     btn("Load", () => loadSetup(e.name));
-    btn("Download", () => { location.href = "/api/configs/download?name=" + encodeURIComponent(e.name); });
+    btn("Download", () => download("/api/configs/download?name=" + encodeURIComponent(e.name), e.name + ".json"));
     btn("Delete", async () => {
       if (!confirm(`Delete setup "${e.name}"? The running config is not affected.`)) return;
       await post("/api/configs/delete?name=" + encodeURIComponent(e.name));
@@ -792,6 +821,8 @@ $("setupUpload").onchange = async ev => {
   }
   ev.target.value = "";
 };
+
+$("downloadRunning").onclick = () => download("/api/configs/download", (setups.active || "automa3-config") + ".json");
 
 $("setupBadge").onclick = () => document.querySelector('nav button[data-tab="setups"]').click();
 

@@ -98,6 +98,10 @@ public class ProDjLinkSource implements MusicSource {
                     return;
                 }
                 status = "no DJ Link devices found, retrying";
+            } catch (java.net.BindException e) {
+                status = "the DJ Link network ports are in use by another program: is AutoMA3 already running "
+                        + "(window or terminal), or rekordbox / Beat Link Trigger on this Mac?";
+                log.warn("Pro DJ Link start failed: {}", status);
             } catch (Exception e) {
                 status = "error: " + e.getMessage();
                 log.warn("Pro DJ Link start failed: {}", e.toString());
@@ -110,9 +114,26 @@ public class ProDjLinkSource implements MusicSource {
         }
     }
 
+    // listeners kept as fields so stop() can remove them (beat-link finders are singletons)
+    private final org.deepsymmetry.beatlink.DeviceUpdateListener updateListener = this::onUpdate;
+    private final org.deepsymmetry.beatlink.BeatListener beatListener = this::onBeatPacket;
+    private final org.deepsymmetry.beatlink.data.TrackMetadataListener metadataListener = u -> scheduleAnalysis(u.player);
+    private final org.deepsymmetry.beatlink.data.BeatGridListener gridListener = u -> scheduleAnalysis(u.player);
+    private final org.deepsymmetry.beatlink.data.AnalysisTagListener tagListener = u -> scheduleAnalysis(u.player);
+    private final org.deepsymmetry.beatlink.data.WaveformListener waveformListener = new org.deepsymmetry.beatlink.data.WaveformListener() {
+        @Override
+        public void previewChanged(org.deepsymmetry.beatlink.data.WaveformPreviewUpdate update) {
+        }
+
+        @Override
+        public void detailChanged(org.deepsymmetry.beatlink.data.WaveformDetailUpdate update) {
+            scheduleAnalysis(update.player);
+        }
+    };
+
     private void startFinders() throws Exception {
         BeatFinder.getInstance().start();
-        BeatFinder.getInstance().addBeatListener(this::onBeatPacket);
+        BeatFinder.getInstance().addBeatListener(beatListener);
 
         MetadataFinder.getInstance().start();
         if (configStore.get().djLink.readUsbFiles) {
@@ -128,21 +149,12 @@ public class ProDjLinkSource implements MusicSource {
         TimeFinder.getInstance().start();
         AnalysisTagFinder.getInstance().start();
 
-        MetadataFinder.getInstance().addTrackMetadataListener(u -> scheduleAnalysis(u.player));
-        BeatGridFinder.getInstance().addBeatGridListener(u -> scheduleAnalysis(u.player));
-        WaveformFinder.getInstance().addWaveformListener(new org.deepsymmetry.beatlink.data.WaveformListener() {
-            @Override
-            public void previewChanged(org.deepsymmetry.beatlink.data.WaveformPreviewUpdate update) {
-            }
-
-            @Override
-            public void detailChanged(org.deepsymmetry.beatlink.data.WaveformDetailUpdate update) {
-                scheduleAnalysis(update.player);
-            }
-        });
-        AnalysisTagFinder.getInstance().addAnalysisTagListener(u -> scheduleAnalysis(u.player), ".EXT", "PSSI");
+        MetadataFinder.getInstance().addTrackMetadataListener(metadataListener);
+        BeatGridFinder.getInstance().addBeatGridListener(gridListener);
+        WaveformFinder.getInstance().addWaveformListener(waveformListener);
+        AnalysisTagFinder.getInstance().addAnalysisTagListener(tagListener, ".EXT", "PSSI");
         // only now: status updates trigger track analysis, which needs all finders running
-        VirtualCdj.getInstance().addUpdateListener(this::onUpdate);
+        VirtualCdj.getInstance().addUpdateListener(updateListener);
     }
 
     private boolean mixerPresent() {
@@ -404,13 +416,24 @@ public class ProDjLinkSource implements MusicSource {
     @Override
     public void stop() {
         running = false;
+        listener = null;
         if (starter != null) starter.interrupt();
+        VirtualCdj.getInstance().removeUpdateListener(updateListener);
+        BeatFinder.getInstance().removeBeatListener(beatListener);
+        MetadataFinder.getInstance().removeTrackMetadataListener(metadataListener);
+        BeatGridFinder.getInstance().removeBeatGridListener(gridListener);
+        WaveformFinder.getInstance().removeWaveformListener(waveformListener);
+        AnalysisTagFinder.getInstance().removeAnalysisTagListener(tagListener, ".EXT", "PSSI");
         try {
+            // stopping the virtual player also stops the finders that depend on it
             VirtualCdj.getInstance().stop();
+            BeatFinder.getInstance().stop();
+            CrateDigger.getInstance().stop();
             DeviceFinder.getInstance().stop();
         } catch (Exception ignored) {
             // shutting down
         }
         analysisWorker.shutdownNow();
+        status = "stopped";
     }
 }
