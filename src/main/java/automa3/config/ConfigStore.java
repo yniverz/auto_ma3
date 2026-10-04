@@ -69,6 +69,9 @@ public class ConfigStore {
             if (look.id == null || look.id.isBlank()) look.id = UUID.randomUUID().toString().substring(0, 8);
             if (look.role == null) look.role = Role.BASE;
             if (look.sections == null) look.sections = new java.util.ArrayList<>();
+            if (look.description == null) look.description = "";
+            if (look.tags == null) look.tags = new java.util.ArrayList<>();
+            if (look.meta == null) look.meta = new java.util.LinkedHashMap<>();
             look.energyMin = clamp(look.energyMin, 0, 1);
             look.energyMax = clamp(look.energyMax, 0, 1);
             if (look.energyMax < look.energyMin) look.energyMax = look.energyMin;

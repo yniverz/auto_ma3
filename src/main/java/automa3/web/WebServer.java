@@ -4,6 +4,8 @@ import automa3.App;
 import automa3.audio.AudioAnalyzer;
 import automa3.config.Config;
 import automa3.config.ConfigStore;
+import automa3.config.LookTransfer;
+import com.fasterxml.jackson.databind.JsonNode;
 import automa3.ma3.Ma3Profile;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -122,6 +124,37 @@ public class WebServer {
             } else if (path.equals("/api/analysis")) {
                 var st = app.engine().structure(Integer.parseInt(query.getOrDefault("player", "0")));
                 json(ex, st == null ? 404 : 200, st == null ? Map.of("error", "no analysis") : st);
+            } else if (path.equals("/api/looks/export")) {
+                byte[] body = ConfigStore.JSON.writeValueAsBytes(LookTransfer.export(app.config().get()));
+                ex.getResponseHeaders().set("Content-Type", "application/json");
+                ex.getResponseHeaders().set("Content-Disposition", "attachment; filename=\"automa3-looks.json\"");
+                ex.sendResponseHeaders(200, body.length);
+                try (OutputStream os = ex.getResponseBody()) {
+                    os.write(body);
+                }
+            } else if (path.equals("/api/looks/import/preview") && method.equals("POST")) {
+                // for the web UI: merge into the editor's (unsaved) looks, nothing is saved
+                JsonNode req = ConfigStore.JSON.readTree(ex.getRequestBody());
+                List<Config.Look> base = ConfigStore.JSON.convertValue(req.path("base"),
+                        ConfigStore.JSON.getTypeFactory().constructCollectionType(List.class, Config.Look.class));
+                java.util.Set<Integer> select = null;
+                if (req.path("select").isArray()) {
+                    select = new java.util.HashSet<>();
+                    for (JsonNode n : req.path("select")) select.add(n.asInt());
+                }
+                LookTransfer.Result r = LookTransfer.importLooks(base == null ? List.of() : base, req.path("file"),
+                        LookTransfer.Mode.valueOf(req.path("mode").asText("merge").toUpperCase()), select);
+                json(ex, 200, r);
+            } else if (path.equals("/api/looks/import") && method.equals("POST")) {
+                // for other tools: import a look file into the running setup and save it
+                JsonNode file = ConfigStore.JSON.readTree(ex.getRequestBody());
+                Config c = ConfigStore.copy(app.config().get());
+                LookTransfer.Result r = LookTransfer.importLooks(c.looks, file,
+                        LookTransfer.Mode.valueOf(query.getOrDefault("mode", "merge").toUpperCase()), null);
+                c.looks = new java.util.ArrayList<>(r.looks());
+                if (Boolean.parseBoolean(query.getOrDefault("context", "false"))) LookTransfer.applyContext(c, r.context());
+                app.config().replace(c);
+                json(ex, 200, Map.of("added", r.added(), "updated", r.updated(), "skipped", r.skipped(), "entries", r.entries()));
             } else if (path.equals("/api/profiles")) {
                 json(ex, 200, profiles());
             } else if (path.equals("/api/dryrun") && method.equals("POST")) {

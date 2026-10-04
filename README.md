@@ -32,6 +32,14 @@ Options: `--sim`, `--replay recordings/session-....jsonl`, `--speed 4` (sim/repl
 
 Settings live in `config.json` (created on first start) and are edited in the web UI.
 
+## Exchanging looks with other tools
+
+Looks tab → **Export looks** / **Import looks…** writes and reads an `automa3-looks` JSON file: each look's
+grandMA3 location (page, executor, sequence), role, description and all AutoMA3 settings, plus free `tags`/`meta`
+for other tools. Imports can be partial (only some looks, only some fields) and are previewed before they land in
+the editor. Other programs can also import directly into a running AutoMA3 (`POST /api/looks/import`).
+Format and API: [docs/looks-format.md](docs/looks-format.md).
+
 ## Mac app
 
 `packaging/build-mac-app.sh` (or the VS Code task "Build Mac app") builds `target/dist/AutoMA3.app` and

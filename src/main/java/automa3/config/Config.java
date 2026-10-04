@@ -83,6 +83,12 @@ public class Config {
         /** For fader/haze looks: maximum fader level 0..100. */
         public int level = 100;
         public boolean enabled = true;
+        /** What the look does, free text (e.g. "fast circle on the spots"). */
+        public String description = "";
+        /** Free tags, kept as they are (e.g. from a show generator). */
+        public List<String> tags = new ArrayList<>();
+        /** Arbitrary data from other tools, kept untouched and exported again. */
+        public java.util.Map<String, Object> meta = new java.util.LinkedHashMap<>();
 
         public String layerName() {
             return layer == null || layer.isBlank() ? role.name() : layer;

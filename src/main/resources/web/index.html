@@ -150,6 +150,7 @@
   body.offline #srcStatus { color: var(--bad); }
   .savebar { position: sticky; bottom: 0; background: rgba(17,17,17,.96); padding: 12px 0; display: flex; gap: 12px;
              align-items: center; border-top: 1px solid var(--line); margin-top: 16px; }
+  input.needs { border-color: var(--accent); }
   .kv { display: flex; gap: 8px; margin-bottom: 4px; align-items: center; }
   @media (max-width: 600px) { main { padding: 12px; } header, nav { padding-left: 12px; padding-right: 12px; }
     .section-big { font-size: 32px; } button.ctl { flex: 1 1 40%; } }
@@ -230,7 +231,34 @@
         and extra <b>layers</b> (e.g. two MOVEMENT layers "Spots" and "Washes" run at the same time). Sections empty = any section.
         <b>Seq</b> = sequence number on that executor (MA3 2.1+): lets the app notice when you touch it and back off.</p>
       <div class="table-wrap"><table id="looksTable"></table></div>
-      <div class="row" style="margin-top:8px"><button class="small" id="addLook">+ Add look</button></div>
+      <div class="row" style="margin-top:8px">
+        <button class="small" id="addLook">+ Add look</button>
+        <span style="flex:1"></span>
+        <button class="small" id="exportLooks" title="Save all looks as an automa3-looks file (docs/looks-format.md)">Export looks</button>
+        <label class="small" style="cursor:pointer" title="Import looks from an automa3-looks file"><span class="btn-like">Import looks…</span>
+          <input type="file" id="importLooksFile" accept=".json,application/json" class="hidden"></label>
+      </div>
+      <div class="muted small" id="lookMsg" style="margin-top:8px"></div>
+    </div>
+    <div class="panel hidden" id="importPanel" style="margin-top:16px">
+      <h2>Import looks</h2>
+      <p class="muted small" id="importInfo"></p>
+      <div class="row" style="margin-bottom:12px">
+        <label class="small muted">Mode
+          <select id="importMode">
+            <option value="merge">Merge: update looks on the same executor (or id), add the others</option>
+            <option value="add">Add all as new looks</option>
+            <option value="replace">Replace all current looks</option>
+          </select></label>
+        <label class="small muted" id="importContextLabel"><input type="checkbox" id="importContext">
+          Also take speed master and control addresses from the file</label>
+      </div>
+      <div class="table-wrap"><table id="importTable"></table></div>
+      <div class="row" style="margin-top:12px">
+        <button class="primary" id="importApply">Import selected</button>
+        <button class="small" id="importCancel">Cancel</button>
+        <span class="muted small">Imported looks land in the editor: review, add names, then Save changes.</span>
+      </div>
     </div>
   </section>
 
@@ -565,7 +593,7 @@ function td(...children) {
 
 function renderLooks() {
   const t = $("looksTable");
-  t.innerHTML = "<tr><th>On</th><th>Name</th><th>Role</th><th>Layer</th><th>Page</th><th>Exec</th><th>Mode</th><th>Sections</th><th>Energy</th><th>Weight</th><th>Seq</th><th>Beats</th><th>Level</th><th></th></tr>";
+  t.innerHTML = "<tr><th>On</th><th>Name</th><th>Description</th><th>Role</th><th>Layer</th><th>Page</th><th>Exec</th><th>Mode</th><th>Sections</th><th>Energy</th><th>Weight</th><th>Seq</th><th>Beats</th><th>Level</th><th></th></tr>";
   draft.looks.forEach((l, i) => {
     const tr = document.createElement("tr");
     const chips = document.createElement("div");
@@ -596,7 +624,14 @@ function renderLooks() {
     del.onclick = () => { draft.looks.splice(i, 1); setDirty(true); renderLooks(); };
     const layer = input(l, "layer", "optstring", "w-m");
     layer.placeholder = l.role;
-    tr.append(td(input(l, "enabled", "bool")), td(input(l, "name", "text", "w-m")), td(select(l, "role", ROLES)),
+    const nameIn = input(l, "name", "text", "w-m");
+    nameIn.placeholder = "name…";
+    if (!l.name) nameIn.classList.add("needs");
+    nameIn.addEventListener("input", () => nameIn.classList.toggle("needs", !nameIn.value));
+    const descIn = input(l, "description", "text", "w-m");
+    descIn.placeholder = "what it does";
+    if (l.tags && l.tags.length) descIn.title = "tags: " + l.tags.join(", ");
+    tr.append(td(input(l, "enabled", "bool")), td(nameIn), td(descIn), td(select(l, "role", ROLES)),
       td(layer), td(input(l, "page", "number", "w-s")), td(input(l, "exec", "number", "w-s")),
       td(select(l, "mode", MODES, "optstring")), td(chips), td(energy), td(input(l, "weight", "number", "w-s")),
       td(input(l, "sequence", "optnumber", "w-s")), td(input(l, "flashBeats", "number", "w-s")), td(input(l, "level", "number", "w-s")),
@@ -606,9 +641,92 @@ function renderLooks() {
   });
 }
 
+// ---------- look export / import (format: docs/looks-format.md)
+let importFile = null;
+
+$("exportLooks").onclick = () => download("/api/looks/export", "automa3-looks.json");
+
+$("importLooksFile").onchange = async ev => {
+  const file = ev.target.files[0];
+  ev.target.value = "";
+  if (!file) return;
+  try {
+    importFile = JSON.parse(await file.text());
+  } catch (e) {
+    $("lookMsg").textContent = "Not a JSON file: " + e.message;
+    return;
+  }
+  $("importInfo").textContent = `${file.name}: ${(importFile.looks || []).length} looks` +
+    (importFile.exportedBy ? ` from ${importFile.exportedBy}` : "") + ". Choose the looks to import:";
+  $("importContextLabel").classList.toggle("hidden", !importFile.context);
+  $("importContext").checked = false;
+  $("importPanel").classList.remove("hidden");
+  await previewImport(null);
+  $("importPanel").scrollIntoView({behavior: "smooth"});
+};
+
+async function previewImport(select) {
+  try {
+    return await api("/api/looks/import/preview", {method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({file: importFile, base: draft.looks, mode: $("importMode").value, select})}).then(r => {
+      if (select === null) renderImportTable(r);
+      return r;
+    });
+  } catch (e) {
+    $("importTable").innerHTML = "";
+    $("importInfo").textContent = "Cannot import this file: " + e.message;
+    return null;
+  }
+}
+
+function renderImportTable(r) {
+  const t = $("importTable");
+  t.innerHTML = "<tr><th></th><th>Look</th><th>Result</th><th>Notes</th></tr>";
+  r.entries.forEach(e => {
+    const tr = document.createElement("tr");
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.dataset.index = e.index;
+    cb.checked = e.action !== "error";
+    cb.disabled = e.action === "error";
+    const action = e.action === "added" ? "new look" : e.action === "updated" ? "updates existing look" : e.action;
+    const color = e.action === "error" ? "var(--bad)" : e.action === "updated" ? "var(--accent)" : "var(--ok)";
+    tr.append(td(cb), td(e.label), td(Object.assign(document.createElement("span"), {textContent: action, style: `color:${color}`})),
+      td(Object.assign(document.createElement("span"), {className: "muted small", textContent: e.messages.join(" · ")})));
+    t.append(tr);
+  });
+}
+
+$("importMode").onchange = () => previewImport(null);
+$("importCancel").onclick = () => { importFile = null; $("importPanel").classList.add("hidden"); };
+
+$("importApply").onclick = async () => {
+  const select = [...$("importTable").querySelectorAll("input[type=checkbox]")].filter(c => c.checked).map(c => Number(c.dataset.index));
+  if ($("importMode").value === "replace" && !confirm("Replace all current looks with the selected ones?")) return;
+  const r = await previewImport(select);
+  if (!r) return;
+  draft.looks = r.looks;
+  if ($("importContext").checked && importFile.context) {
+    const c = importFile.context;
+    if (c.speedMaster != null) draft.speed.master = c.speedMaster;
+    if (c.controlPrefix != null) draft.oscIn.controlPrefix = c.controlPrefix;
+    if (c.oscInPort != null) draft.oscIn.port = c.oscInPort;
+    if (c.controlSequences) draft.oscIn.controlSequences = c.controlSequences;
+    renderSettings();
+  }
+  importFile = null;
+  $("importPanel").classList.add("hidden");
+  setDirty(true);
+  renderLooks();
+  const unnamed = draft.looks.filter(l => !l.name).length;
+  $("lookMsg").textContent = `Imported: ${r.added} new, ${r.updated} updated` +
+    (unnamed ? `, ${unnamed} without a name (outlined)` : "") + ". Review, then Save changes.";
+};
+
 $("addLook").onclick = () => {
   const maxExec = draft.looks.reduce((m, l) => Math.max(m, l.exec), 100);
-  draft.looks.push({name: "", role: "EFFECT", page: 1, exec: maxExec + 1, sections: [], energyMin: 0, energyMax: 1, weight: 1, level: 100, enabled: true, flashBeats: 0});
+  draft.looks.push({name: "", description: "", role: "EFFECT", page: 1, exec: maxExec + 1, sections: [], energyMin: 0, energyMax: 1,
+    weight: 1, level: 100, enabled: true, flashBeats: 0, tags: [], meta: {}});
   setDirty(true); renderLooks();
 };
 
