@@ -58,6 +58,8 @@ public class ProDjLinkSource implements MusicSource {
     private final java.util.Set<Integer> analysisPending = ConcurrentHashMap.newKeySet();
     private final java.util.Set<String> loggedProblems = ConcurrentHashMap.newKeySet();
     private final java.util.Set<String> noPhraseLogged = ConcurrentHashMap.newKeySet();
+    /** track key -> time (ms) of explicit phrase requests made, to retry a few times only. */
+    private final Map<String, List<Long>> phraseRequests = new ConcurrentHashMap<>();
 
     public ProDjLinkSource(ConfigStore configStore, java.nio.file.Path analysisDir) {
         this.configStore = configStore;
@@ -179,7 +181,8 @@ public class ProDjLinkSource implements MusicSource {
         if (key != null && !key.equals(previous)) scheduleAnalysis(player);
         // rekordbox phrase data can arrive after the waveform: switch to it as soon as it is there
         if (key != null && !"phrase".equals(sentSource.get(player)) && AnalysisTagFinder.getInstance().isRunning()
-                && AnalysisTagFinder.getInstance().getLatestTrackAnalysisFor(player, ".EXT", "PSSI") != null) {
+                && (AnalysisTagFinder.getInstance().getLatestTrackAnalysisFor(player, ".EXT", "PSSI") != null
+                || phraseRetryDue(key))) {
             scheduleAnalysis(player);
         }
 
@@ -252,10 +255,15 @@ public class ProDjLinkSource implements MusicSource {
 
         TrackStructure structure = null;
         RekordboxAnlz.TaggedSection tag = AnalysisTagFinder.getInstance().getLatestTrackAnalysisFor(player, ".EXT", "PSSI");
+        if (tag == null) tag = requestPhrases(player, key);
         if (tag != null && tag.body() instanceof RekordboxAnlz.SongStructureTag sst) {
             structure = fromPhrases(key, sst, grid.beatCount + 1, wave == null ? List.of() : wave.barEnergy(),
                     firstDownbeat, dropBeats, bars);
-            if (structure != null) structure = structure.withBeatBands(beats);
+            if (structure != null) {
+                structure = PhraseMapper.refineWithWaveform(structure, wave, dropBeats).withBeatBands(beats);
+            }
+        } else if (tag != null) {
+            log.warn("Player {}: phrase section has unexpected type {}", player, tag.body() == null ? null : tag.body().getClass());
         }
         if (structure == null && wave != null && configStore.get().djLink.waveformAnalysis) {
             structure = wave;
@@ -284,6 +292,37 @@ public class ProDjLinkSource implements MusicSource {
                     firstDownbeat, grid.beatCount, structure.source().equals("phrase"), barStarts, bars, beats,
                     wave == null ? List.of() : wave.segments(), structure.source().equals("phrase") ? structure.segments() : List.of())
                     .save(analysisDir);
+        }
+    }
+
+    private boolean phraseRetryDue(String key) {
+        List<Long> tries = phraseRequests.get(key);
+        return tries != null && !tries.isEmpty() && tries.size() < 3
+                && System.currentTimeMillis() - tries.get(tries.size() - 1) >= 5000;
+    }
+
+    /**
+     * Ask for the rekordbox phrase analysis of the loaded track directly (a few tries per track) and log
+     * the outcome, so it is visible why phrases are missing.
+     */
+    private RekordboxAnlz.TaggedSection requestPhrases(int player, String key) {
+        long now = System.currentTimeMillis();
+        List<Long> tries = phraseRequests.computeIfAbsent(key, k -> new java.util.concurrent.CopyOnWriteArrayList<>());
+        if (tries.size() >= 3 || (!tries.isEmpty() && now - tries.get(tries.size() - 1) < 5000)) return null;
+        tries.add(now);
+        TrackMetadata md = MetadataFinder.getInstance().getLatestMetadataFor(player);
+        if (md == null) {
+            log.info("Player {}: no track metadata yet, cannot ask for phrase analysis", player);
+            return null;
+        }
+        try {
+            RekordboxAnlz.TaggedSection tag = AnalysisTagFinder.getInstance().requestAnalysisTagFrom(md.trackReference, ".EXT", "PSSI");
+            log.info("Player {}: phrase analysis request for \"{}\" ({}): {}", player, md.getTitle(), md.trackReference,
+                    tag == null ? "nothing returned" : "received");
+            return tag;
+        } catch (Exception e) {
+            log.warn("Player {}: phrase analysis request for \"{}\" failed: {}", player, md.getTitle(), e.toString());
+            return null;
         }
     }
 

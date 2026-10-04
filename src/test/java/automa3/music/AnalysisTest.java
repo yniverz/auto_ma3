@@ -138,6 +138,39 @@ class AnalysisTest {
         assertNotEquals(Section.DROP, at(st, 215));
     }
 
+    /**
+     * Real rekordbox 7 phrase analysis of Wild (INTRO, CHORUS x3, UP x2, CHORUS, OUTRO), refined with the
+     * real CDJ-3000 waveform: phrase boundaries for the drops, waveform for the detail inside long phrases.
+     */
+    @Test
+    void realTrackWildFromRekordboxPhrases() throws Exception {
+        java.nio.file.Path ext = java.nio.file.Path.of(AnalysisTest.class.getResource("/tracks/wild.EXT").toURI());
+        org.deepsymmetry.cratedigger.pdb.RekordboxAnlz anlz = org.deepsymmetry.cratedigger.pdb.RekordboxAnlz.fromFile(ext.toString());
+        org.deepsymmetry.cratedigger.pdb.RekordboxAnlz.SongStructureTag pssi = null;
+        for (var section : anlz.sections()) {
+            if (section.body() instanceof org.deepsymmetry.cratedigger.pdb.RekordboxAnlz.SongStructureTag t) pssi = t;
+        }
+        assertNotNull(pssi, "PSSI section in the rekordbox file");
+        TrackStructure wave = analyzeFixture("wild.json");
+        TrackStructure phrase = ProDjLinkSource.fromPhrases("wild", pssi, 292, List.of(), 3, 64, List.of());
+        TrackStructure st = PhraseMapper.refineWithWaveform(phrase, wave, 64);
+
+        assertEquals("phrase", st.source());
+        assertEquals(Section.INTRO, at(st, 20));
+        assertEquals(Section.BUILD, at(st, 55), "waveform build inside the rekordbox intro");
+        assertEquals(51, st.segmentAt(55).startBeat());
+        assertEquals(Section.DROP, at(st, 67), "chorus after the intro is the drop");
+        assertEquals(67, st.segmentAt(67).startBeat());
+        assertEquals(Section.PEAK, at(st, 140));
+        assertEquals(Section.GROOVE, at(st, 170), "first part of the long UP phrase: bass still running");
+        assertEquals(Section.BREAKDOWN, at(st, 190), "middle of the UP phrase: no bass");
+        assertEquals(Section.BUILD, at(st, 215));
+        assertEquals(211, st.segmentAt(215).startBeat(), "real build start from the waveform");
+        assertEquals(Section.DROP, at(st, 227));
+        assertEquals(227, st.segmentAt(227).startBeat());
+        assertEquals(Section.OUTRO, at(st, 270));
+    }
+
     private static TrackStructure analyzeFixture(String name) throws Exception {
         java.nio.file.Path file = java.nio.file.Path.of(AnalysisTest.class.getResource("/tracks/" + name).toURI());
         AnalysisDump d = AnalysisDump.load(file);
