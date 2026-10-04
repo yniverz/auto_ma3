@@ -168,12 +168,12 @@ public class SimulatedSource implements MusicSource {
         deck.beat = 0;
         listener.onDeck(new DeckState(deck.player, "SIM-CDJ", false, false, true, false, deck.track.bpm(), -1, 1,
                 deck.key, deck.track.name(), "AutoMA3 Simulator", System.currentTimeMillis()));
-        TrackStructure structure = switch (deck.source) {
-            case "phrase" -> exactStructure(deck.key, deck.track, dropBeats);
-            case "waveform" -> WaveformAnalyzer.analyzeBeats(deck.key, perBeat(syntheticWaveform(deck.track, random), random), 1, dropBeats);
-            default -> null;
-        };
-        if (structure != null) listener.onStructure(deck.player, structure);
+        // like real CDJs: tracks with rekordbox phrases also have a waveform, so both analyses are sent
+        if (!deck.source.equals("none")) {
+            listener.onStructure(deck.player,
+                    WaveformAnalyzer.analyzeBeats(deck.key, perBeat(syntheticWaveform(deck.track, random), random), 1, dropBeats));
+        }
+        if (deck.source.equals("phrase")) listener.onStructure(deck.player, exactStructure(deck.key, deck.track, dropBeats));
     }
 
     public static TrackStructure exactStructure(String key, Template t, int dropBeats) {

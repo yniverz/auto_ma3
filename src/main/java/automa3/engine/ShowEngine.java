@@ -59,8 +59,8 @@ public class ShowEngine implements MusicListener {
 
     // music state
     private final Map<Integer, DeckState> decks = new HashMap<>();
-    /** Concurrent: also read by the web UI. */
-    private final Map<Integer, TrackStructure> structures = new java.util.concurrent.ConcurrentHashMap<>();
+    /** player -> analysis source ("phrase" / "waveform" / ...) -> structure. Concurrent: also read by the web UI. */
+    private final Map<Integer, Map<String, TrackStructure>> structures = new java.util.concurrent.ConcurrentHashMap<>();
     private final Map<Integer, Integer> lastBeatNumber = new HashMap<>();
     private final Map<Integer, Long> lastBeatMs = new HashMap<>();
     private int primary = -1;
@@ -72,6 +72,7 @@ public class ShowEngine implements MusicListener {
     // show state
     private Section currentSection;
     private String sectionReason = "";
+    private String lastSource;
     private long sectionStartGlobal;
     private long lullStartGlobal = -1;
     private long dropUntilGlobal = -1;
@@ -121,7 +122,18 @@ public class ShowEngine implements MusicListener {
 
     /** Full analysis (sections, energy and waveform bands) of the track on a player, for the UI. */
     public TrackStructure structure(int player) {
-        return structures.get(player);
+        TrackStructure st = structureFor(player);
+        if (st == null || !st.beatBands().isEmpty()) return st;
+        // for the graph: borrow the per-beat waveform data from another analysis of the same track
+        Map<String, TrackStructure> bySource = structures.get(player);
+        if (bySource != null) {
+            for (TrackStructure other : bySource.values()) {
+                if (Objects.equals(other.trackKey(), st.trackKey()) && !other.beatBands().isEmpty()) {
+                    return st.withBeatBands(other.beatBands());
+                }
+            }
+        }
+        return st;
     }
 
     public OperatorState operator() {
@@ -149,7 +161,9 @@ public class ShowEngine implements MusicListener {
     @Override
     public void onStructure(int player, TrackStructure structure) {
         sched.execute(() -> {
-            structures.put(player, structure);
+            Map<String, TrackStructure> bySource = structures.computeIfAbsent(player, p -> new java.util.concurrent.ConcurrentHashMap<>());
+            bySource.values().removeIf(old -> !Objects.equals(old.trackKey(), structure.trackKey())); // new track
+            bySource.put(structure.source(), structure);
             event("Player " + player + ": " + structure.segments().size() + " sections from " + structure.source());
         });
     }
@@ -201,11 +215,30 @@ public class ShowEngine implements MusicListener {
         return seg == null ? null : seg.section();
     }
 
+    /** The analysis of the player's current track selected by the analysis mode (auto / phrase / waveform). */
     private TrackStructure structureFor(int player) {
-        TrackStructure st = structures.get(player);
+        Map<String, TrackStructure> bySource = structures.get(player);
         DeckState d = decks.get(player);
-        if (st == null || d == null || !Objects.equals(st.trackKey(), d.trackKey())) return null;
-        return st;
+        if (bySource == null || d == null) return null;
+        String mode = configStore.get().djLink.analysisMode == null ? "auto" : configStore.get().djLink.analysisMode;
+        List<String> order = mode.equalsIgnoreCase("waveform") ? List.of("waveform", "phrase") : List.of("phrase", "waveform");
+        for (String source : order) {
+            TrackStructure st = bySource.get(source);
+            if (st != null && Objects.equals(st.trackKey(), d.trackKey())) return st;
+        }
+        for (TrackStructure st : bySource.values()) {
+            if (Objects.equals(st.trackKey(), d.trackKey())) return st;
+        }
+        return null;
+    }
+
+    /** Analyses available for the player's current track. */
+    private List<String> availableAnalyses(int player) {
+        Map<String, TrackStructure> bySource = structures.get(player);
+        DeckState d = decks.get(player);
+        if (bySource == null || d == null) return List.of();
+        return bySource.values().stream().filter(st -> Objects.equals(st.trackKey(), d.trackKey()))
+                .map(TrackStructure::source).sorted().toList();
     }
 
     // ------------------------------------------------------------------ beat handling
@@ -258,6 +291,12 @@ public class ShowEngine implements MusicListener {
             currentTrackKey = key;
             trackColors.clear();
             if (deck != null && deck.title() != null) event("Track: " + deck.title() + (deck.artist() != null ? " - " + deck.artist() : ""));
+        }
+
+        String source = st == null ? "none" : st.source();
+        if (!source.equals(lastSource)) {
+            if (lastSource != null && !trackChanged) event("Analysis now: " + source);
+            lastSource = source;
         }
 
         // ---- section for the next beat
@@ -324,11 +363,11 @@ public class ShowEngine implements MusicListener {
 
         // ---- section change bookkeeping
         boolean sectionChanged = section != currentSection;
+        sectionReason = reason; // always current, also after switching the analysis
         if (sectionChanged) {
             if (section.isKicking() || section == Section.INTRO) lullStartGlobal = -1;
             else if (lullStartGlobal < 0) lullStartGlobal = nextGlobal;
             currentSection = section;
-            sectionReason = reason;
             sectionStartGlobal = nextGlobal;
             event("Beat " + (next > 0 ? next : "?") + ": " + section + " (" + reason + ")");
         }
@@ -803,7 +842,7 @@ public class ShowEngine implements MusicListener {
             deckList.add(new EngineSnapshot.Deck(d.player(), d.deviceName(), isPlaying(d, now), d.onAir(), d.tempoMaster(),
                     d.player() == primary, Math.round(d.bpm() * 10) / 10.0, beat == null ? -1 : beat,
                     d.title(), d.artist(), d.trackKey(), s == null ? null : s.name(), st == null ? "none" : st.source(),
-                    st == null ? List.of() : st.segments(), st == null ? 0 : st.lastBeat()));
+                    availableAnalyses(d.player()), st == null ? List.of() : st.segments(), st == null ? 0 : st.lastBeat()));
         });
         Map<String, String> activeLabels = new LinkedHashMap<>();
         active.forEach((k, v) -> activeLabels.put(k, v.label()));

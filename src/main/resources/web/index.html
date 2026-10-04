@@ -60,6 +60,8 @@
   .form-grid label span { color: var(--muted); }
   pre.code { background: var(--bg); border: 1px solid var(--line); padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 12px; }
   .hidden { display: none !important; }
+  body.offline main { opacity: .45; pointer-events: none; }
+  body.offline #srcStatus { color: var(--bad); }
   .savebar { position: sticky; bottom: 0; background: var(--bg); padding: 10px 0; display: flex; gap: 10px; align-items: center; border-top: 1px solid var(--line); margin-top: 12px; }
   .kv { display: flex; gap: 6px; margin-bottom: 4px; }
   @media (max-width: 600px) { main { padding: 10px; } .section-big { font-size: 30px; } button.ctl { flex: 1 1 40%; } }
@@ -69,6 +71,12 @@
 <header>
   <h1>AutoMA3</h1>
   <span id="srcStatus" class="status">connecting...</span>
+  <label class="small muted" title="Which track analysis drives the show">Analysis
+    <select id="modeSel">
+      <option value="auto">Auto (rekordbox if available)</option>
+      <option value="phrase">rekordbox phrases</option>
+      <option value="waveform">Waveform</option>
+    </select></label>
   <span id="setupBadge" class="badge" style="cursor:pointer" title="Saved setups">no saved setup</span>
   <span id="dryBadge" class="badge warn hidden">DRY RUN</span>
   <button class="small" id="dryBtn">Dry run</button>
@@ -219,22 +227,49 @@ document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
 });
 
 // ---------- live
+// Live state is pushed by the app (Server-Sent Events). The browser's own retry gives up when the app is
+// down, so reconnect ourselves: quickly after an error, and when no message or ping came for 12 s.
+let es = null, lastMessage = 0, attempts = 0, retryTimer = null, wasOffline = false;
+
 function connect() {
-  // live state is pushed by the app (Server-Sent Events); the browser reconnects automatically
-  const es = new EventSource("/api/stream");
+  if (es) es.close();
+  es = new EventSource("/api/stream");
+  es.onopen = () => {
+    attempts = 0;
+    lastMessage = Date.now();
+    document.body.classList.remove("offline");
+    if (wasOffline) {
+      wasOffline = false;
+      // the app may have restarted with other settings
+      if (dirty) loadSetups(); else loadConfig();
+    }
+  };
   es.onmessage = ev => {
+    lastMessage = Date.now();
     state = JSON.parse(ev.data);
     renderLive();
   };
-  es.onerror = () => {
-    $("srcStatus").textContent = "connection to app lost, reconnecting...";
-  };
+  es.addEventListener("ping", () => { lastMessage = Date.now(); });
+  es.onerror = connectionLost;
 }
+
+function connectionLost() {
+  if (es) { es.close(); es = null; }
+  wasOffline = true;
+  attempts++;
+  document.body.classList.add("offline");
+  $("srcStatus").textContent = `connection to app lost, reconnecting (attempt ${attempts})...`;
+  clearTimeout(retryTimer);
+  retryTimer = setTimeout(connect, Math.min(1000, 200 * attempts));
+}
+
+setInterval(() => { if (es && es.readyState === EventSource.OPEN && Date.now() - lastMessage > 12000) connectionLost(); }, 2000);
 
 function renderLive() {
   const e = state.engine;
   $("srcStatus").textContent = state.source.name + ": " + state.source.status;
   $("dryBadge").classList.toggle("hidden", !state.dryRun);
+  if (document.activeElement !== $("modeSel") && state.analysisMode) $("modeSel").value = state.analysisMode;
   $("dryBtn").textContent = state.dryRun ? "Go live" : "Dry run";
   $("recBtn").textContent = state.recording ? "Stop recording" : "Record";
   $("recBtn").style.color = state.recording ? "var(--bad)" : "";
@@ -273,6 +308,10 @@ function setCtl(id, on, onText, offText) {
   b.textContent = on ? onText : offText;
 }
 
+function analysisName(a) {
+  return a === "phrase" ? "rekordbox phrases" : a === "waveform" ? "waveform" : a;
+}
+
 function deckHtml(d) {
   const total = d.lastBeat || 1;
   const segs = d.segments.map(s => `<div title="${s.section} (${esc(s.label)})" style="width:${(s.endBeat - s.startBeat) / total * 100}%;background:var(--${s.section})"></div>`).join("");
@@ -282,7 +321,7 @@ function deckHtml(d) {
       ${d.playing ? '<span class="badge ok">playing</span>' : '<span class="badge">stopped</span>'}
       ${d.onAir ? '<span class="badge ok">on air</span>' : ""}${d.master ? '<span class="badge">master</span>' : ""}
       ${d.primary ? '<span class="badge warn">driving lights</span>' : ""}
-      <span class="muted">${d.bpm} BPM · beat ${d.beat} · ${esc(d.section || "-")} · analysis: ${esc(d.analysis)}</span></div>
+      <span class="muted">${d.bpm} BPM · beat ${d.beat} · ${esc(d.section || "-")} · analysis: <b>${esc(analysisName(d.analysis))}</b>${d.availableAnalyses.length > 1 ? " (also available: " + d.availableAnalyses.filter(a => a !== d.analysis).map(analysisName).join(", ") + ")" : ""}</span></div>
     <div class="small">${esc(d.title || "")} <span class="muted">${esc(d.artist || "")}</span></div>
     <div class="timeline">${segs || '<div style="width:100%;background:var(--panel)"></div>'}${head}</div>
     ${waveSvg(d, total)}
@@ -325,7 +364,7 @@ function waveSvg(d, total) {
   return `<svg class="wave" viewBox="0 0 1000 ${H}" preserveAspectRatio="none">${bars}
       <polyline points="${line("mid")}" fill="none" stroke="#f5a524" stroke-width="1.2" vector-effect="non-scaling-stroke"/>
       <polyline points="${line("high")}" fill="none" stroke="#e6e9ee" stroke-width="1" vector-effect="non-scaling-stroke"/>${head}</svg>
-    <div class="wave-legend"><b style="color:#5b8cff">■ bass</b> · <b style="color:var(--accent)">— mid</b> · <b style="color:var(--text)">— high</b> per ${perBeat ? "beat" : "bar"} (hover for values)${d.analysis === "waveform" ? ' · <span style="color:var(--accent)">no rekordbox phrase analysis found for this track: using the waveform</span>' : ""}</div>`;
+    <div class="wave-legend"><b style="color:#5b8cff">■ bass</b> · <b style="color:var(--accent)">— mid</b> · <b style="color:var(--text)">— high</b> per ${perBeat ? "beat" : "bar"} (hover for values)${!d.availableAnalyses.includes("phrase") && d.availableAnalyses.length ? ' · <span style="color:var(--accent)">no rekordbox phrase analysis for this track</span>' : ""}</div>`;
 }
 
 const ctl = (action, value) => post("/api/control/" + action + (value !== undefined ? "?value=" + value : ""));
@@ -340,6 +379,14 @@ $("c-arm").onclick = () => {
 };
 $("c-release").onclick = () => ctl("release", 1);
 $("bias").onchange = () => ctl("energy", $("bias").value / 100);
+$("modeSel").onchange = async () => {
+  const mode = $("modeSel").value;
+  await post("/api/analysis-mode?value=" + mode);
+  // keep the editor in step so a later "Save changes" does not undo the switch
+  if (config) config.djLink.analysisMode = mode;
+  if (draft) draft.djLink.analysisMode = mode;
+  loadSetups();
+};
 $("dryBtn").onclick = () => post("/api/dryrun?value=" + !state.dryRun);
 $("recBtn").onclick = () => post(state.recording ? "/api/record/stop" : "/api/record/start");
 

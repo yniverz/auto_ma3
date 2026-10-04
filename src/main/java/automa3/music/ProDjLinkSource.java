@@ -50,10 +50,10 @@ public class ProDjLinkSource implements MusicSource {
         return t;
     });
     /** player -> signature of the last structure sent, to avoid duplicates. */
-    private final Map<Integer, String> sentStructure = new ConcurrentHashMap<>();
+    private final Map<String, String> sentStructure = new ConcurrentHashMap<>();
     private final Map<Integer, String> trackKeys = new ConcurrentHashMap<>();
-    /** player -> analysis source last sent ("phrase" / "waveform"). */
-    private final Map<Integer, String> sentSource = new ConcurrentHashMap<>();
+    /** Track keys for which rekordbox phrase analysis was sent. */
+    private final java.util.Set<String> phraseSent = ConcurrentHashMap.newKeySet();
     private final Map<Integer, Boolean> lastPlaying = new ConcurrentHashMap<>();
     private final java.util.Set<Integer> analysisPending = ConcurrentHashMap.newKeySet();
     private final java.util.Set<String> loggedProblems = ConcurrentHashMap.newKeySet();
@@ -180,7 +180,7 @@ public class ProDjLinkSource implements MusicSource {
         String previous = key == null ? trackKeys.remove(player) : trackKeys.put(player, key);
         if (key != null && !key.equals(previous)) scheduleAnalysis(player);
         // rekordbox phrase data can arrive after the waveform: switch to it as soon as it is there
-        if (key != null && !"phrase".equals(sentSource.get(player)) && AnalysisTagFinder.getInstance().isRunning()
+        if (key != null && !phraseSent.contains(key) && AnalysisTagFinder.getInstance().isRunning()
                 && (AnalysisTagFinder.getInstance().getLatestTrackAnalysisFor(player, ".EXT", "PSSI") != null
                 || phraseRetryDue(key))) {
             scheduleAnalysis(player);
@@ -253,46 +253,49 @@ public class ProDjLinkSource implements MusicSource {
         List<WaveformAnalyzer.BarBands> bars = WaveformAnalyzer.barsFromBeats(beats, firstDownbeat);
         TrackStructure wave = beats.isEmpty() ? null : WaveformAnalyzer.analyzeBeats(key, beats, firstDownbeat, dropBeats);
 
-        TrackStructure structure = null;
+        TrackStructure phrase = null;
         RekordboxAnlz.TaggedSection tag = AnalysisTagFinder.getInstance().getLatestTrackAnalysisFor(player, ".EXT", "PSSI");
         if (tag == null) tag = requestPhrases(player, key);
         if (tag != null && tag.body() instanceof RekordboxAnlz.SongStructureTag sst) {
-            structure = fromPhrases(key, sst, grid.beatCount + 1, wave == null ? List.of() : wave.barEnergy(),
+            phrase = fromPhrases(key, sst, grid.beatCount + 1, wave == null ? List.of() : wave.barEnergy(),
                     firstDownbeat, dropBeats, bars);
-            if (structure != null) {
-                structure = PhraseMapper.refineWithWaveform(structure, wave, dropBeats).withBeatBands(beats);
-            }
+            if (phrase != null) phrase = PhraseMapper.refineWithWaveform(phrase, wave, dropBeats).withBeatBands(beats);
         } else if (tag != null) {
             log.warn("Player {}: phrase section has unexpected type {}", player, tag.body() == null ? null : tag.body().getClass());
         }
-        if (structure == null && wave != null && configStore.get().djLink.waveformAnalysis) {
-            structure = wave;
-            if (noPhraseLogged.add(key)) {
-                log.info("Player {}: no rekordbox phrase analysis for this track (yet), using the waveform. "
-                        + "Analyse with Phrase enabled in rekordbox and export to the USB again.", player);
-            }
+        if (phrase == null && wave != null && noPhraseLogged.add(key)) {
+            log.info("Player {}: no rekordbox phrase analysis for this track (yet), only the waveform is available. "
+                    + "Analyse with Phrase enabled in rekordbox and export to the USB again.", player);
         }
-        if (structure == null || structure.segments().isEmpty()) return;
 
-        String sig = key + "|" + structure.source() + "|" + structure.segments().size() + "|" + structure.barEnergy().size()
-                + "|" + structure.beatBands().size();
-        if (sig.equals(sentStructure.put(player, sig))) return;
-        sentSource.put(player, structure.source());
+        // send both analyses; the engine uses the one selected in the UI (auto / rekordbox / waveform)
+        boolean changed = false;
+        if (wave != null && configStore.get().djLink.waveformAnalysis) changed |= send(l, player, key, wave);
+        if (phrase != null && !phrase.segments().isEmpty()) {
+            changed |= send(l, player, key, phrase);
+            phraseSent.add(key);
+        }
+        if (!changed || bars.isEmpty()) return;
+
+        TrackMetadata md = MetadataFinder.getInstance().getLatestMetadataFor(player);
+        List<Long> barStarts = new java.util.ArrayList<>();
+        for (int i = 0; i < bars.size(); i++) barStarts.add(grid.getTimeWithinTrack(firstDownbeat + i * 4));
+        new AnalysisDump(md == null ? null : md.getTitle(),
+                md == null || md.getArtist() == null ? null : md.getArtist().label,
+                key, detail == null ? null : detail.style.name(), grid.getBpm(firstDownbeat) / 100.0,
+                firstDownbeat, grid.beatCount, phrase != null, barStarts, bars, beats,
+                wave == null ? List.of() : wave.segments(), phrase == null ? List.of() : phrase.segments())
+                .save(analysisDir);
+    }
+
+    /** Send a structure unless the same one was already sent for this player. */
+    private boolean send(MusicListener l, int player, String key, TrackStructure structure) {
+        String sig = key + "|" + structure.segments() + "|" + structure.beatBands().size();
+        if (sig.equals(sentStructure.put(player + "|" + structure.source(), sig))) return false;
         log.info("Player {}: {} sections from {}", player, structure.segments().size(),
                 structure.source().equals("phrase") ? "rekordbox phrase analysis" : "waveform");
         l.onStructure(player, structure);
-
-        if (!bars.isEmpty()) {
-            TrackMetadata md = MetadataFinder.getInstance().getLatestMetadataFor(player);
-            List<Long> barStarts = new java.util.ArrayList<>();
-            for (int i = 0; i < bars.size(); i++) barStarts.add(grid.getTimeWithinTrack(firstDownbeat + i * 4));
-            new AnalysisDump(md == null ? null : md.getTitle(),
-                    md == null || md.getArtist() == null ? null : md.getArtist().label,
-                    key, detail == null ? null : detail.style.name(), grid.getBpm(firstDownbeat) / 100.0,
-                    firstDownbeat, grid.beatCount, structure.source().equals("phrase"), barStarts, bars, beats,
-                    wave == null ? List.of() : wave.segments(), structure.source().equals("phrase") ? structure.segments() : List.of())
-                    .save(analysisDir);
-        }
+        return true;
     }
 
     private boolean phraseRetryDue(String key) {

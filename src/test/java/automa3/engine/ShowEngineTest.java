@@ -165,6 +165,33 @@ class ShowEngineTest {
     }
 
     @Test
+    void analysisModeSelectsPhraseOrWaveform() throws Exception {
+        SimulatedSource.Template t = SimulatedSource.TEMPLATES.get(0);
+        engine.onDeck(new DeckState(1, "CDJ-3000", true, true, true, true, bpm, 1, 1, "k", "T", "A", sched.currentTimeMillis()));
+        engine.onStructure(1, SimulatedSource.exactStructure("k", t, 64));
+        engine.onStructure(1, automa3.music.WaveformAnalyzer.analyzeBeats("k",
+                SimulatedSource.syntheticWaveform(t, new Random(1)).stream()
+                        .flatMap(b -> java.util.stream.Stream.of(b, b, b, b)).toList(), 1, 64));
+        sched.runUntil(sched.nanoTime() + 100_000_000L);
+        assertEquals("phrase", engine.snapshot().decks().get(0).analysis(), "auto prefers rekordbox phrases");
+        assertEquals(List.of("phrase", "waveform"), engine.snapshot().decks().get(0).availableAnalyses());
+
+        Config c = ConfigStore.copy(store.get());
+        c.djLink.analysisMode = "waveform";
+        store.replace(c);
+        sched.runUntil(sched.nanoTime() + 100_000_000L);
+        assertEquals("waveform", engine.snapshot().decks().get(0).analysis(), "manual waveform mode");
+        assertEquals("waveform", engine.structure(1).source());
+
+        // a new track on the deck drops the old track's analyses
+        engine.onDeck(new DeckState(1, "CDJ-3000", true, true, true, true, bpm, 1, 1, "k2", "T2", "A", sched.currentTimeMillis()));
+        engine.onStructure(1, SimulatedSource.exactStructure("k2", t, 64));
+        sched.runUntil(sched.nanoTime() + 100_000_000L);
+        assertEquals("phrase", engine.snapshot().decks().get(0).analysis(), "waveform mode falls back to phrases");
+        assertEquals(List.of("phrase"), engine.snapshot().decks().get(0).availableAnalyses());
+    }
+
+    @Test
     void controlsFromConsole() {
         engine.onOsc(new OscCodec.Message("/automa3/auto", List.of(0)));
         engine.onOsc(new OscCodec.Message("/gma3/automa3/strobe", List.of(0)));

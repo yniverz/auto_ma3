@@ -94,6 +94,13 @@ public class WebServer {
                 try (OutputStream os = ex.getResponseBody()) {
                     os.write(body);
                 }
+            } else if (path.equals("/api/analysis-mode") && method.equals("POST")) {
+                String mode = query.getOrDefault("value", "auto").toLowerCase();
+                if (!List.of("auto", "phrase", "waveform").contains(mode)) throw new IllegalArgumentException("Unknown analysis mode " + mode);
+                Config c = ConfigStore.copy(app.config().get());
+                c.djLink.analysisMode = mode;
+                app.config().replace(c);
+                json(ex, 200, Map.of("analysisMode", mode));
             } else if (path.equals("/api/analysis")) {
                 var st = app.engine().structure(Integer.parseInt(query.getOrDefault("player", "0")));
                 json(ex, st == null ? 404 : 200, st == null ? Map.of("error", "no analysis") : st);
@@ -129,7 +136,7 @@ public class WebServer {
 
     /**
      * Live state as Server-Sent Events: one open connection, pushed whenever the state changes
-     * (checked every 40 ms), with a keep-alive comment when nothing changes.
+     * (checked every 40 ms), with a "ping" event every 5 s when nothing changes.
      */
     private void stream(HttpExchange ex) throws IOException {
         ex.getResponseHeaders().set("Content-Type", "text/event-stream");
@@ -147,8 +154,9 @@ public class WebServer {
                     os.flush();
                     last = json;
                     lastWrite = now;
-                } else if (now - lastWrite > 15_000) {
-                    os.write(": keep-alive\n\n".getBytes(StandardCharsets.UTF_8));
+                } else if (now - lastWrite > 5_000) {
+                    // a real event (not a comment) so the page can tell a quiet connection from a dead one
+                    os.write("event: ping\ndata: {}\n\n".getBytes(StandardCharsets.UTF_8));
                     os.flush();
                     lastWrite = now;
                 }
@@ -183,6 +191,7 @@ public class WebServer {
         s.put("oscInAgeSec", last == 0 ? -1 : (System.currentTimeMillis() - last) / 1000);
         s.put("sendError", app.hub().lastSendError());
         s.put("dryRun", app.hub().isDryRun());
+        s.put("analysisMode", app.config().get().djLink.analysisMode);
         s.put("recording", app.recorder().isRecording() ? String.valueOf(app.recorder().file()) : null);
         s.put("audioError", app.audio() == null ? null : app.audio().error());
         s.put("configPath", app.config().path().toAbsolutePath().toString());
