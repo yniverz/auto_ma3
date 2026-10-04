@@ -32,7 +32,10 @@ public class ConfigStore {
     public ConfigStore(Path path) throws IOException {
         this.path = path;
         if (Files.exists(path)) {
-            config = normalize(JSON.readValue(path.toFile(), Config.class));
+            Config loaded = JSON.readValue(path.toFile(), Config.class);
+            int version = loaded.configVersion;
+            config = normalize(loaded);
+            if (version < Config.CURRENT_CONFIG_VERSION) save(); // write the migrated file once
         } else {
             config = normalize(defaultConfig());
             save();
@@ -65,6 +68,7 @@ public class ConfigStore {
 
     /** Fill in ids and clamp values so the engine never sees invalid data. */
     public static Config normalize(Config c) {
+        migrate(c);
         for (Config.Look look : c.looks) {
             if (look.id == null || look.id.isBlank()) look.id = UUID.randomUUID().toString().substring(0, 8);
             if (look.role == null) look.role = Role.BASE;
@@ -85,6 +89,15 @@ public class ConfigStore {
         c.speed.master = Math.max(1, c.speed.master);
         if (c.speed.multiplier <= 0) c.speed.multiplier = 1;
         return c;
+    }
+
+    /**
+     * One-time changes for configs written by older versions. Configs without a version are version 1.
+     * Version 2: the web UI moved from port 8080 (also used by grandMA3's web interface) to 8081.
+     */
+    static void migrate(Config c) {
+        if (c.configVersion < 2 && c.webPort == 8080) c.webPort = 8081;
+        c.configVersion = Config.CURRENT_CONFIG_VERSION;
     }
 
     private static double clamp(double v, double lo, double hi) {

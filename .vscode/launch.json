@@ -42,7 +42,7 @@
       "presentation": { "group": "2 Build", "order": 3 }
     },
 
-    // ---- Terminal: backend in the terminal, web UI in the browser (http://127.0.0.1:8080/)
+    // ---- Terminal: backend in the terminal, web UI in the browser (http://127.0.0.1:8081/)
     {
       "name": "Terminal: Simulator (dry run)",
       "type": "node-terminal",

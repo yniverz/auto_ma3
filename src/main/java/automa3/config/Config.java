@@ -17,7 +17,14 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Config {
 
-    public int webPort = 8080;
+    /** Port of the web UI. 8081 because grandMA3's own web interface uses 8080. */
+    public int webPort = 8081;
+    /**
+     * Layout version of this file, for one-time migrations of old configs. Files without it are version 1;
+     * ConfigStore sets it to the current version when loading or creating a config.
+     */
+    public int configVersion = 1;
+    public static final int CURRENT_CONFIG_VERSION = 2;
     /** 127.0.0.1 = only this Mac. Set to 0.0.0.0 to open the UI from a tablet on the show network. */
     public String webHost = "127.0.0.1";
     public List<ConsoleConfig> consoles = new ArrayList<>();

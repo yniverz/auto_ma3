@@ -49,7 +49,7 @@ public final class Main {
                               --config FILE      config file (default ./config.json)
                               --dry-run          do not send anything to consoles
                               --record           record the session from the start
-                              --port N           web UI port (default from config, 8080)
+                              --port N           web UI port (default from config, 8081)
                             """);
                     return;
                 }

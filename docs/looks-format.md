@@ -214,14 +214,14 @@ In the UI the result lands in the editor **unsaved**: names can be added (unname
 
 ## API
 
-AutoMA3 serves its API on the web UI port (default 8080, bound to 127.0.0.1 unless set otherwise in Settings).
+AutoMA3 serves its API on the web UI port (default 8081, bound to 127.0.0.1 unless set otherwise in Settings).
 
 ### `GET /api/looks/export`
 
 Returns the look file of the running setup (`Content-Disposition: attachment; filename="automa3-looks.json"`).
 
 ```bash
-curl -o looks.json http://127.0.0.1:8080/api/looks/export
+curl -o looks.json http://127.0.0.1:8081/api/looks/export
 ```
 
 ### `POST /api/looks/import?mode=merge&context=false`
@@ -231,7 +231,7 @@ Imports a look file into the running setup **and saves it**. Body: the look file
 context.
 
 ```bash
-curl -X POST --data-binary @looks.json "http://127.0.0.1:8080/api/looks/import?mode=merge"
+curl -X POST --data-binary @looks.json "http://127.0.0.1:8081/api/looks/import?mode=merge"
 ```
 
 Response `200`:

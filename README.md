@@ -24,7 +24,7 @@ java -jar target/auto-ma3.jar             # live with CDJs (Mac on the Pro DJ Li
 java -jar target/auto-ma3.jar --sim       # simulated DJ set, no CDJs needed
 ```
 
-Then open http://localhost:8080/.
+Then open http://localhost:8081/ (8080 is left free for grandMA3's own web interface).
 
 Options: `--sim`, `--replay recordings/session-....jsonl`, `--speed 4` (sim/replay speed), `--dry-run` (send nothing),
 `--record`, `--config FILE`, `--port N`, `--analyze analysis/<track>.json` (print the waveform analysis of a track).
