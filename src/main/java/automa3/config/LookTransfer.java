@@ -129,6 +129,20 @@ public final class LookTransfer {
                 continue;
             }
             Config.Look target = mode == Mode.MERGE ? findMatch(result, in) : null;
+            if (in.path("disableOnly").asBoolean(false)) {
+                // a look the sender no longer has (e.g. a show build left its executor empty): only switch off a
+                // matching look that is already here, never add one
+                if (target == null) {
+                    entries.add(new Entry(i, label, "skipped", List.of(mode == Mode.MERGE
+                            ? "not in this show (no such look here to switch off)" : "not in this show")));
+                    skipped++;
+                } else {
+                    target.enabled = false;
+                    entries.add(new Entry(i, target.label(), "updated", List.of("not in this show: switched off")));
+                    updated++;
+                }
+                continue;
+            }
             boolean isNew = target == null;
             if (isNew) {
                 if (location(in, "exec") == null) {

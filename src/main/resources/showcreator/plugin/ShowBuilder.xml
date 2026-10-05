@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GMA3 DataVersion="2.3.2.0">
+    <Plugin Name="ShowBuilder" Version="0.1.0" Author="MA3 Show Creator">
+        <ComponentLua Name="ShowBuilder" FileName="ShowBuilder.lua" Installed="Yes" />
+    </Plugin>
+</GMA3>

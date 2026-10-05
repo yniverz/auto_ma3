@@ -1,0 +1,21 @@
+{
+  "description": "Hand-curated metadata for MA3 predefined phasers, keyed by the preset name in predefined_phaser.xml. Everything else (number, attributes, capabilities) is derived from the file. energy: rough 0 (calm) .. 1 (full). Unknown entries get energy null.",
+  "presets": {
+    "Dim Sinus":         { "energy": 0.35, "tags": ["smooth", "wave"] },
+    "Snap On":           { "energy": 0.7,  "tags": ["snap"] },
+    "Snap Off":          { "energy": 0.7,  "tags": ["snap"] },
+    "Chase":             { "energy": 0.6,  "tags": ["chase"] },
+    "Strobe":            { "energy": 1.0,  "tags": ["strobe"], "notes": "dimmer strobe; safety limits apply in AutoMA3 only for STROBE/BLINDER roles" },
+    "Rnd Strobe":        { "energy": 1.0,  "tags": ["strobe", "random"] },
+    "Circle":            { "energy": 0.5,  "tags": ["movement"] },
+    "Circle Inverted":   { "energy": 0.5,  "tags": ["movement"] },
+    "Eight":             { "energy": 0.6,  "tags": ["movement"] },
+    "Eight Inverted":    { "energy": 0.6,  "tags": ["movement"] },
+    "Tilt Sin":          { "energy": 0.45, "tags": ["movement", "wave"] },
+    "Pan Sin":           { "energy": 0.45, "tags": ["movement", "wave"] },
+    "Flyout":            { "energy": 0.8,  "tags": ["movement", "dimmer"] },
+    "Flyout Inverted":   { "energy": 0.8,  "tags": ["movement", "dimmer"] },
+    "Zoom - Blue White": { "energy": 0.5,  "tags": ["color", "beam"], "requires": ["color_mix"], "notes": "zoom part only on fixtures with zoom" },
+    "Rainbow":           { "energy": 0.5,  "tags": ["color", "rainbow"] }
+  }
+}

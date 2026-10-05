@@ -1,0 +1,364 @@
+{
+  "format": "ma3sc-plan",
+  "version": 1,
+  "notes": "Techno contrast revision. Rig seen from FOH: 4 MH 100 Beam heads in a 2x2 block (left 101 back / 103 front, right 102 back / 104 front), 4 Root Par 6 nearest the audience, 4 Stagepar QCL upstage, 2 Sunstrips low at the very back. Contrast first: no BASE look lights the whole rig evenly any more; most leave whole fixture types dark (front pars off in four of five bases, 'Beams only' lights the heads alone), so the picture is made of lit and dark areas. Effects are on/off shapes only (chase, snap_on/snap_off with full-cycle spreads, left/right ping-pong at 0 and 180 degrees); the soft dim_sinus waves and the rainbow are gone. Colours are saturated pairs with no pastel and no mixed white except where white is the point: red/white, cyan/magenta left-right, acid green/magenta, blue/amber depth, fire and ice, cold white/blue, and deep red mono for calm parts. Colour FX layer: hard two-colour phasers, each on one fixture type only (heads white/red, front pars cyan/magenta, stage pars red/blue). Real strobe: the STROBE looks run the strobe phasers at Mul4 (four flashes per beat, about 8.5 Hz at 128 BPM). A riser look ramps a strobe in over the build. Separation rule (user request): no sequence mixes static values with phasers, and no sequence mixes phaser kinds (dimmer chasers never share a sequence with colour phasers), so a sequence that is fired again or left running can never leave a stray static state behind a chaser. Every sequence is therefore either all-static (BASE, COLOR, ACCENT, BLINDER, BLACKOUT), all dimmer phasers (EFFECT, Pars, RISER, STROBE) or all colour phasers (Colour FX). Consequence: the strobes no longer force white; they flash in the colour of the running COLOR look. One deliberate exception: MOVEMENT cues keep a static pan/tilt offset next to the position phaser on the same heads, because the position phasers are relative and without the offset the heads would swing around straight down; both lines touch only pan/tilt, never dimmer or colour, and the plan format has no other way to give a relative phaser its centre. Layers as before: default MOVEMENT moves the back heads 101/102, layer 'Front heads' moves 103/104; default EFFECT works on heads + sunstrips, layer 'Pars' on Root Pars + Stagepars, so no two layers touch the same attributes. BLACKOUT sequences run at High priority. Left out: Haze and Fog (no haze or fog fixture in this rig).",
+  "groups": [
+    { "key": "all_lr", "name": "SC All LR", "fixtures": { "set": "all", "order": "left_to_right" } },
+    { "key": "all_co", "name": "SC All center out", "fixtures": { "set": "all", "order": "center_out" } },
+    { "key": "colour_all", "name": "SC Colour fixtures", "fixtures": { "set": "cap:color_mix", "order": "left_to_right" } },
+    { "key": "shutter_lr", "name": "SC Shutter fixtures LR", "fixtures": { "set": "cap:shutter", "order": "left_to_right" } },
+    { "key": "heads_lr", "name": "SC Heads LR", "fixtures": { "set": "type:MH 100 Beam", "order": "left_to_right" } },
+    { "key": "heads_mirror", "name": "SC Heads mirror", "fixtures": { "set": "type:MH 100 Beam", "order": "mirror" } },
+    { "key": "heads_fs", "name": "SC Heads FOH to stage", "fixtures": { "set": "type:MH 100 Beam", "order": "foh_to_stage" } },
+    { "key": "heads_left", "name": "SC Heads left", "fixtures": { "fids": [103, 101] } },
+    { "key": "heads_right", "name": "SC Heads right", "fixtures": { "fids": [104, 102] } },
+    { "key": "head_bl", "name": "SC Head back left", "fixtures": { "fids": [101] } },
+    { "key": "head_br", "name": "SC Head back right", "fixtures": { "fids": [102] } },
+    { "key": "head_fl", "name": "SC Head front left", "fixtures": { "fids": [103] } },
+    { "key": "head_fr", "name": "SC Head front right", "fixtures": { "fids": [104] } },
+    { "key": "front_pars", "name": "SC Front pars", "fixtures": { "set": "type:Root Par 6", "order": "foh_to_stage" } },
+    { "key": "front_pars_mirror", "name": "SC Front pars mirror", "fixtures": { "set": "type:Root Par 6", "order": "mirror" } },
+    { "key": "front_left", "name": "SC Front pars left", "fixtures": { "fids": [203, 201] } },
+    { "key": "front_right", "name": "SC Front pars right", "fixtures": { "fids": [204, 202] } },
+    { "key": "stage_pars", "name": "SC Stage pars", "fixtures": { "set": "type:Stagepar Pro QCL MKII", "order": "left_to_right" } },
+    { "key": "stage_pars_co", "name": "SC Stage pars center out", "fixtures": { "set": "type:Stagepar Pro QCL MKII", "order": "center_out" } },
+    { "key": "stage_pars_mirror", "name": "SC Stage pars mirror", "fixtures": { "set": "type:Stagepar Pro QCL MKII", "order": "mirror" } },
+    { "key": "stage_left", "name": "SC Stage pars left", "fixtures": { "fids": [303, 301] } },
+    { "key": "stage_right", "name": "SC Stage pars right", "fixtures": { "fids": [304, 302] } },
+    { "key": "pars_fs", "name": "SC Pars FOH to stage", "fixtures": { "fids": [203, 204, 201, 202, 303, 304, 301, 302] } },
+    { "key": "sunstrips", "name": "SC Sunstrips", "fixtures": { "set": "type:Sunstrip active mkII", "order": "left_to_right" } },
+    { "key": "left_side", "name": "SC Left side", "fixtures": { "fids": [103, 101, 203, 201, 303, 301] } },
+    { "key": "right_side", "name": "SC Right side", "fixtures": { "fids": [104, 102, 204, 202, 304, 302] } },
+    { "key": "outer_pairs", "name": "SC Outer pairs", "fixtures": { "fids": [203, 204, 103, 104, 303, 304] } },
+    { "key": "inner_pairs", "name": "SC Inner pairs", "fixtures": { "fids": [201, 202, 101, 102, 301, 302] } }
+  ],
+  "sequences": [
+    { "key": "base_low", "name": "SC Base low",
+      "cues": [ { "name": "Low", "lines": [
+        { "group": "heads_lr", "values": { "dimmer": 50 } },
+        { "group": "stage_pars", "values": { "dimmer": 35 } } ] } ] },
+    { "key": "base_back", "name": "SC Base back",
+      "cues": [ { "name": "Back", "lines": [
+        { "group": "heads_lr", "values": { "dimmer": 100 } },
+        { "group": "stage_pars", "values": { "dimmer": 100 } },
+        { "group": "sunstrips", "values": { "dimmer": 60 } } ] } ] },
+    { "key": "base_beams", "name": "SC Base beams only",
+      "cues": [ { "name": "Beams", "lines": [
+        { "group": "heads_lr", "values": { "dimmer": 100 } } ] } ] },
+    { "key": "base_cross", "name": "SC Base front cross",
+      "cues": [ { "name": "Cross", "lines": [
+        { "group": "heads_lr", "values": { "dimmer": 100 } },
+        { "group": "front_pars", "values": { "dimmer": 80 } } ] } ] },
+    { "key": "base_full", "name": "SC Base full",
+      "cues": [ { "name": "Full", "lines": [
+        { "group": "heads_lr", "values": { "dimmer": 100 } },
+        { "group": "stage_pars", "values": { "dimmer": 100 } },
+        { "group": "sunstrips", "values": { "dimmer": 80 } },
+        { "group": "front_pars", "values": { "dimmer": 50 } } ] } ] },
+
+    { "key": "color_red_white", "name": "SC Colour A red white",
+      "cues": [ { "name": "Red white", "lines": [
+        { "group": "heads_lr", "values": { "color_r": 100, "color_g": 100, "color_b": 100, "color_w": 100 } },
+        { "group": "stage_pars", "values": { "color_r": 100, "color_g": 0, "color_b": 0, "color_w": 0 } },
+        { "group": "front_pars", "values": { "color_r": 100, "color_g": 0, "color_b": 0, "color_w": 0 } } ] } ] },
+    { "key": "color_cyan_magenta", "name": "SC Colour B cyan magenta",
+      "cues": [ { "name": "Split", "lines": [
+        { "group": "left_side", "values": { "color_r": 100, "color_g": 0, "color_b": 100, "color_w": 0 } },
+        { "group": "right_side", "values": { "color_r": 0, "color_g": 100, "color_b": 100, "color_w": 0 } } ] } ] },
+    { "key": "color_red_mono", "name": "SC Colour C deep red",
+      "cues": [ { "name": "Red", "lines": [
+        { "group": "colour_all", "values": { "color_r": 100, "color_g": 0, "color_b": 0, "color_w": 0 } } ] } ] },
+    { "key": "color_acid", "name": "SC Colour D acid",
+      "cues": [ { "name": "Acid", "lines": [
+        { "group": "heads_lr", "values": { "color_r": 0, "color_g": 100, "color_b": 0, "color_w": 0 } },
+        { "group": "stage_pars", "values": { "color_r": 100, "color_g": 0, "color_b": 100, "color_w": 0 } },
+        { "group": "front_pars", "values": { "color_r": 100, "color_g": 0, "color_b": 100, "color_w": 0 } } ] } ] },
+    { "key": "color_blue_amber", "name": "SC Colour E blue amber",
+      "cues": [ { "name": "Blue amber", "lines": [
+        { "group": "front_pars", "values": { "color_r": 100, "color_g": 45, "color_b": 0, "color_w": 0 } },
+        { "group": "heads_lr", "values": { "color_r": 0, "color_g": 0, "color_b": 100, "color_w": 0 } },
+        { "group": "stage_pars", "values": { "color_r": 0, "color_g": 0, "color_b": 100, "color_w": 0 } } ] } ] },
+    { "key": "color_fire_ice", "name": "SC Colour F fire and ice",
+      "cues": [ { "name": "Fire ice", "lines": [
+        { "group": "outer_pairs", "values": { "color_r": 100, "color_g": 0, "color_b": 0, "color_w": 0 } },
+        { "group": "inner_pairs", "values": { "color_r": 0, "color_g": 100, "color_b": 100, "color_w": 0 } } ] } ] },
+    { "key": "color_cold", "name": "SC Colour G cold white blue",
+      "cues": [ { "name": "Cold", "lines": [
+        { "group": "heads_lr", "values": { "color_r": 100, "color_g": 100, "color_b": 100, "color_w": 100 } },
+        { "group": "stage_pars", "values": { "color_r": 0, "color_g": 0, "color_b": 100, "color_w": 0 } },
+        { "group": "front_pars", "values": { "color_r": 0, "color_g": 0, "color_b": 100, "color_w": 0 } } ] } ] },
+
+    { "key": "cfx_heads", "name": "SC Heads white red", "speed_scale": "One",
+      "cues": [ { "name": "White red", "lines": [
+        { "group": "heads_mirror", "preset": "white_red", "phase": { "from": 0, "to": 360 }, "wings": 2 } ] } ] },
+    { "key": "cfx_front", "name": "SC Front pars cyan magenta", "speed_scale": "Div2",
+      "cues": [ { "name": "Cyan magenta", "lines": [
+        { "group": "front_pars_mirror", "preset": "cyan_magenta", "phase": { "from": 0, "to": 360 }, "wings": 2 } ] } ] },
+    { "key": "cfx_stage", "name": "SC Stage pars red blue", "speed_scale": "Div2",
+      "cues": [ { "name": "Red blue", "lines": [
+        { "group": "stage_pars", "preset": "red_blue", "phase": { "from": 0, "to": 360 } } ] } ] },
+
+    { "key": "move_slow", "name": "SC Move slow", "speed_scale": "Div4",
+      "cues": [ { "name": "Pan sway", "lines": [
+        { "group": "head_bl", "values": { "tilt": 35, "pan": -15 } },
+        { "group": "head_br", "values": { "tilt": 35, "pan": 15 } },
+        { "group": "head_bl", "preset": "pan_sin", "phase": { "from": 0, "to": 0 } },
+        { "group": "head_br", "preset": "pan_sin", "phase": { "from": 180, "to": 180 } } ] } ] },
+    { "key": "move_circle", "name": "SC Move circle", "speed_scale": "Div2",
+      "cues": [ { "name": "Circles", "lines": [
+        { "group": "head_bl", "values": { "tilt": 55, "pan": -25 } },
+        { "group": "head_br", "values": { "tilt": 55, "pan": 25 } },
+        { "group": "head_bl", "preset": "circle" },
+        { "group": "head_br", "preset": "circle_inverted" } ] } ] },
+    { "key": "move_fast", "name": "SC Move fast", "speed_scale": "Div2",
+      "cues": [ { "name": "Eight", "lines": [
+        { "group": "head_bl", "values": { "tilt": 70, "pan": -30 } },
+        { "group": "head_br", "values": { "tilt": 70, "pan": 30 } },
+        { "group": "head_bl", "preset": "eight" },
+        { "group": "head_br", "preset": "eight_inverted" } ] } ] },
+
+    { "key": "front_nod", "name": "SC Front heads nod", "speed_scale": "Div4",
+      "cues": [ { "name": "Nod", "lines": [
+        { "group": "head_fl", "values": { "tilt": 30, "pan": -10 } },
+        { "group": "head_fr", "values": { "tilt": 30, "pan": 10 } },
+        { "group": "head_fl", "preset": "tilt_sin", "phase": { "from": 0, "to": 0 } },
+        { "group": "head_fr", "preset": "tilt_sin", "phase": { "from": 180, "to": 180 } } ] } ] },
+    { "key": "front_fan", "name": "SC Front heads fan", "speed_scale": "Div2",
+      "cues": [ { "name": "Fan", "lines": [
+        { "group": "head_fl", "values": { "tilt": 50, "pan": -35 } },
+        { "group": "head_fr", "values": { "tilt": 50, "pan": 35 } },
+        { "group": "head_fl", "preset": "pan_sin", "phase": { "from": 0, "to": 0 } },
+        { "group": "head_fr", "preset": "pan_sin", "phase": { "from": 180, "to": 180 } } ] } ] },
+    { "key": "front_peak", "name": "SC Front heads peak", "speed_scale": "One",
+      "cues": [ { "name": "Fast circles", "lines": [
+        { "group": "head_fl", "values": { "tilt": 75, "pan": -20 } },
+        { "group": "head_fr", "values": { "tilt": 75, "pan": 20 } },
+        { "group": "head_fl", "preset": "circle_inverted" },
+        { "group": "head_fr", "preset": "circle" } ] } ] },
+
+    { "key": "fx_slow_chase", "name": "SC Heads slow chase", "speed_scale": "Div2",
+      "cues": [ { "name": "Slow chase", "lines": [
+        { "group": "heads_fs", "preset": "chase", "phase": { "from": 0, "to": 360 } } ] } ] },
+    { "key": "fx_pingpong", "name": "SC Heads ping pong", "speed_scale": "One",
+      "cues": [ { "name": "Ping pong", "lines": [
+        { "group": "heads_left", "preset": "snap_on", "phase": { "from": 0, "to": 0 } },
+        { "group": "heads_right", "preset": "snap_on", "phase": { "from": 180, "to": 180 } },
+        { "group": "sunstrips", "preset": "snap_on", "phase": { "from": 180, "to": 0 } } ] } ] },
+    { "key": "fx_chase", "name": "SC Dimmer chase", "speed_scale": "One",
+      "cues": [ { "name": "Chase LR", "lines": [
+        { "group": "heads_lr", "preset": "chase", "phase": { "from": 0, "to": 360 } },
+        { "group": "sunstrips", "preset": "chase", "phase": { "from": 0, "to": 360 } } ] } ] },
+    { "key": "fx_snap", "name": "SC Heads snap", "speed_scale": "Mul2",
+      "cues": [ { "name": "Snap", "lines": [
+        { "group": "heads_mirror", "preset": "snap_on", "phase": { "from": 0, "to": 360 }, "wings": 2 },
+        { "group": "sunstrips", "preset": "snap_off", "phase": { "from": 0, "to": 180 } } ] } ] },
+
+    { "key": "px_slow", "name": "SC Stage pars slow chase", "speed_scale": "Div2",
+      "cues": [ { "name": "Slow chase", "lines": [
+        { "group": "stage_pars", "preset": "chase", "phase": { "from": 0, "to": 360 } } ] } ] },
+    { "key": "px_mirror", "name": "SC Pars mirror chase", "speed_scale": "One",
+      "cues": [ { "name": "Mirror chase", "lines": [
+        { "group": "front_pars_mirror", "preset": "chase", "phase": { "from": 0, "to": 360 }, "wings": 2 },
+        { "group": "stage_pars_mirror", "preset": "chase", "phase": { "from": 180, "to": 540 }, "wings": 2 } ] } ] },
+    { "key": "px_cross", "name": "SC Pars cross ping pong", "speed_scale": "One",
+      "cues": [ { "name": "Cross", "lines": [
+        { "group": "front_left", "preset": "snap_on", "phase": { "from": 0, "to": 0 } },
+        { "group": "stage_right", "preset": "snap_on", "phase": { "from": 0, "to": 0 } },
+        { "group": "front_right", "preset": "snap_on", "phase": { "from": 180, "to": 180 } },
+        { "group": "stage_left", "preset": "snap_on", "phase": { "from": 180, "to": 180 } } ] } ] },
+    { "key": "px_depth", "name": "SC Pars depth chase", "speed_scale": "Mul2",
+      "cues": [ { "name": "Depth", "lines": [
+        { "group": "pars_fs", "preset": "chase", "phase": { "from": 0, "to": 360 } } ] } ] },
+
+    { "key": "riser_soft", "name": "SC Riser soft", "speed_scale": "Div2",
+      "cues": [ { "name": "Soft", "lines": [
+        { "group": "stage_pars_co", "preset": "chase", "phase": { "from": 0, "to": 360 } },
+        { "group": "sunstrips", "preset": "chase", "phase": { "from": 0, "to": 180 } } ] } ] },
+    { "key": "riser", "name": "SC Riser", "speed_scale": "One",
+      "cues": [ { "name": "Chase out", "lines": [
+        { "group": "all_co", "preset": "chase", "phase": { "from": 0, "to": 360 } } ] } ] },
+    { "key": "riser_strobe", "name": "SC Riser strobe", "speed_scale": "Mul2",
+      "cues": [ { "name": "Strobe in", "lines": [
+        { "group": "all_lr", "preset": "strobe" } ] } ] },
+
+    { "key": "drop_hit", "name": "SC Drop hit",
+      "cues": [ { "name": "Hit", "lines": [
+        { "group": "all_lr", "values": { "dimmer": 100 } } ] } ] },
+    { "key": "accent_beams", "name": "SC Hit beams white",
+      "cues": [ { "name": "Hit", "lines": [
+        { "group": "heads_lr", "values": { "dimmer": 100, "color_r": 100, "color_g": 100, "color_b": 100, "color_w": 100 } },
+        { "group": "sunstrips", "values": { "dimmer": 100 } } ] } ] },
+    { "key": "accent_back", "name": "SC Hit back silhouette",
+      "cues": [ { "name": "Hit", "lines": [
+        { "group": "stage_pars", "values": { "dimmer": 100, "color_r": 100, "color_g": 100, "color_b": 100, "color_w": 100 } },
+        { "group": "sunstrips", "values": { "dimmer": 100 } } ] } ] },
+    { "key": "accent_red", "name": "SC Hit red",
+      "cues": [ { "name": "Hit", "lines": [
+        { "group": "colour_all", "values": { "dimmer": 100, "color_r": 100, "color_g": 0, "color_b": 0, "color_w": 0 } },
+        { "group": "sunstrips", "values": { "dimmer": 100 } } ] } ] },
+
+    { "key": "strobe", "name": "SC Strobe white", "speed_scale": "Mul4",
+      "cues": [ { "name": "Strobe", "lines": [
+        { "group": "all_lr", "preset": "strobe" } ] } ] },
+    { "key": "strobe_beams", "name": "SC Strobe beams", "speed_scale": "Mul4",
+      "cues": [ { "name": "Strobe", "lines": [
+        { "group": "shutter_lr", "preset": "strobe" } ] } ] },
+    { "key": "strobe_rnd", "name": "SC Random strobe", "speed_scale": "Mul4",
+      "cues": [ { "name": "Random", "lines": [
+        { "group": "all_lr", "preset": "rnd_strobe" } ] } ] },
+
+    { "key": "blinder", "name": "SC Blinder",
+      "cues": [ { "name": "Blind", "lines": [
+        { "group": "front_pars", "values": { "dimmer": 100, "color_r": 100, "color_g": 100, "color_b": 100, "color_w": 100 } },
+        { "group": "sunstrips", "values": { "dimmer": 100 } } ] } ] },
+    { "key": "blinder_full", "name": "SC Blinder full",
+      "cues": [ { "name": "Blind", "lines": [
+        { "group": "front_pars", "values": { "dimmer": 100, "color_r": 100, "color_g": 100, "color_b": 100, "color_w": 100 } },
+        { "group": "stage_pars", "values": { "dimmer": 100, "color_r": 100, "color_g": 100, "color_b": 100, "color_w": 100 } },
+        { "group": "sunstrips", "values": { "dimmer": 100 } } ] } ] },
+
+    { "key": "blackout", "name": "SC Blackout", "priority": "High",
+      "cues": [ { "name": "Black", "lines": [
+        { "group": "all_lr", "values": { "dimmer": 0 } } ] } ] },
+    { "key": "blackout_silhouette", "name": "SC Blackout silhouette", "priority": "High",
+      "cues": [ { "name": "Silhouette", "lines": [
+        { "group": "colour_all", "values": { "dimmer": 0 } },
+        { "group": "sunstrips", "values": { "dimmer": 100 } } ] } ] }
+  ],
+  "looks": [
+    { "key": "base_low", "sequence": "base_low", "role": "BASE", "name": "Base low", "exec": 101,
+      "sections": ["INTRO", "BREAKDOWN", "OUTRO"], "energy": { "min": 0, "max": 0.5 },
+      "description": "heads 50, stage pars 35; front pars and sunstrips dark" },
+    { "key": "base_back", "sequence": "base_back", "role": "BASE", "name": "Base back",
+      "sections": ["GROOVE", "BUILD"], "energy": { "min": 0.3, "max": 0.7 },
+      "description": "heads and stage pars full, sunstrips 60, front pars dark: silhouettes" },
+    { "key": "base_beams", "sequence": "base_beams", "role": "BASE", "name": "Beams only",
+      "sections": ["GROOVE", "DROP", "PEAK"], "energy": { "min": 0.5, "max": 1 },
+      "description": "only the four heads at full, everything else dark" },
+    { "key": "base_cross", "sequence": "base_cross", "role": "BASE", "name": "Base front cross",
+      "sections": ["GROOVE", "PEAK"], "energy": { "min": 0.4, "max": 0.9 },
+      "description": "heads full and front pars 80, upstage dark" },
+    { "key": "base_full", "sequence": "base_full", "role": "BASE", "name": "Base full", "exec": 102,
+      "energy": { "min": 0.4, "max": 1 },
+      "description": "heads and stage pars full, sunstrips 80, front pars 50" },
+
+    { "key": "color_red_white", "sequence": "color_red_white", "role": "COLOR", "name": "Colour A", "exec": 103,
+      "energy": { "min": 0, "max": 1 }, "description": "white beams over deep red pars" },
+    { "key": "color_cyan_magenta", "sequence": "color_cyan_magenta", "role": "COLOR", "name": "Colour B", "exec": 104,
+      "energy": { "min": 0, "max": 1 }, "description": "left side magenta, right side cyan (seen from FOH)" },
+    { "key": "color_red_mono", "sequence": "color_red_mono", "role": "COLOR", "name": "Colour C deep red",
+      "sections": ["INTRO", "BREAKDOWN", "OUTRO"], "energy": { "min": 0, "max": 0.5 },
+      "description": "every colour fixture saturated red" },
+    { "key": "color_acid", "sequence": "color_acid", "role": "COLOR", "name": "Colour D acid",
+      "sections": ["GROOVE", "DROP", "PEAK"], "energy": { "min": 0.5, "max": 1 },
+      "description": "green heads over magenta pars" },
+    { "key": "color_blue_amber", "sequence": "color_blue_amber", "role": "COLOR", "name": "Colour E blue amber",
+      "sections": ["INTRO", "GROOVE", "BUILD", "OUTRO"], "energy": { "min": 0.2, "max": 0.8 },
+      "description": "amber front pars against deep blue heads and stage pars" },
+    { "key": "color_fire_ice", "sequence": "color_fire_ice", "role": "COLOR", "name": "Colour F fire and ice",
+      "sections": ["BUILD", "DROP", "PEAK"], "energy": { "min": 0.6, "max": 1 },
+      "description": "outer pairs red, inner pairs cyan on every fixture type" },
+    { "key": "color_cold", "sequence": "color_cold", "role": "COLOR", "name": "Colour G cold white blue",
+      "sections": ["DROP", "PEAK"], "energy": { "min": 0.6, "max": 1 },
+      "description": "white beams over deep blue pars" },
+
+    { "key": "cfx_heads", "sequence": "cfx_heads", "role": "EFFECT", "layer": "Colour FX", "name": "Heads white red",
+      "sections": ["DROP", "PEAK"], "energy": { "min": 0.7, "max": 1 },
+      "description": "heads swap white and red in mirror pairs, One" },
+    { "key": "cfx_front", "sequence": "cfx_front", "role": "EFFECT", "layer": "Colour FX", "name": "Front pars cyan magenta",
+      "sections": ["GROOVE", "BUILD"], "energy": { "min": 0.3, "max": 0.8 },
+      "description": "front pars swap cyan and magenta, mirrored full cycle, Div2" },
+    { "key": "cfx_stage", "sequence": "cfx_stage", "role": "EFFECT", "layer": "Colour FX", "name": "Stage pars red blue",
+      "sections": ["GROOVE", "BUILD", "PEAK"], "energy": { "min": 0.4, "max": 1 },
+      "description": "stage pars swap red and blue, spread left to right, Div2" },
+
+    { "key": "move_slow", "sequence": "move_slow", "role": "MOVEMENT", "name": "Move slow", "exec": 105,
+      "energy": { "min": 0, "max": 0.6 },
+      "description": "back heads, low tilt over the stage, mirrored pan sway, Div4" },
+    { "key": "move_circle", "sequence": "move_circle", "role": "MOVEMENT", "name": "Move circle",
+      "sections": ["GROOVE", "BUILD"], "energy": { "min": 0.35, "max": 0.75 },
+      "description": "back heads, mirrored circles fanned out, Div2" },
+    { "key": "move_fast", "sequence": "move_fast", "role": "MOVEMENT", "name": "Move fast", "exec": 106,
+      "energy": { "min": 0.5, "max": 1 },
+      "description": "back heads, mirrored figure eights tilted towards the audience, Div2" },
+
+    { "key": "front_nod", "sequence": "front_nod", "role": "MOVEMENT", "layer": "Front heads", "name": "Front heads nod",
+      "sections": ["INTRO", "BREAKDOWN", "OUTRO"], "energy": { "min": 0, "max": 0.5 },
+      "description": "front heads, alternating tilt nod over the stage, Div4" },
+    { "key": "front_fan", "sequence": "front_fan", "role": "MOVEMENT", "layer": "Front heads", "name": "Front heads fan",
+      "sections": ["GROOVE", "BUILD"], "energy": { "min": 0.3, "max": 0.8 },
+      "description": "front heads fanned wide, mirrored pan sway, Div2" },
+    { "key": "front_peak", "sequence": "front_peak", "role": "MOVEMENT", "layer": "Front heads", "name": "Front heads peak",
+      "sections": ["DROP", "PEAK"], "energy": { "min": 0.7, "max": 1 },
+      "description": "front heads, fast mirrored circles high over the audience, One" },
+
+    { "key": "fx_slow_chase", "sequence": "fx_slow_chase", "role": "EFFECT", "name": "Heads slow chase",
+      "sections": ["INTRO", "BREAKDOWN", "OUTRO"], "energy": { "min": 0, "max": 0.5 },
+      "description": "one head at a time from FOH to the stage, hard on/off, Div2" },
+    { "key": "fx_pingpong", "sequence": "fx_pingpong", "role": "EFFECT", "name": "Heads ping pong",
+      "sections": ["GROOVE", "BUILD"], "energy": { "min": 0.3, "max": 0.8 },
+      "description": "left heads and right heads snap in turn, sunstrips against them, One" },
+    { "key": "fx_chase", "sequence": "fx_chase", "role": "EFFECT", "name": "Dimmer chase", "exec": 107,
+      "energy": { "min": 0.4, "max": 1 },
+      "description": "heads and sunstrips chase left to right, One" },
+    { "key": "fx_snap", "sequence": "fx_snap", "role": "EFFECT", "name": "Heads snap",
+      "sections": ["DROP", "PEAK"], "energy": { "min": 0.7, "max": 1 },
+      "description": "heads snap on in mirror pairs, sunstrips snap off, Mul2" },
+
+    { "key": "px_slow", "sequence": "px_slow", "role": "EFFECT", "layer": "Pars", "name": "Stage pars slow chase",
+      "sections": ["INTRO", "BREAKDOWN", "OUTRO"], "energy": { "min": 0, "max": 0.5 },
+      "description": "stage pars only, one at a time left to right, Div2" },
+    { "key": "px_mirror", "sequence": "px_mirror", "role": "EFFECT", "layer": "Pars", "name": "Pars mirror chase",
+      "sections": ["GROOVE", "BUILD"], "energy": { "min": 0.4, "max": 0.8 },
+      "description": "front and stage pars chase in mirror pairs, half a cycle apart, One" },
+    { "key": "px_cross", "sequence": "px_cross", "role": "EFFECT", "layer": "Pars", "name": "Pars cross ping pong",
+      "sections": ["GROOVE", "DROP", "PEAK"], "energy": { "min": 0.5, "max": 1 },
+      "description": "diagonals: front left + stage right, then front right + stage left, One" },
+    { "key": "px_depth", "sequence": "px_depth", "role": "EFFECT", "layer": "Pars", "name": "Pars depth chase",
+      "sections": ["DROP", "PEAK"], "energy": { "min": 0.7, "max": 1 },
+      "description": "all pars chase from FOH to the stage, Mul2" },
+
+    { "key": "riser_soft", "sequence": "riser_soft", "role": "RISER", "name": "Riser soft",
+      "sections": ["BUILD"], "energy": { "min": 0, "max": 0.5 },
+      "description": "stage pars chase from the centre out, sunstrips with them, Div2" },
+    { "key": "riser", "sequence": "riser", "role": "RISER", "name": "Riser", "exec": 108,
+      "energy": { "min": 0, "max": 1 },
+      "description": "whole rig chases from the centre out, One" },
+    { "key": "riser_strobe", "sequence": "riser_strobe", "role": "RISER", "name": "Riser strobe",
+      "sections": ["BUILD"], "energy": { "min": 0.6, "max": 1 },
+      "description": "dimmer strobe on the whole rig fading in with the build, in the running colour, Mul2" },
+
+    { "key": "drop_hit", "sequence": "drop_hit", "role": "ACCENT", "name": "Drop hit", "exec": 109,
+      "energy": { "min": 0, "max": 1 }, "description": "everything to full" },
+    { "key": "accent_beams", "sequence": "accent_beams", "role": "ACCENT", "name": "Hit beams white",
+      "sections": ["GROOVE", "BUILD", "DROP"], "energy": { "min": 0.3, "max": 1 },
+      "description": "heads full white plus sunstrips" },
+    { "key": "accent_back", "sequence": "accent_back", "role": "ACCENT", "name": "Hit back silhouette",
+      "sections": ["INTRO", "BREAKDOWN", "BUILD"], "energy": { "min": 0, "max": 0.6 },
+      "description": "stage pars full white plus sunstrips behind the performers" },
+    { "key": "accent_red", "sequence": "accent_red", "role": "ACCENT", "name": "Hit red",
+      "sections": ["DROP", "PEAK"], "energy": { "min": 0.6, "max": 1 },
+      "description": "every colour fixture full saturated red, sunstrips full" },
+
+    { "key": "strobe", "sequence": "strobe", "role": "STROBE", "name": "Strobe", "exec": 110,
+      "energy": { "min": 0, "max": 1 }, "description": "whole rig dimmer strobe in the running colour, four flashes per beat (Mul4)" },
+    { "key": "strobe_beams", "sequence": "strobe_beams", "role": "STROBE", "name": "Strobe beams",
+      "sections": ["BUILD"], "energy": { "min": 0.5, "max": 1 },
+      "description": "heads and stage pars dimmer strobe, Mul4" },
+    { "key": "strobe_rnd", "sequence": "strobe_rnd", "role": "STROBE", "name": "Random strobe",
+      "sections": ["DROP", "PEAK"], "energy": { "min": 0.7, "max": 1 },
+      "description": "whole rig random dimmer strobe, Mul4" },
+
+    { "key": "blinder", "sequence": "blinder", "role": "BLINDER", "name": "Blinder", "exec": 111,
+      "energy": { "min": 0, "max": 1 }, "description": "front pars full white plus sunstrips" },
+    { "key": "blinder_full", "sequence": "blinder_full", "role": "BLINDER", "name": "Blinder full",
+      "sections": ["DROP", "PEAK"], "energy": { "min": 0.8, "max": 1 },
+      "description": "front and stage pars full white plus sunstrips" },
+
+    { "key": "blackout", "sequence": "blackout", "role": "BLACKOUT", "name": "Blackout", "exec": 112,
+      "energy": { "min": 0, "max": 1 }, "description": "all dimmers 0, High priority" },
+    { "key": "blackout_silhouette", "sequence": "blackout_silhouette", "role": "BLACKOUT", "name": "Blackout silhouette",
+      "sections": ["BREAKDOWN", "DROP"], "energy": { "min": 0.3, "max": 1 },
+      "description": "everything dark except the sunstrips at full, High priority" }
+  ]
+}

@@ -16,6 +16,8 @@ It sends grandMA3 command-line commands over OSC (`/cmd`). You program the looks
   **Follow** on a deck (or `/automa3/follow,i,<player>` from the console) chooses it by hand.
 - **Multiple consoles, multiple MA3 versions**: each console gets commands in the syntax of its own version profile, with per-console overrides.
 - **Safety**: strobe and blinder max on-time, minimum gap and duty cycle. Specials are disarmed by default.
+- **Show creation** (optional, Show tab): builds the looks themselves in grandMA3 onPC from the patch, designed by
+  an AI planner (Claude Code). See below.
 
 ## Run
 
@@ -55,6 +57,35 @@ grandMA3 location (page, executor, sequence), role, description and all AutoMA3 
 for other tools. Imports can be partial (only some looks, only some fields) and are previewed before they land in
 the editor. Other programs can also import directly into a running AutoMA3 (`POST /api/looks/import`).
 Format and API: [docs/looks-format.md](docs/looks-format.md).
+
+## Show creation (Show tab)
+
+Optional: AutoMA3 works the same without it. It builds groups, effect sequences (from grandMA3's predefined
+phasers) and executor assignments in **grandMA3 onPC on this Mac**, and hands the looks to the Looks tab, so a new
+rig needs only its patch and a few words for the planner.
+
+1. **Rig**: *Read patch from grandMA3* reads fixtures, types, attributes and positions from the open show (an MVR
+   export can be added to cross-check positions).
+2. **Look list**: AutoMA3's current looks, a look file, or the defaults.
+3. **Plan**: the planner (Claude Code, installed and logged in) designs groups, effects and looks and checks its plan
+   until it is valid. Ask for changes in plain words; it continues the same conversation.
+4. **Build in grandMA3**: deletes and rebuilds the reserved ranges (default groups, sequences and MAtricks
+   501–599) and assigns the executors (page 1, 101–199). Nothing outside them is touched.
+5. **Use in AutoMA3…**: the built looks open in the Looks tab's import preview; import, then Save changes.
+
+Strobe looks use the fixtures' own strobe channel (a frequency in Hz) where they have one, and grandMA3's dimmer
+strobe only on fixtures without; only effects that follow the beat run on the BPM speed master (static looks and
+strobes keep their own speed).
+
+Shows are kept in `shows/` of the data folder, **separately from the setups**. **Copy…** makes another version of a
+show (patch, look list and plan; the original stays as it is), e.g. a harder variant during a show. Building
+replaces what a previous build put in the reserved ranges, also during a show.
+
+The build uses the console at 127.0.0.1 from the Consoles tab (its version picks the command syntax; the build
+commands can be overridden there too) and needs grandMA3's OSC input ("Receive Command") and the ShowBuilder plugin
+imported once (docs/showcreator/TESTING.md). With **Dry run** on nothing is sent; the command to paste is shown
+instead. Settings → Show creation sets the ranges, page, FOH side and the Claude Code path. Notes on the grandMA3
+syntax (verified vs. assumed): docs/showcreator/MA3_NOTES.md; design decisions: docs/showcreator/DECISIONS.md.
 
 ## Releases and updates
 
@@ -153,7 +184,9 @@ mvn clean test
 
 The tests cover OSC encoding, version profiles, phrase and waveform analysis (including real CDJ-3000 / rekordbox
 data of tracks in `src/test/resources/tracks`), full engine runs on virtual time (drop timing, riser, fog lead,
-strobe safety, hold, operator locks, console controls, analysis mode), look export/import and the update check.
+strobe safety, hold, operator locks, console controls, analysis mode), look export/import, the update check and
+show creation (parity with the Python show creator it replaces, the ShowBuilder plugin run in Lua against a console
+mock if `lua` is installed, a fake console over OSC, the planner with a stand-in for Claude Code).
 `--sim` runs three synthetic tracks that cycle through phrase / waveform / no analysis, with DJ-style overlaps.
 Use `--record` at a gig and `--replay` afterwards to debug with the real data; every analysed track is also saved
 to `analysis/` and can be inspected with `--analyze`.

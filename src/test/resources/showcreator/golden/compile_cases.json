@@ -1,0 +1,5276 @@
+[
+ {
+  "name": "base",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "cfg": {},
+  "looks_in": null,
+  "steps": [
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Group 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Sequence 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete MAtricks 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Fixture 101 + 102 + 103 + 104",
+    "key": "select_fixtures",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Group 501 /Overwrite /NoConfirmation",
+    "key": "store_group",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Group 501 \"SC Spots LR\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 1 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.1 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 2 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Group 501",
+    "key": "select_group",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseFromX\" 0",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseToX\" 360",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store MAtricks 501 /Overwrite /NoConfirmation",
+    "key": "store_matricks",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label MAtricks 501 \"SC ph0-360\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.2 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign MAtricks 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Cook Sequence 501 /Merge",
+    "key": "cook_sequence",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 1 \"Sinus\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 2 \"Chase\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 \"SC Dimmer wave\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"SpeedMaster\" \"Speed1\"",
+    "key": "speed_master",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"OffWhenOverridden\" \"No\"",
+    "key": "seq_prop",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Sequence 501 At Page 1.107",
+    "key": "assign_exec",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "get",
+    "addr": "Sequence 501",
+    "props": [
+     "Name",
+     "SpeedMaster",
+     "SpeedScale",
+     "Priority",
+     "OffWhenOverridden"
+    ]
+   },
+   {
+    "op": "export",
+    "addr": "Sequence 501",
+    "file": "sequence_501.xml"
+   },
+   {
+    "op": "export",
+    "addr": "Group 501",
+    "file": "group_501.xml"
+   }
+  ],
+  "warnings": [],
+  "allocation": {
+   "groups": {
+    "spots_lr": 501
+   },
+   "sequences": {
+    "dimmer_wave": 501
+   },
+   "executors": {
+    "dimmer_wave": 107
+   },
+   "page": 1
+  },
+  "looks": {
+   "format": "automa3-looks",
+   "version": 1,
+   "exportedBy": "ma3-showcreator",
+   "exportedAt": "TIME",
+   "context": {
+    "speedMaster": 1
+   },
+   "looks": [
+    {
+     "id": "bd94297e",
+     "name": "Dimmer chase",
+     "role": "EFFECT",
+     "ma3": {
+      "page": 1,
+      "exec": 107,
+      "sequence": 501
+     },
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "enabled": true,
+     "meta": {
+      "generator": {
+       "tool": "ma3-showcreator",
+       "look": "dimmer_wave",
+       "sequence": "dimmer_wave"
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "name": "matricks_shared",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      },
+      {
+       "name": "Chase again",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      },
+      {
+       "name": "Wings",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         },
+         "wings": 2
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "cfg": {},
+  "looks_in": null,
+  "steps": [
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Group 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Sequence 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete MAtricks 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Fixture 101 + 102 + 103 + 104",
+    "key": "select_fixtures",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Group 501 /Overwrite /NoConfirmation",
+    "key": "store_group",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Group 501 \"SC Spots LR\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 1 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.1 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 2 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Group 501",
+    "key": "select_group",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseFromX\" 0",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseToX\" 360",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store MAtricks 501 /Overwrite /NoConfirmation",
+    "key": "store_matricks",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label MAtricks 501 \"SC ph0-360\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.2 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign MAtricks 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 3 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 3 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.2 At Sequence 501 Cue 3 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign MAtricks 501 At Sequence 501 Cue 3 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 4 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Group 501",
+    "key": "select_group",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"XWings\" 2",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseFromX\" 0",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseToX\" 360",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store MAtricks 502 /Overwrite /NoConfirmation",
+    "key": "store_matricks",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label MAtricks 502 \"SC ph0-360 w2\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 4 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.2 At Sequence 501 Cue 4 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign MAtricks 502 At Sequence 501 Cue 4 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Cook Sequence 501 /Merge",
+    "key": "cook_sequence",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 1 \"Sinus\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 2 \"Chase\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 3 \"Chase again\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 4 \"Wings\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 \"SC Dimmer wave\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"SpeedMaster\" \"Speed1\"",
+    "key": "speed_master",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"OffWhenOverridden\" \"No\"",
+    "key": "seq_prop",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Sequence 501 At Page 1.107",
+    "key": "assign_exec",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "get",
+    "addr": "Sequence 501",
+    "props": [
+     "Name",
+     "SpeedMaster",
+     "SpeedScale",
+     "Priority",
+     "OffWhenOverridden"
+    ]
+   },
+   {
+    "op": "export",
+    "addr": "Sequence 501",
+    "file": "sequence_501.xml"
+   },
+   {
+    "op": "export",
+    "addr": "Group 501",
+    "file": "group_501.xml"
+   }
+  ],
+  "warnings": [],
+  "allocation": {
+   "groups": {
+    "spots_lr": 501
+   },
+   "sequences": {
+    "dimmer_wave": 501
+   },
+   "executors": {
+    "dimmer_wave": 107
+   },
+   "page": 1
+  },
+  "looks": {
+   "format": "automa3-looks",
+   "version": 1,
+   "exportedBy": "ma3-showcreator",
+   "exportedAt": "TIME",
+   "context": {
+    "speedMaster": 1
+   },
+   "looks": [
+    {
+     "id": "bd94297e",
+     "name": "Dimmer chase",
+     "role": "EFFECT",
+     "ma3": {
+      "page": 1,
+      "exec": 107,
+      "sequence": 501
+     },
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "enabled": true,
+     "meta": {
+      "generator": {
+       "tool": "ma3-showcreator",
+       "look": "dimmer_wave",
+       "sequence": "dimmer_wave"
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "name": "programmer",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         },
+         "wings": 2
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "cfg": {
+   "cue_method": "programmer"
+  },
+  "looks_in": null,
+  "steps": [
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Group 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Sequence 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete MAtricks 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Fixture 101 + 102 + 103 + 104",
+    "key": "select_fixtures",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Group 501 /Overwrite /NoConfirmation",
+    "key": "store_group",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Group 501 \"SC Spots LR\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Group 501",
+    "key": "select_group",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "At Preset 21.1",
+    "key": "at_preset",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 1 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Group 501",
+    "key": "select_group",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"XWings\" 2",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "At Preset 21.2",
+    "key": "at_preset",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "At Phase 0 Thru 270",
+    "key": "at_phase",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 2 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 1 \"Sinus\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 2 \"Chase\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 \"SC Dimmer wave\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"SpeedMaster\" \"Speed1\"",
+    "key": "speed_master",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"OffWhenOverridden\" \"No\"",
+    "key": "seq_prop",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Sequence 501 At Page 1.107",
+    "key": "assign_exec",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "get",
+    "addr": "Sequence 501",
+    "props": [
+     "Name",
+     "SpeedMaster",
+     "SpeedScale",
+     "Priority",
+     "OffWhenOverridden"
+    ]
+   },
+   {
+    "op": "export",
+    "addr": "Sequence 501",
+    "file": "sequence_501.xml"
+   },
+   {
+    "op": "export",
+    "addr": "Group 501",
+    "file": "group_501.xml"
+   }
+  ],
+  "warnings": [],
+  "allocation": {
+   "groups": {
+    "spots_lr": 501
+   },
+   "sequences": {
+    "dimmer_wave": 501
+   },
+   "executors": {
+    "dimmer_wave": 107
+   },
+   "page": 1
+  },
+  "looks": {
+   "format": "automa3-looks",
+   "version": 1,
+   "exportedBy": "ma3-showcreator",
+   "exportedAt": "TIME",
+   "context": {
+    "speedMaster": 1
+   },
+   "looks": [
+    {
+     "id": "bd94297e",
+     "name": "Dimmer chase",
+     "role": "EFFECT",
+     "ma3": {
+      "page": 1,
+      "exec": 107,
+      "sequence": 501
+     },
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "enabled": true,
+     "meta": {
+      "generator": {
+       "tool": "ma3-showcreator",
+       "look": "dimmer_wave",
+       "sequence": "dimmer_wave"
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "name": "spread_all",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 180
+         },
+         "wings": 2,
+         "blocks": 3,
+         "groups": 4
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "cfg": {},
+  "looks_in": null,
+  "steps": [
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Group 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Sequence 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete MAtricks 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Fixture 101 + 102 + 103 + 104",
+    "key": "select_fixtures",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Group 501 /Overwrite /NoConfirmation",
+    "key": "store_group",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Group 501 \"SC Spots LR\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 1 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.1 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 2 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Group 501",
+    "key": "select_group",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"XWings\" 2",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"XBlock\" 3",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"XGroup\" 4",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseFromX\" 0",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseToX\" 180",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store MAtricks 501 /Overwrite /NoConfirmation",
+    "key": "store_matricks",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label MAtricks 501 \"SC ph0-180 w2 b3 g4\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.2 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign MAtricks 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Cook Sequence 501 /Merge",
+    "key": "cook_sequence",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 1 \"Sinus\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 2 \"Chase\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 \"SC Dimmer wave\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"SpeedMaster\" \"Speed1\"",
+    "key": "speed_master",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"OffWhenOverridden\" \"No\"",
+    "key": "seq_prop",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Sequence 501 At Page 1.107",
+    "key": "assign_exec",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "get",
+    "addr": "Sequence 501",
+    "props": [
+     "Name",
+     "SpeedMaster",
+     "SpeedScale",
+     "Priority",
+     "OffWhenOverridden"
+    ]
+   },
+   {
+    "op": "export",
+    "addr": "Sequence 501",
+    "file": "sequence_501.xml"
+   },
+   {
+    "op": "export",
+    "addr": "Group 501",
+    "file": "group_501.xml"
+   }
+  ],
+  "warnings": [],
+  "allocation": {
+   "groups": {
+    "spots_lr": 501
+   },
+   "sequences": {
+    "dimmer_wave": 501
+   },
+   "executors": {
+    "dimmer_wave": 107
+   },
+   "page": 1
+  },
+  "looks": {
+   "format": "automa3-looks",
+   "version": 1,
+   "exportedBy": "ma3-showcreator",
+   "exportedAt": "TIME",
+   "context": {
+    "speedMaster": 1
+   },
+   "looks": [
+    {
+     "id": "bd94297e",
+     "name": "Dimmer chase",
+     "role": "EFFECT",
+     "ma3": {
+      "page": 1,
+      "exec": 107,
+      "sequence": 501
+     },
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "enabled": true,
+     "meta": {
+      "generator": {
+       "tool": "ma3-showcreator",
+       "look": "dimmer_wave",
+       "sequence": "dimmer_wave"
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "name": "programmer_spread",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 10.5,
+          "to": 370.5
+         },
+         "wings": 2,
+         "blocks": 3,
+         "groups": 4
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "cfg": {
+   "cue_method": "programmer"
+  },
+  "looks_in": null,
+  "steps": [
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Group 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Sequence 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete MAtricks 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Fixture 101 + 102 + 103 + 104",
+    "key": "select_fixtures",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Group 501 /Overwrite /NoConfirmation",
+    "key": "store_group",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Group 501 \"SC Spots LR\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Group 501",
+    "key": "select_group",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "At Preset 21.1",
+    "key": "at_preset",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 1 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Group 501",
+    "key": "select_group",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"XWings\" 2",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"XBlock\" 3",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"XGroup\" 4",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "At Preset 21.2",
+    "key": "at_preset",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "At Phase 10.5 Thru 280.5",
+    "key": "at_phase",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 2 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 1 \"Sinus\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 2 \"Chase\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 \"SC Dimmer wave\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"SpeedMaster\" \"Speed1\"",
+    "key": "speed_master",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"OffWhenOverridden\" \"No\"",
+    "key": "seq_prop",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Sequence 501 At Page 1.107",
+    "key": "assign_exec",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "get",
+    "addr": "Sequence 501",
+    "props": [
+     "Name",
+     "SpeedMaster",
+     "SpeedScale",
+     "Priority",
+     "OffWhenOverridden"
+    ]
+   },
+   {
+    "op": "export",
+    "addr": "Sequence 501",
+    "file": "sequence_501.xml"
+   },
+   {
+    "op": "export",
+    "addr": "Group 501",
+    "file": "group_501.xml"
+   }
+  ],
+  "warnings": [],
+  "allocation": {
+   "groups": {
+    "spots_lr": 501
+   },
+   "sequences": {
+    "dimmer_wave": 501
+   },
+   "executors": {
+    "dimmer_wave": 107
+   },
+   "page": 1
+  },
+  "looks": {
+   "format": "automa3-looks",
+   "version": 1,
+   "exportedBy": "ma3-showcreator",
+   "exportedAt": "TIME",
+   "context": {
+    "speedMaster": 1
+   },
+   "looks": [
+    {
+     "id": "bd94297e",
+     "name": "Dimmer chase",
+     "role": "EFFECT",
+     "ma3": {
+      "page": 1,
+      "exec": 107,
+      "sequence": 501
+     },
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "enabled": true,
+     "meta": {
+      "generator": {
+       "tool": "ma3-showcreator",
+       "look": "dimmer_wave",
+       "sequence": "dimmer_wave"
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "name": "no_speed_master",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ],
+     "speed_master": false
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "cfg": {},
+  "looks_in": null,
+  "steps": [
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Group 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Sequence 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete MAtricks 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Fixture 101 + 102 + 103 + 104",
+    "key": "select_fixtures",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Group 501 /Overwrite /NoConfirmation",
+    "key": "store_group",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Group 501 \"SC Spots LR\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 1 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.1 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 2 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Group 501",
+    "key": "select_group",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseFromX\" 0",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseToX\" 360",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store MAtricks 501 /Overwrite /NoConfirmation",
+    "key": "store_matricks",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label MAtricks 501 \"SC ph0-360\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.2 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign MAtricks 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Cook Sequence 501 /Merge",
+    "key": "cook_sequence",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 1 \"Sinus\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 2 \"Chase\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 \"SC Dimmer wave\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"OffWhenOverridden\" \"No\"",
+    "key": "seq_prop",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Sequence 501 At Page 1.107",
+    "key": "assign_exec",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "get",
+    "addr": "Sequence 501",
+    "props": [
+     "Name",
+     "SpeedMaster",
+     "SpeedScale",
+     "Priority",
+     "OffWhenOverridden"
+    ]
+   },
+   {
+    "op": "export",
+    "addr": "Sequence 501",
+    "file": "sequence_501.xml"
+   },
+   {
+    "op": "export",
+    "addr": "Group 501",
+    "file": "group_501.xml"
+   }
+  ],
+  "warnings": [],
+  "allocation": {
+   "groups": {
+    "spots_lr": 501
+   },
+   "sequences": {
+    "dimmer_wave": 501
+   },
+   "executors": {
+    "dimmer_wave": 107
+   },
+   "page": 1
+  },
+  "looks": {
+   "format": "automa3-looks",
+   "version": 1,
+   "exportedBy": "ma3-showcreator",
+   "exportedAt": "TIME",
+   "context": {
+    "speedMaster": 1
+   },
+   "looks": [
+    {
+     "id": "bd94297e",
+     "name": "Dimmer chase",
+     "role": "EFFECT",
+     "ma3": {
+      "page": 1,
+      "exec": 107,
+      "sequence": 501
+     },
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "enabled": true,
+     "meta": {
+      "generator": {
+       "tool": "ma3-showcreator",
+       "look": "dimmer_wave",
+       "sequence": "dimmer_wave"
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "name": "speed_master_3",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "cfg": {
+   "speed_master": 3
+  },
+  "looks_in": null,
+  "steps": [
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Group 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Sequence 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete MAtricks 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Fixture 101 + 102 + 103 + 104",
+    "key": "select_fixtures",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Group 501 /Overwrite /NoConfirmation",
+    "key": "store_group",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Group 501 \"SC Spots LR\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 1 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.1 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 2 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Group 501",
+    "key": "select_group",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseFromX\" 0",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseToX\" 360",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store MAtricks 501 /Overwrite /NoConfirmation",
+    "key": "store_matricks",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label MAtricks 501 \"SC ph0-360\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.2 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign MAtricks 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Cook Sequence 501 /Merge",
+    "key": "cook_sequence",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 1 \"Sinus\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 2 \"Chase\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 \"SC Dimmer wave\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"SpeedMaster\" \"Speed3\"",
+    "key": "speed_master",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"OffWhenOverridden\" \"No\"",
+    "key": "seq_prop",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Sequence 501 At Page 1.107",
+    "key": "assign_exec",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "get",
+    "addr": "Sequence 501",
+    "props": [
+     "Name",
+     "SpeedMaster",
+     "SpeedScale",
+     "Priority",
+     "OffWhenOverridden"
+    ]
+   },
+   {
+    "op": "export",
+    "addr": "Sequence 501",
+    "file": "sequence_501.xml"
+   },
+   {
+    "op": "export",
+    "addr": "Group 501",
+    "file": "group_501.xml"
+   }
+  ],
+  "warnings": [],
+  "allocation": {
+   "groups": {
+    "spots_lr": 501
+   },
+   "sequences": {
+    "dimmer_wave": 501
+   },
+   "executors": {
+    "dimmer_wave": 107
+   },
+   "page": 1
+  },
+  "looks": {
+   "format": "automa3-looks",
+   "version": 1,
+   "exportedBy": "ma3-showcreator",
+   "exportedAt": "TIME",
+   "context": {
+    "speedMaster": 3
+   },
+   "looks": [
+    {
+     "id": "bd94297e",
+     "name": "Dimmer chase",
+     "role": "EFFECT",
+     "ma3": {
+      "page": 1,
+      "exec": 107,
+      "sequence": 501
+     },
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "enabled": true,
+     "meta": {
+      "generator": {
+       "tool": "ma3-showcreator",
+       "look": "dimmer_wave",
+       "sequence": "dimmer_wave"
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "name": "static_fade",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Full",
+       "fade": 1.5,
+       "lines": [
+        {
+         "group": "spots_lr",
+         "values": {
+          "dimmer": 100,
+          "tilt": -12.25
+         }
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "cfg": {},
+  "looks_in": null,
+  "steps": [
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Group 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Sequence 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete MAtricks 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Fixture 101 + 102 + 103 + 104",
+    "key": "select_fixtures",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Group 501 /Overwrite /NoConfirmation",
+    "key": "store_group",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Group 501 \"SC Spots LR\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Group 501",
+    "key": "select_group",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Attribute \"Dimmer\" At 100",
+    "key": "at_attribute",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Attribute \"Tilt\" At -12.25",
+    "key": "at_attribute",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 1 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Cue 1 Part 0 Property \"CueFade\" 1.5",
+    "key": "cue_fade",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 2 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Group 501",
+    "key": "select_group",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseFromX\" 0",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseToX\" 360",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store MAtricks 501 /Overwrite /NoConfirmation",
+    "key": "store_matricks",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label MAtricks 501 \"SC ph0-360\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.2 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign MAtricks 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Cook Sequence 501 /Merge",
+    "key": "cook_sequence",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 1 \"Full\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 2 \"Chase\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 \"SC Dimmer wave\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"SpeedMaster\" \"Speed1\"",
+    "key": "speed_master",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"OffWhenOverridden\" \"No\"",
+    "key": "seq_prop",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Sequence 501 At Page 1.107",
+    "key": "assign_exec",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "get",
+    "addr": "Sequence 501",
+    "props": [
+     "Name",
+     "SpeedMaster",
+     "SpeedScale",
+     "Priority",
+     "OffWhenOverridden"
+    ]
+   },
+   {
+    "op": "export",
+    "addr": "Sequence 501",
+    "file": "sequence_501.xml"
+   },
+   {
+    "op": "export",
+    "addr": "Group 501",
+    "file": "group_501.xml"
+   }
+  ],
+  "warnings": [],
+  "allocation": {
+   "groups": {
+    "spots_lr": 501
+   },
+   "sequences": {
+    "dimmer_wave": 501
+   },
+   "executors": {
+    "dimmer_wave": 107
+   },
+   "page": 1
+  },
+  "looks": {
+   "format": "automa3-looks",
+   "version": 1,
+   "exportedBy": "ma3-showcreator",
+   "exportedAt": "TIME",
+   "context": {
+    "speedMaster": 1
+   },
+   "looks": [
+    {
+     "id": "bd94297e",
+     "name": "Dimmer chase",
+     "role": "EFFECT",
+     "ma3": {
+      "page": 1,
+      "exec": 107,
+      "sequence": 501
+     },
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "enabled": true,
+     "meta": {
+      "generator": {
+       "tool": "ma3-showcreator",
+       "look": "dimmer_wave",
+       "sequence": "dimmer_wave"
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "name": "alloc",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "key": "second",
+     "name": "Second",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 101
+    },
+    {
+     "key": "second",
+     "sequence": "second",
+     "role": "BASE",
+     "name": "Second",
+     "description": "d",
+     "layer": "L",
+     "mode": "FLASH",
+     "weight": 2,
+     "flashBeats": 1,
+     "level": 50,
+     "tags": [
+      "a"
+     ]
+    }
+   ]
+  },
+  "cfg": {},
+  "looks_in": null,
+  "steps": [
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Group 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Sequence 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete MAtricks 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Fixture 101 + 102 + 103 + 104",
+    "key": "select_fixtures",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Group 501 /Overwrite /NoConfirmation",
+    "key": "store_group",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Group 501 \"SC Spots LR\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 1 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.1 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 2 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Group 501",
+    "key": "select_group",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseFromX\" 0",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseToX\" 360",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store MAtricks 501 /Overwrite /NoConfirmation",
+    "key": "store_matricks",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label MAtricks 501 \"SC ph0-360\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.2 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign MAtricks 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Cook Sequence 501 /Merge",
+    "key": "cook_sequence",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 1 \"Sinus\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 2 \"Chase\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 \"SC Dimmer wave\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"SpeedMaster\" \"Speed1\"",
+    "key": "speed_master",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"OffWhenOverridden\" \"No\"",
+    "key": "seq_prop",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 502 Cue 1 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 502 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.1 At Sequence 502 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 502 Cue 2 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 502 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.2 At Sequence 502 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign MAtricks 501 At Sequence 502 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Cook Sequence 502 /Merge",
+    "key": "cook_sequence",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 502 Cue 1 \"Sinus\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 502 Cue 2 \"Chase\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 502 \"Second\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 502 Property \"SpeedMaster\" \"Speed1\"",
+    "key": "speed_master",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 502 Property \"OffWhenOverridden\" \"No\"",
+    "key": "seq_prop",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Sequence 501 At Page 1.101",
+    "key": "assign_exec",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Sequence 502 At Page 1.102",
+    "key": "assign_exec",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "get",
+    "addr": "Sequence 501",
+    "props": [
+     "Name",
+     "SpeedMaster",
+     "SpeedScale",
+     "Priority",
+     "OffWhenOverridden"
+    ]
+   },
+   {
+    "op": "export",
+    "addr": "Sequence 501",
+    "file": "sequence_501.xml"
+   },
+   {
+    "op": "get",
+    "addr": "Sequence 502",
+    "props": [
+     "Name",
+     "SpeedMaster",
+     "SpeedScale",
+     "Priority",
+     "OffWhenOverridden"
+    ]
+   },
+   {
+    "op": "export",
+    "addr": "Sequence 502",
+    "file": "sequence_502.xml"
+   },
+   {
+    "op": "export",
+    "addr": "Group 501",
+    "file": "group_501.xml"
+   }
+  ],
+  "warnings": [],
+  "allocation": {
+   "groups": {
+    "spots_lr": 501
+   },
+   "sequences": {
+    "dimmer_wave": 501,
+    "second": 502
+   },
+   "executors": {
+    "dimmer_wave": 101,
+    "second": 102
+   },
+   "page": 1
+  },
+  "looks": {
+   "format": "automa3-looks",
+   "version": 1,
+   "exportedBy": "ma3-showcreator",
+   "exportedAt": "TIME",
+   "context": {
+    "speedMaster": 1
+   },
+   "looks": [
+    {
+     "id": "bd94297e",
+     "name": "Dimmer chase",
+     "role": "EFFECT",
+     "ma3": {
+      "page": 1,
+      "exec": 101,
+      "sequence": 501
+     },
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "enabled": true,
+     "meta": {
+      "generator": {
+       "tool": "ma3-showcreator",
+       "look": "dimmer_wave",
+       "sequence": "dimmer_wave"
+      }
+     }
+    },
+    {
+     "id": "sc_second",
+     "name": "Second",
+     "role": "BASE",
+     "ma3": {
+      "page": 1,
+      "exec": 102,
+      "sequence": 502
+     },
+     "description": "d",
+     "layer": "L",
+     "mode": "FLASH",
+     "weight": 2,
+     "flashBeats": 1,
+     "level": 50,
+     "tags": [
+      "a"
+     ],
+     "enabled": true,
+     "meta": {
+      "generator": {
+       "tool": "ma3-showcreator",
+       "look": "second",
+       "sequence": "second"
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "name": "page7",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "cfg": {
+   "page": 7
+  },
+  "looks_in": null,
+  "steps": [
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Group 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Sequence 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete MAtricks 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Fixture 101 + 102 + 103 + 104",
+    "key": "select_fixtures",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Group 501 /Overwrite /NoConfirmation",
+    "key": "store_group",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Group 501 \"SC Spots LR\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 1 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.1 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 2 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Group 501",
+    "key": "select_group",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseFromX\" 0",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseToX\" 360",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store MAtricks 501 /Overwrite /NoConfirmation",
+    "key": "store_matricks",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label MAtricks 501 \"SC ph0-360\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.2 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign MAtricks 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Cook Sequence 501 /Merge",
+    "key": "cook_sequence",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 1 \"Sinus\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 2 \"Chase\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 \"SC Dimmer wave\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"SpeedMaster\" \"Speed1\"",
+    "key": "speed_master",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"OffWhenOverridden\" \"No\"",
+    "key": "seq_prop",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Sequence 501 At Page 7.107",
+    "key": "assign_exec",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "get",
+    "addr": "Sequence 501",
+    "props": [
+     "Name",
+     "SpeedMaster",
+     "SpeedScale",
+     "Priority",
+     "OffWhenOverridden"
+    ]
+   },
+   {
+    "op": "export",
+    "addr": "Sequence 501",
+    "file": "sequence_501.xml"
+   },
+   {
+    "op": "export",
+    "addr": "Group 501",
+    "file": "group_501.xml"
+   }
+  ],
+  "warnings": [],
+  "allocation": {
+   "groups": {
+    "spots_lr": 501
+   },
+   "sequences": {
+    "dimmer_wave": 501
+   },
+   "executors": {
+    "dimmer_wave": 107
+   },
+   "page": 7
+  },
+  "looks": {
+   "format": "automa3-looks",
+   "version": 1,
+   "exportedBy": "ma3-showcreator",
+   "exportedAt": "TIME",
+   "context": {
+    "speedMaster": 1
+   },
+   "looks": [
+    {
+     "id": "bd94297e",
+     "name": "Dimmer chase",
+     "role": "EFFECT",
+     "ma3": {
+      "page": 7,
+      "exec": 107,
+      "sequence": 501
+     },
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "enabled": true,
+     "meta": {
+      "generator": {
+       "tool": "ma3-showcreator",
+       "look": "dimmer_wave",
+       "sequence": "dimmer_wave"
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "name": "speed_prio",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ],
+     "speed_scale": "Div2",
+     "priority": "High"
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "cfg": {},
+  "looks_in": null,
+  "steps": [
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Group 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Sequence 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete MAtricks 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Fixture 101 + 102 + 103 + 104",
+    "key": "select_fixtures",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Group 501 /Overwrite /NoConfirmation",
+    "key": "store_group",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Group 501 \"SC Spots LR\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 1 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.1 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 2 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Group 501",
+    "key": "select_group",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseFromX\" 0",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseToX\" 360",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store MAtricks 501 /Overwrite /NoConfirmation",
+    "key": "store_matricks",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label MAtricks 501 \"SC ph0-360\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.2 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign MAtricks 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Cook Sequence 501 /Merge",
+    "key": "cook_sequence",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 1 \"Sinus\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 2 \"Chase\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 \"SC Dimmer wave\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"SpeedMaster\" \"Speed1\"",
+    "key": "speed_master",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"OffWhenOverridden\" \"No\"",
+    "key": "seq_prop",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"SpeedScale\" \"Div2\"",
+    "key": "seq_prop",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"Priority\" \"High\"",
+    "key": "seq_prop",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Sequence 501 At Page 1.107",
+    "key": "assign_exec",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "get",
+    "addr": "Sequence 501",
+    "props": [
+     "Name",
+     "SpeedMaster",
+     "SpeedScale",
+     "Priority",
+     "OffWhenOverridden"
+    ]
+   },
+   {
+    "op": "export",
+    "addr": "Sequence 501",
+    "file": "sequence_501.xml"
+   },
+   {
+    "op": "export",
+    "addr": "Group 501",
+    "file": "group_501.xml"
+   }
+  ],
+  "warnings": [],
+  "allocation": {
+   "groups": {
+    "spots_lr": 501
+   },
+   "sequences": {
+    "dimmer_wave": 501
+   },
+   "executors": {
+    "dimmer_wave": 107
+   },
+   "page": 1
+  },
+  "looks": {
+   "format": "automa3-looks",
+   "version": 1,
+   "exportedBy": "ma3-showcreator",
+   "exportedAt": "TIME",
+   "context": {
+    "speedMaster": 1
+   },
+   "looks": [
+    {
+     "id": "bd94297e",
+     "name": "Dimmer chase",
+     "role": "EFFECT",
+     "ma3": {
+      "page": 1,
+      "exec": 107,
+      "sequence": 501
+     },
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "enabled": true,
+     "meta": {
+      "generator": {
+       "tool": "ma3-showcreator",
+       "look": "dimmer_wave",
+       "sequence": "dimmer_wave"
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "name": "leftovers",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "cfg": {},
+  "looks_in": [
+   {
+    "id": "bd94297e",
+    "name": "Dimmer chase",
+    "role": "EFFECT",
+    "ma3": {
+     "page": 1,
+     "exec": 107
+    }
+   },
+   {
+    "name": "Haze",
+    "role": "HAZE",
+    "ma3": {
+     "page": 1,
+     "exec": 113
+    }
+   },
+   {
+    "name": "Base",
+    "role": "BASE",
+    "exec": 101
+   },
+   {
+    "id": "zz",
+    "name": "Move",
+    "role": "MOVEMENT"
+   }
+  ],
+  "steps": [
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Group 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Sequence 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete MAtricks 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Fixture 101 + 102 + 103 + 104",
+    "key": "select_fixtures",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Group 501 /Overwrite /NoConfirmation",
+    "key": "store_group",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Group 501 \"SC Spots LR\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 1 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.1 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 2 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Group 501",
+    "key": "select_group",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseFromX\" 0",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseToX\" 360",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store MAtricks 501 /Overwrite /NoConfirmation",
+    "key": "store_matricks",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label MAtricks 501 \"SC ph0-360\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.2 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign MAtricks 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Cook Sequence 501 /Merge",
+    "key": "cook_sequence",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 1 \"Sinus\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 2 \"Chase\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 \"SC Dimmer wave\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"SpeedMaster\" \"Speed1\"",
+    "key": "speed_master",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"OffWhenOverridden\" \"No\"",
+    "key": "seq_prop",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Sequence 501 At Page 1.107",
+    "key": "assign_exec",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "get",
+    "addr": "Sequence 501",
+    "props": [
+     "Name",
+     "SpeedMaster",
+     "SpeedScale",
+     "Priority",
+     "OffWhenOverridden"
+    ]
+   },
+   {
+    "op": "export",
+    "addr": "Sequence 501",
+    "file": "sequence_501.xml"
+   },
+   {
+    "op": "export",
+    "addr": "Group 501",
+    "file": "group_501.xml"
+   }
+  ],
+  "warnings": [],
+  "allocation": {
+   "groups": {
+    "spots_lr": 501
+   },
+   "sequences": {
+    "dimmer_wave": 501
+   },
+   "executors": {
+    "dimmer_wave": 107
+   },
+   "page": 1
+  },
+  "looks": {
+   "format": "automa3-looks",
+   "version": 1,
+   "exportedBy": "ma3-showcreator",
+   "exportedAt": "TIME",
+   "context": {
+    "speedMaster": 1
+   },
+   "looks": [
+    {
+     "id": "bd94297e",
+     "name": "Dimmer chase",
+     "role": "EFFECT",
+     "ma3": {
+      "page": 1,
+      "exec": 107,
+      "sequence": 501
+     },
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "enabled": true,
+     "meta": {
+      "generator": {
+       "tool": "ma3-showcreator",
+       "look": "dimmer_wave",
+       "sequence": "dimmer_wave"
+      }
+     }
+    },
+    {
+     "name": "Haze",
+     "role": "HAZE",
+     "enabled": false,
+     "ma3": {
+      "page": 1,
+      "exec": 113
+     },
+     "meta": {
+      "generator": {
+       "tool": "ma3-showcreator",
+       "note": "not built by the plan (see plan notes)"
+      }
+     }
+    },
+    {
+     "name": "Base",
+     "role": "BASE",
+     "enabled": false,
+     "ma3": {
+      "page": 1,
+      "exec": 101
+     },
+     "meta": {
+      "generator": {
+       "tool": "ma3-showcreator",
+       "note": "not built by the plan (see plan notes)"
+      }
+     }
+    },
+    {
+     "name": "Move",
+     "role": "MOVEMENT",
+     "enabled": false,
+     "ma3": {
+      "page": 1,
+      "exec": null
+     },
+     "meta": {
+      "generator": {
+       "tool": "ma3-showcreator",
+       "note": "not built by the plan (see plan notes)"
+      }
+     },
+     "id": "zz"
+    }
+   ]
+  }
+ },
+ {
+  "name": "escaping",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC \"Spots\" LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinüs\ttab",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "cfg": {},
+  "looks_in": null,
+  "steps": [
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Group 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete Sequence 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "Delete MAtricks 501 Thru 599 /NoConfirmation",
+    "key": "delete_range",
+    "fatal": false,
+    "allow_fail": true,
+    "note": "fails harmlessly when the range is already empty"
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Fixture 101 + 102 + 103 + 104",
+    "key": "select_fixtures",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Group 501 /Overwrite /NoConfirmation",
+    "key": "store_group",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Group 501 \"SC \"Spots\" LR\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 1 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.1 At Sequence 501 Cue 1 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store Sequence 501 Cue 2 /Overwrite /NoConfirmation",
+    "key": "store_cue",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Group 501",
+    "key": "select_group",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseFromX\" 0",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Selection MAtricks \"PhaseToX\" 360",
+    "key": "matricks_set",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Store MAtricks 501 /Overwrite /NoConfirmation",
+    "key": "store_matricks",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label MAtricks 501 \"SC ph0-360\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Reset Selection MAtricks",
+    "key": "matricks_reset",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Group 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Preset 21.2 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign MAtricks 501 At Sequence 501 Cue 2 Part 0.1",
+    "key": "recipe_assign",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Cook Sequence 501 /Merge",
+    "key": "cook_sequence",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 1 \"Sinüs\ttab\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 Cue 2 \"Chase\"",
+    "key": "label_cue",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Label Sequence 501 \"SC Dimmer wave\"",
+    "key": "label",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"SpeedMaster\" \"Speed1\"",
+    "key": "speed_master",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Set Sequence 501 Property \"OffWhenOverridden\" \"No\"",
+    "key": "seq_prop",
+    "fatal": false
+   },
+   {
+    "op": "cmd",
+    "cmd": "Assign Sequence 501 At Page 1.107",
+    "key": "assign_exec",
+    "fatal": true
+   },
+   {
+    "op": "cmd",
+    "cmd": "ClearAll",
+    "key": "clear_all",
+    "fatal": false
+   },
+   {
+    "op": "get",
+    "addr": "Sequence 501",
+    "props": [
+     "Name",
+     "SpeedMaster",
+     "SpeedScale",
+     "Priority",
+     "OffWhenOverridden"
+    ]
+   },
+   {
+    "op": "export",
+    "addr": "Sequence 501",
+    "file": "sequence_501.xml"
+   },
+   {
+    "op": "export",
+    "addr": "Group 501",
+    "file": "group_501.xml"
+   }
+  ],
+  "warnings": [],
+  "allocation": {
+   "groups": {
+    "spots_lr": 501
+   },
+   "sequences": {
+    "dimmer_wave": 501
+   },
+   "executors": {
+    "dimmer_wave": 107
+   },
+   "page": 1
+  },
+  "looks": {
+   "format": "automa3-looks",
+   "version": 1,
+   "exportedBy": "ma3-showcreator",
+   "exportedAt": "TIME",
+   "context": {
+    "speedMaster": 1
+   },
+   "looks": [
+    {
+     "id": "bd94297e",
+     "name": "Dimmer chase",
+     "role": "EFFECT",
+     "ma3": {
+      "page": 1,
+      "exec": 107,
+      "sequence": 501
+     },
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "enabled": true,
+     "meta": {
+      "generator": {
+       "tool": "ma3-showcreator",
+       "look": "dimmer_wave",
+       "sequence": "dimmer_wave"
+      }
+     }
+    }
+   ]
+  }
+ }
+]

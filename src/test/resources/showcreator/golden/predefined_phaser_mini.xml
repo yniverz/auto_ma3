@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic test file with the structure of grandMA3's lib_presets/predefined_phaser.xml -->
+<GMA3 DataVersion="1.7.0.0">
+    <Preset Name="Dim Sinus" PresetModeInternal="Universal">
+        <PresetData Size="1">
+            <Phaser IDType="2" ID="1" Attribute="Dimmer"><Step Function="Dimmer" Absolute="100" /><Step Function="Dimmer" Absolute="0" /></Phaser>
+        </PresetData>
+    </Preset>
+    <Preset Name="Chase" PresetModeInternal="Universal">
+        <PresetData Size="1">
+            <Phaser IDType="2" ID="1" Attribute="Dimmer"><Step Function="Dimmer" Absolute="100" /><Step Function="Dimmer" Absolute="0" /></Phaser>
+        </PresetData>
+    </Preset>
+    <Preset Name="Circle" PresetModeInternal="Universal">
+        <PresetData Size="2">
+            <Phaser IDType="2" ID="1" Attribute="Pan"><Step Function="Pan" Relative="10" /><Step Function="Pan" Relative="-10" /></Phaser>
+            <Phaser IDType="2" ID="1" Attribute="Tilt"><Step Function="Tilt" Relative="10" /><Step Function="Tilt" Relative="-10" /></Phaser>
+        </PresetData>
+    </Preset>
+    <Preset Name="Zoom - Blue White" PresetModeInternal="Universal">
+        <PresetData Size="2">
+            <Phaser IDType="2" ID="1" Attribute="ColorRGB_B"><Step Function="ColorRGB_B" Absolute="100" /><Step Function="ColorRGB_B" Absolute="100" /></Phaser>
+            <Phaser IDType="2" ID="1" Attribute="Zoom"><Step Function="Zoom" Absolute="10" /><Step Function="Zoom" Absolute="40" /></Phaser>
+        </PresetData>
+    </Preset>
+    <Preset Name="Static Red" PresetModeInternal="Universal">
+        <PresetData Size="1" />
+    </Preset>
+</GMA3>

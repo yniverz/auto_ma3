@@ -134,4 +134,37 @@ class LookTransferTest {
         assertEquals("/show", c.oscIn.controlPrefix);
         assertEquals("auto", c.oscIn.controlSequences.get("900"));
     }
+
+    /** A smaller show: two looks kept, the others left out by the build ("disable only"). */
+    @Test
+    void leftOutLooksOnlySwitchOffExistingLooksAndAreNeverAdded() throws Exception {
+        Config c = config(); // 14 default looks on 1.101 - 1.114
+        String base = c.looks.get(0).id;
+        JsonNode file = json("""
+                {"format": "automa3-looks", "version": 1, "looks": [
+                  {"id": "%s", "name": "Base new", "role": "BASE", "ma3": {"page": 1, "exec": 101, "sequence": 501}, "enabled": true},
+                  {"id": "sc_move", "name": "Move new", "role": "MOVEMENT", "ma3": {"page": 1, "exec": 140, "sequence": 502}, "enabled": true},
+                  {"name": "Strobe", "role": "STROBE", "enabled": false, "disableOnly": true, "ma3": {"page": 1, "exec": 110}},
+                  {"name": "Gone", "role": "EFFECT", "enabled": false, "disableOnly": true, "ma3": {"page": 1, "exec": 177}}]}
+                """.formatted(base));
+
+        LookTransfer.Result merge = LookTransfer.importLooks(c.looks, file, LookTransfer.Mode.MERGE, null);
+        assertEquals(15, merge.looks().size(), "14 existing + the new movement look, no disabled extras");
+        assertEquals(1, merge.added());
+        assertEquals(2, merge.updated(), "base updated, strobe switched off");
+        assertEquals(1, merge.skipped(), "nothing on 1.177 to switch off");
+        Config.Look strobe = merge.looks().stream().filter(l -> l.exec == 110).findFirst().orElseThrow();
+        assertFalse(strobe.enabled);
+        assertEquals("Strobe", strobe.name, "only switched off, nothing else changed");
+        assertEquals(c.looks.get(9).meta, strobe.meta);
+        assertEquals(List.of("updated", "added", "updated", "skipped"), merge.entries().stream().map(LookTransfer.Entry::action).toList());
+
+        for (LookTransfer.Mode m : List.of(LookTransfer.Mode.REPLACE, LookTransfer.Mode.ADD)) {
+            LookTransfer.Result r = LookTransfer.importLooks(c.looks, file, m, null);
+            assertEquals(2, r.added(), m.name());
+            assertEquals(2, r.skipped(), m.name() + ": left-out looks are not added");
+            assertEquals(m == LookTransfer.Mode.REPLACE ? 2 : 16, r.looks().size(), m.name());
+            assertTrue(r.looks().stream().noneMatch(l -> l.exec == 177), m.name());
+        }
+    }
 }

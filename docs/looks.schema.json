@@ -61,6 +61,7 @@
         "flashBeats": { "type": "number", "minimum": 0, "default": 0, "description": "Flash looks: beats to stay on, 0 = AutoMA3's default for the role." },
         "level": { "type": "integer", "minimum": 0, "maximum": 100, "default": 100 },
         "enabled": { "type": "boolean", "default": true },
+        "disableOnly": { "type": "boolean", "default": false, "description": "Import only: switch off a matching look, never add one (merge); skipped otherwise." },
         "tags": { "type": "array", "items": { "type": "string" } },
         "meta": { "type": "object", "description": "Free data for other tools; AutoMA3 keeps it untouched and exports it again." }
       }

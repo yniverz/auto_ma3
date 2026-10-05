@@ -1,0 +1,233 @@
+{
+  "format": "automa3-looks",
+  "version": 1,
+  "exportedBy": "ma3-showcreator",
+  "exportedAt": "TIME",
+  "context": {
+    "speedMaster": 1
+  },
+  "looks": [
+    {
+      "id": "bd94297e",
+      "name": "Dimmer chase",
+      "role": "EFFECT",
+      "ma3": {
+        "page": 1,
+        "exec": 107,
+        "sequence": 501
+      },
+      "description": "dimmer sinus, then a left-to-right chase",
+      "sections": [
+        "GROOVE",
+        "PEAK"
+      ],
+      "energy": {
+        "min": 0.4,
+        "max": 1.0
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "dimmer_wave",
+          "sequence": "dimmer_wave"
+        }
+      }
+    },
+    {
+      "name": "Base low",
+      "role": "BASE",
+      "enabled": false,
+      "ma3": {
+        "page": 1,
+        "exec": 101
+      },
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "note": "not built by the plan (see plan notes)"
+        }
+      }
+    },
+    {
+      "name": "Base full",
+      "role": "BASE",
+      "enabled": false,
+      "ma3": {
+        "page": 1,
+        "exec": 102
+      },
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "note": "not built by the plan (see plan notes)"
+        }
+      }
+    },
+    {
+      "name": "Colour A",
+      "role": "COLOR",
+      "enabled": false,
+      "ma3": {
+        "page": 1,
+        "exec": 103
+      },
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "note": "not built by the plan (see plan notes)"
+        }
+      }
+    },
+    {
+      "name": "Colour B",
+      "role": "COLOR",
+      "enabled": false,
+      "ma3": {
+        "page": 1,
+        "exec": 104
+      },
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "note": "not built by the plan (see plan notes)"
+        }
+      }
+    },
+    {
+      "name": "Move slow",
+      "role": "MOVEMENT",
+      "enabled": false,
+      "ma3": {
+        "page": 1,
+        "exec": 105
+      },
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "note": "not built by the plan (see plan notes)"
+        }
+      }
+    },
+    {
+      "name": "Move fast",
+      "role": "MOVEMENT",
+      "enabled": false,
+      "ma3": {
+        "page": 1,
+        "exec": 106
+      },
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "note": "not built by the plan (see plan notes)"
+        }
+      }
+    },
+    {
+      "name": "Riser",
+      "role": "RISER",
+      "enabled": false,
+      "ma3": {
+        "page": 1,
+        "exec": 108
+      },
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "note": "not built by the plan (see plan notes)"
+        }
+      }
+    },
+    {
+      "name": "Drop hit",
+      "role": "ACCENT",
+      "enabled": false,
+      "ma3": {
+        "page": 1,
+        "exec": 109
+      },
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "note": "not built by the plan (see plan notes)"
+        }
+      }
+    },
+    {
+      "name": "Strobe",
+      "role": "STROBE",
+      "enabled": false,
+      "ma3": {
+        "page": 1,
+        "exec": 110
+      },
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "note": "not built by the plan (see plan notes)"
+        }
+      }
+    },
+    {
+      "name": "Blinder",
+      "role": "BLINDER",
+      "enabled": false,
+      "ma3": {
+        "page": 1,
+        "exec": 111
+      },
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "note": "not built by the plan (see plan notes)"
+        }
+      }
+    },
+    {
+      "name": "Blackout",
+      "role": "BLACKOUT",
+      "enabled": false,
+      "ma3": {
+        "page": 1,
+        "exec": 112
+      },
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "note": "not built by the plan (see plan notes)"
+        }
+      }
+    },
+    {
+      "name": "Haze",
+      "role": "HAZE",
+      "enabled": false,
+      "ma3": {
+        "page": 1,
+        "exec": 113
+      },
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "note": "not built by the plan (see plan notes)"
+        }
+      }
+    },
+    {
+      "name": "Fog",
+      "role": "FOG",
+      "enabled": false,
+      "ma3": {
+        "page": 1,
+        "exec": 114
+      },
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "note": "not built by the plan (see plan notes)"
+        }
+      }
+    }
+  ]
+}

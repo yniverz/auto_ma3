@@ -27,6 +27,10 @@ public final class Main {
     }
 
     public static void main(String[] args) throws Exception {
+        if (args.length > 0 && args[0].equals("show")) { // show creator commands (the planner's ./sc)
+            System.setProperty("java.awt.headless", "true");
+            System.exit(automa3.show.ShowCli.run(java.util.Arrays.copyOfRange(args, 1, args.length), defaultDataDir().resolve("config.json")));
+        }
         Path configPath = defaultDataDir().resolve("config.json");
         boolean sim = false, dryRun = false, record = false, open = false;
         Path replay = null, analyze = null;
@@ -58,6 +62,7 @@ public final class Main {
                               --record           record the session from the start
                               --port N           web UI port (default from config, 8081)
                               --open             open the web UI in the browser once it runs
+                              show <command>     show creator commands (brief, validate, rig, status)
                             """.formatted(defaultDataDir().resolve("config.json")));
                     return;
                 }

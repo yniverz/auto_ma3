@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MA3 Show Creator plan",
+  "description": "Written by the planner. Data only: semantic keys, never grandMA3 command syntax or pool numbers (except fixture ids).",
+  "type": "object",
+  "required": ["format", "version", "groups", "sequences", "looks"],
+  "additionalProperties": false,
+  "properties": {
+    "format": { "const": "ma3sc-plan" },
+    "version": { "const": 1 },
+    "notes": { "type": "string", "description": "Free text from the planner (reasoning, open questions)." },
+    "groups": { "type": "array", "items": { "$ref": "#/$defs/group" } },
+    "sequences": { "type": "array", "items": { "$ref": "#/$defs/sequence" } },
+    "looks": { "type": "array", "items": { "$ref": "#/$defs/look" } }
+  },
+  "$defs": {
+    "key": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "patternMessage": "keys use lowercase letters, digits and _ and start with a letter"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^\\\\\"$&*?,.;^{|}~]+$",
+      "patternMessage": "grandMA3 names must not contain \\ \" $ & * ? , . ; ^ { | } ~"
+    },
+    "group": {
+      "type": "object",
+      "required": ["key", "name", "fixtures"],
+      "additionalProperties": false,
+      "properties": {
+        "key": { "$ref": "#/$defs/key" },
+        "name": { "$ref": "#/$defs/name" },
+        "fixtures": {
+          "description": "Either {\"fids\": [...]} in the wanted order, or {\"set\": <rig set>, \"order\": <rig ordering of that set>}.",
+          "oneOf": [
+            {
+              "type": "object", "required": ["fids"], "additionalProperties": false,
+              "properties": { "fids": { "type": "array", "items": { "type": "integer", "minimum": 1 }, "minItems": 1, "uniqueItems": true } }
+            },
+            {
+              "type": "object", "required": ["set", "order"], "additionalProperties": false,
+              "properties": { "set": { "type": "string" }, "order": { "type": "string" } }
+            }
+          ]
+        }
+      }
+    },
+    "sequence": {
+      "type": "object",
+      "required": ["key", "name", "cues"],
+      "additionalProperties": false,
+      "properties": {
+        "key": { "$ref": "#/$defs/key" },
+        "name": { "$ref": "#/$defs/name" },
+        "speed_master": { "type": "boolean", "description": "Run phasers on the AutoMA3 speed master (BPM). Default true." },
+        "speed_scale": {
+          "enum": ["Div4", "Div2", "One", "Mul2", "Mul4"],
+          "description": "Phaser speed relative to the speed master (BPM): Div2 = half speed, Mul2 = double. Default One."
+        },
+        "priority": {
+          "enum": ["Lowest", "Low", "LTP", "High", "Highest", "HTP"],
+          "description": "Playback priority. Default LTP (latest action wins). E.g. High for BLACKOUT."
+        },
+        "cues": { "type": "array", "items": { "$ref": "#/$defs/cue" }, "minItems": 1 }
+      }
+    },
+    "cue": {
+      "type": "object",
+      "required": ["name", "lines"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "$ref": "#/$defs/name" },
+        "fade": { "type": "number", "minimum": 0, "description": "Cue fade in seconds." },
+        "lines": { "type": "array", "items": { "$ref": "#/$defs/line" }, "minItems": 1 }
+      }
+    },
+    "line": {
+      "type": "object",
+      "description": "One group with one preset or static values, plus optional spread.",
+      "required": ["group"],
+      "additionalProperties": false,
+      "properties": {
+        "group": { "$ref": "#/$defs/key" },
+        "preset": { "$ref": "#/$defs/key" },
+        "values": {
+          "type": "object",
+          "description": "Static attribute values, keys from library.static_attributes.",
+          "additionalProperties": { "type": "number" }
+        },
+        "phase": {
+          "type": "object",
+          "required": ["from", "to"],
+          "additionalProperties": false,
+          "description": "Phase spread across the group in degrees, MAtricks semantics: 0..360 on 4 fixtures = 0/90/180/270 (a full cycle).",
+          "properties": { "from": { "type": "number" }, "to": { "type": "number" } }
+        },
+        "wings": { "type": "integer", "minimum": 0 },
+        "blocks": { "type": "integer", "minimum": 0 },
+        "groups": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "look": {
+      "type": "object",
+      "required": ["key", "sequence", "role", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "key": { "$ref": "#/$defs/key" },
+        "sequence": { "$ref": "#/$defs/key" },
+        "role": { "enum": ["BASE", "COLOR", "MOVEMENT", "EFFECT", "RISER", "ACCENT", "STROBE", "BLINDER", "BLACKOUT", "HAZE", "FOG", "SPECIAL"] },
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "layer": { "type": "string" },
+        "mode": { "enum": ["TOGGLE", "FLASH", "TEMP", "FADER"] },
+        "sections": {
+          "type": "array", "uniqueItems": true,
+          "items": { "enum": ["INTRO", "GROOVE", "BUILD", "BREAKDOWN", "DROP", "PEAK", "OUTRO"] }
+        },
+        "energy": {
+          "type": "object", "required": ["min", "max"], "additionalProperties": false,
+          "properties": { "min": { "type": "number", "minimum": 0, "maximum": 1 }, "max": { "type": "number", "minimum": 0, "maximum": 1 } }
+        },
+        "weight": { "type": "number", "minimum": 0.01 },
+        "flashBeats": { "type": "number", "minimum": 0 },
+        "level": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "automa3_id": { "type": "string", "description": "id of the look in the AutoMA3 look list this look fills (keeps AutoMA3 settings on re-import)." },
+        "exec": { "type": "integer", "minimum": 1, "description": "Executor number on the configured page. Omit to let the compiler allocate." }
+      }
+    }
+  }
+}

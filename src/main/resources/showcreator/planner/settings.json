@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "additionalDirectories": ["../shows"],
+    "allow": [
+      "Bash(./sc brief)",
+      "Bash(./sc validate)",
+      "Bash(./sc rig)"
+    ]
+  }
+}

@@ -30,6 +30,7 @@ public class Config {
     public SpeedConfig speed = new SpeedConfig();
     public AudioConfig audio = new AudioConfig();
     public DjLinkConfig djLink = new DjLinkConfig();
+    public ShowCreatorConfig showCreator = new ShowCreatorConfig();
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ConsoleConfig {
@@ -230,5 +231,30 @@ public class Config {
         public boolean readUsbFiles = false;
         /** Use the waveform to detect sections when a track has no rekordbox phrase analysis. */
         public boolean waveformAnalysis = true;
+    }
+
+    /**
+     * Show creation (Show tab): builds groups, effect sequences and executors in grandMA3 onPC on this Mac from the
+     * patch and a plan. Optional: AutoMA3 runs the same without it.
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ShowCreatorConfig {
+        /** Console (name from the Consoles tab) to build on. Empty: the first enabled console on this Mac (127.0.0.1). */
+        public String console = "";
+        /** grandMA3's folder on this Mac. Empty: ~/MALightingTechnology. */
+        public String ma3Folder = "";
+        /** Reserved ranges: everything in them is deleted and rebuilt by every build. */
+        public int groupsFrom = 501, groupsTo = 599;
+        public int sequencesFrom = 501, sequencesTo = 599;
+        public int matricksFrom = 501, matricksTo = 599;
+        /** Executors are only (re)assigned, never deleted. */
+        public int page = 1;
+        public int executorsFrom = 101, executorsTo = 199;
+        /** How presets get into cues: "recipe" (tested best on 2.3.2) or "programmer". */
+        public String cueMethod = "recipe";
+        /** Where FOH is in the patch coordinates: "-y" (FOH at negative y), "+y", "-x", "+x". */
+        public String audience = "-y";
+        /** Claude Code command for the planner. */
+        public String claude = "claude";
     }
 }

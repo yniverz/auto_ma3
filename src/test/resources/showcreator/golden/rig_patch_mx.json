@@ -1,0 +1,1395 @@
+{
+  "rig": {
+    "format": "ma3sc-rig",
+    "version": 1,
+    "source": {
+      "generator": "test"
+    },
+    "axes": {
+      "x": "audience left -> right (seen from FOH)",
+      "y": "distance from FOH (towards upstage)",
+      "z": "up",
+      "unit": "mm",
+      "audience": "-x"
+    },
+    "fixtures": [
+      {
+        "fid": 101,
+        "name": "Stairville MH 360",
+        "type": "MH 100 Beam",
+        "mode": "14 channel",
+        "layer": "FixtureLayer 1",
+        "class": "FixtureClass 1",
+        "pos": [
+          -2517.3,
+          1020.1,
+          2876.1
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          -90.0
+        ],
+        "caps": [
+          "pan",
+          "tilt",
+          "dimmer",
+          "color_mix",
+          "shutter"
+        ],
+        "attributes": [
+          "Pan",
+          "Tilt",
+          "PositionMSpeed",
+          "Dimmer",
+          "ColorRGB_R",
+          "ColorRGB_G",
+          "ColorRGB_B",
+          "ColorRGB_W",
+          "COLORTEMPERATURE",
+          "COLORMIXER",
+          "Shutter1",
+          "FixtureGlobalReset"
+        ]
+      },
+      {
+        "fid": 102,
+        "name": "Stairville MH 360",
+        "type": "MH 100 Beam",
+        "mode": "14 channel",
+        "layer": "FixtureLayer 1",
+        "class": "FixtureClass 1",
+        "pos": [
+          -2516.8,
+          3813.7,
+          2876.1
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          -90.0
+        ],
+        "caps": [
+          "pan",
+          "tilt",
+          "dimmer",
+          "color_mix",
+          "shutter"
+        ],
+        "attributes": [
+          "Pan",
+          "Tilt",
+          "PositionMSpeed",
+          "Dimmer",
+          "ColorRGB_R",
+          "ColorRGB_G",
+          "ColorRGB_B",
+          "ColorRGB_W",
+          "COLORTEMPERATURE",
+          "COLORMIXER",
+          "Shutter1",
+          "FixtureGlobalReset"
+        ]
+      },
+      {
+        "fid": 103,
+        "name": "Stairville MH 360",
+        "type": "MH 100 Beam",
+        "mode": "14 channel",
+        "layer": "FixtureLayer 1",
+        "class": "FixtureClass 1",
+        "pos": [
+          -810.3,
+          1020.1,
+          2876.1
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          -90.0
+        ],
+        "caps": [
+          "pan",
+          "tilt",
+          "dimmer",
+          "color_mix",
+          "shutter"
+        ],
+        "attributes": [
+          "Pan",
+          "Tilt",
+          "PositionMSpeed",
+          "Dimmer",
+          "ColorRGB_R",
+          "ColorRGB_G",
+          "ColorRGB_B",
+          "ColorRGB_W",
+          "COLORTEMPERATURE",
+          "COLORMIXER",
+          "Shutter1",
+          "FixtureGlobalReset"
+        ]
+      },
+      {
+        "fid": 104,
+        "name": "Stairville MH 360",
+        "type": "MH 100 Beam",
+        "mode": "14 channel",
+        "layer": "FixtureLayer 1",
+        "class": "FixtureClass 1",
+        "pos": [
+          -809.8,
+          3813.7,
+          2876.1
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          -90.0
+        ],
+        "caps": [
+          "pan",
+          "tilt",
+          "dimmer",
+          "color_mix",
+          "shutter"
+        ],
+        "attributes": [
+          "Pan",
+          "Tilt",
+          "PositionMSpeed",
+          "Dimmer",
+          "ColorRGB_R",
+          "ColorRGB_G",
+          "ColorRGB_B",
+          "ColorRGB_W",
+          "COLORTEMPERATURE",
+          "COLORMIXER",
+          "Shutter1",
+          "FixtureGlobalReset"
+        ]
+      },
+      {
+        "fid": 201,
+        "name": "Cameo ROOT Par 6",
+        "type": "Root Par 6",
+        "mode": "7 channel - Delay Off",
+        "layer": "FixtureLayer 1",
+        "class": "FixtureClass 1",
+        "pos": [
+          852.3,
+          1020.3,
+          3106.8
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          180.0
+        ],
+        "caps": [
+          "color_mix",
+          "dimmer"
+        ],
+        "attributes": [
+          "ColorRGB_R",
+          "ColorRGB_G",
+          "ColorRGB_B",
+          "ColorRGB_W",
+          "ColorRGB_RY",
+          "ColorRGB_UV",
+          "Dimmer"
+        ]
+      },
+      {
+        "fid": 202,
+        "name": "Cameo ROOT Par 6",
+        "type": "Root Par 6",
+        "mode": "7 channel - Delay Off",
+        "layer": "FixtureLayer 1",
+        "class": "FixtureClass 1",
+        "pos": [
+          852.3,
+          3812.8,
+          3106.8
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "caps": [
+          "color_mix",
+          "dimmer"
+        ],
+        "attributes": [
+          "ColorRGB_R",
+          "ColorRGB_G",
+          "ColorRGB_B",
+          "ColorRGB_W",
+          "ColorRGB_RY",
+          "ColorRGB_UV",
+          "Dimmer"
+        ]
+      },
+      {
+        "fid": 203,
+        "name": "Cameo ROOT Par 6",
+        "type": "Root Par 6",
+        "mode": "7 channel - Delay Off",
+        "layer": "FixtureLayer 1",
+        "class": "FixtureClass 1",
+        "pos": [
+          2827.3,
+          1003.7,
+          3076.6
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          180.0
+        ],
+        "caps": [
+          "color_mix",
+          "dimmer"
+        ],
+        "attributes": [
+          "ColorRGB_R",
+          "ColorRGB_G",
+          "ColorRGB_B",
+          "ColorRGB_W",
+          "ColorRGB_RY",
+          "ColorRGB_UV",
+          "Dimmer"
+        ]
+      },
+      {
+        "fid": 204,
+        "name": "Cameo ROOT Par 6",
+        "type": "Root Par 6",
+        "mode": "7 channel - Delay Off",
+        "layer": "FixtureLayer 1",
+        "class": "FixtureClass 1",
+        "pos": [
+          2827.3,
+          3817.2,
+          3076.6
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "caps": [
+          "color_mix",
+          "dimmer"
+        ],
+        "attributes": [
+          "ColorRGB_R",
+          "ColorRGB_G",
+          "ColorRGB_B",
+          "ColorRGB_W",
+          "ColorRGB_RY",
+          "ColorRGB_UV",
+          "Dimmer"
+        ]
+      },
+      {
+        "fid": 301,
+        "name": "Stairville Outdoor Stage Par 12x3 Tri",
+        "type": "Stagepar Pro QCL MKII",
+        "mode": "Standard mode",
+        "layer": "FixtureLayer 1",
+        "class": "FixtureClass 1",
+        "pos": [
+          -5490.0,
+          1908.7,
+          3223.3
+        ],
+        "rot": [
+          38.999999349305,
+          0.0,
+          0.0
+        ],
+        "caps": [
+          "dimmer",
+          "color_mix",
+          "shutter"
+        ],
+        "attributes": [
+          "Dimmer",
+          "ColorRGB_R",
+          "ColorRGB_G",
+          "ColorRGB_B",
+          "ColorRGB_W",
+          "StrobeRate",
+          "NoFeature"
+        ]
+      },
+      {
+        "fid": 302,
+        "name": "Stairville Outdoor Stage Par 12x3 Tri",
+        "type": "Stagepar Pro QCL MKII",
+        "mode": "Standard mode",
+        "layer": "FixtureLayer 1",
+        "class": "FixtureClass 1",
+        "pos": [
+          -5490.0,
+          2888.4,
+          3191.4
+        ],
+        "rot": [
+          38.999999349305,
+          0.0,
+          0.0
+        ],
+        "caps": [
+          "dimmer",
+          "color_mix",
+          "shutter"
+        ],
+        "attributes": [
+          "Dimmer",
+          "ColorRGB_R",
+          "ColorRGB_G",
+          "ColorRGB_B",
+          "ColorRGB_W",
+          "StrobeRate",
+          "NoFeature"
+        ]
+      },
+      {
+        "fid": 303,
+        "name": "Stairville Outdoor Stage Par 12x3 Tri",
+        "type": "Stagepar Pro QCL MKII",
+        "mode": "Standard mode",
+        "layer": "FixtureLayer 1",
+        "class": "FixtureClass 1",
+        "pos": [
+          -4226.7,
+          1255.3,
+          2810.4
+        ],
+        "rot": [
+          89.999999302827,
+          0.0,
+          0.0
+        ],
+        "caps": [
+          "dimmer",
+          "color_mix",
+          "shutter"
+        ],
+        "attributes": [
+          "Dimmer",
+          "ColorRGB_R",
+          "ColorRGB_G",
+          "ColorRGB_B",
+          "ColorRGB_W",
+          "StrobeRate",
+          "NoFeature"
+        ]
+      },
+      {
+        "fid": 304,
+        "name": "Stairville Outdoor Stage Par 12x3 Tri",
+        "type": "Stagepar Pro QCL MKII",
+        "mode": "Standard mode",
+        "layer": "FixtureLayer 1",
+        "class": "FixtureClass 1",
+        "pos": [
+          -4225.3,
+          3573.7,
+          2810.4
+        ],
+        "rot": [
+          89.999999302827,
+          0.0,
+          0.0
+        ],
+        "caps": [
+          "dimmer",
+          "color_mix",
+          "shutter"
+        ],
+        "attributes": [
+          "Dimmer",
+          "ColorRGB_R",
+          "ColorRGB_G",
+          "ColorRGB_B",
+          "ColorRGB_W",
+          "StrobeRate",
+          "NoFeature"
+        ]
+      },
+      {
+        "fid": 401,
+        "name": "Showtec SunStrip II",
+        "type": "Sunstrip active mkII",
+        "mode": "10 Ch",
+        "layer": "FixtureLayer 1",
+        "class": "FixtureClass 1",
+        "pos": [
+          -6306.3,
+          2000.0,
+          681.0
+        ],
+        "rot": [
+          -179.99999930283,
+          -61.000000921818,
+          90.0
+        ],
+        "caps": [
+          "dimmer"
+        ],
+        "attributes": [
+          "Dimmer"
+        ]
+      },
+      {
+        "fid": 402,
+        "name": "Showtec SunStrip II",
+        "type": "Sunstrip active mkII",
+        "mode": "10 Ch",
+        "layer": "FixtureLayer 1",
+        "class": "FixtureClass 1",
+        "pos": [
+          -6306.6,
+          3000.0,
+          702.3
+        ],
+        "rot": [
+          -179.99999930283,
+          -61.000000921818,
+          90.0
+        ],
+        "caps": [
+          "dimmer"
+        ],
+        "attributes": [
+          "Dimmer"
+        ]
+      }
+    ],
+    "sets": {
+      "all": [
+        401,
+        402,
+        301,
+        302,
+        303,
+        304,
+        101,
+        102,
+        103,
+        104,
+        201,
+        202,
+        203,
+        204
+      ],
+      "type:MH 100 Beam": [
+        101,
+        102,
+        103,
+        104
+      ],
+      "type:Root Par 6": [
+        201,
+        202,
+        203,
+        204
+      ],
+      "type:Stagepar Pro QCL MKII": [
+        301,
+        302,
+        303,
+        304
+      ],
+      "type:Sunstrip active mkII": [
+        401,
+        402
+      ],
+      "cap:pan": [
+        101,
+        102,
+        103,
+        104
+      ],
+      "cap:tilt": [
+        101,
+        102,
+        103,
+        104
+      ],
+      "cap:dimmer": [
+        401,
+        402,
+        301,
+        302,
+        303,
+        304,
+        101,
+        102,
+        103,
+        104,
+        201,
+        202,
+        203,
+        204
+      ],
+      "cap:color_mix": [
+        301,
+        302,
+        303,
+        304,
+        101,
+        102,
+        103,
+        104,
+        201,
+        202,
+        203,
+        204
+      ],
+      "cap:shutter": [
+        301,
+        302,
+        303,
+        304,
+        101,
+        102,
+        103,
+        104
+      ]
+    },
+    "orderings": {
+      "all": {
+        "left_to_right": [
+          401,
+          402,
+          301,
+          302,
+          303,
+          304,
+          101,
+          102,
+          103,
+          104,
+          201,
+          202,
+          203,
+          204
+        ],
+        "right_to_left": [
+          203,
+          204,
+          201,
+          202,
+          103,
+          104,
+          101,
+          102,
+          303,
+          304,
+          301,
+          302,
+          401,
+          402
+        ],
+        "foh_to_stage": [
+          101,
+          103,
+          201,
+          203,
+          303,
+          301,
+          401,
+          302,
+          402,
+          304,
+          102,
+          104,
+          202,
+          204
+        ],
+        "stage_to_foh": [
+          102,
+          104,
+          202,
+          204,
+          304,
+          402,
+          302,
+          401,
+          301,
+          303,
+          101,
+          103,
+          201,
+          203
+        ],
+        "bottom_to_top": [
+          401,
+          402,
+          303,
+          304,
+          101,
+          102,
+          103,
+          104,
+          201,
+          202,
+          203,
+          204,
+          301,
+          302
+        ],
+        "top_to_bottom": [
+          301,
+          302,
+          201,
+          202,
+          203,
+          204,
+          101,
+          102,
+          103,
+          104,
+          303,
+          304,
+          401,
+          402
+        ],
+        "center_out": [
+          101,
+          102,
+          103,
+          104,
+          303,
+          304,
+          201,
+          202,
+          301,
+          302,
+          203,
+          401,
+          402,
+          204
+        ],
+        "outside_in": [
+          203,
+          401,
+          402,
+          204,
+          301,
+          302,
+          201,
+          202,
+          303,
+          304,
+          103,
+          104,
+          101,
+          102
+        ]
+      },
+      "type:MH 100 Beam": {
+        "left_to_right": [
+          101,
+          102,
+          103,
+          104
+        ],
+        "right_to_left": [
+          103,
+          104,
+          101,
+          102
+        ],
+        "foh_to_stage": [
+          101,
+          103,
+          102,
+          104
+        ],
+        "stage_to_foh": [
+          102,
+          104,
+          101,
+          103
+        ],
+        "bottom_to_top": [
+          101,
+          102,
+          103,
+          104
+        ],
+        "top_to_bottom": [
+          101,
+          102,
+          103,
+          104
+        ],
+        "center_out": [
+          101,
+          103,
+          102,
+          104
+        ],
+        "outside_in": [
+          101,
+          103,
+          102,
+          104
+        ],
+        "mirror": [
+          101,
+          102,
+          104,
+          103
+        ]
+      },
+      "type:Root Par 6": {
+        "left_to_right": [
+          201,
+          202,
+          203,
+          204
+        ],
+        "right_to_left": [
+          203,
+          204,
+          201,
+          202
+        ],
+        "foh_to_stage": [
+          201,
+          203,
+          202,
+          204
+        ],
+        "stage_to_foh": [
+          202,
+          204,
+          201,
+          203
+        ],
+        "bottom_to_top": [
+          201,
+          202,
+          203,
+          204
+        ],
+        "top_to_bottom": [
+          201,
+          202,
+          203,
+          204
+        ],
+        "center_out": [
+          201,
+          203,
+          202,
+          204
+        ],
+        "outside_in": [
+          201,
+          203,
+          202,
+          204
+        ],
+        "mirror": [
+          201,
+          202,
+          204,
+          203
+        ]
+      },
+      "type:Stagepar Pro QCL MKII": {
+        "left_to_right": [
+          301,
+          302,
+          303,
+          304
+        ],
+        "right_to_left": [
+          303,
+          304,
+          301,
+          302
+        ],
+        "foh_to_stage": [
+          303,
+          301,
+          302,
+          304
+        ],
+        "stage_to_foh": [
+          304,
+          302,
+          301,
+          303
+        ],
+        "bottom_to_top": [
+          303,
+          304,
+          301,
+          302
+        ],
+        "top_to_bottom": [
+          301,
+          302,
+          303,
+          304
+        ],
+        "center_out": [
+          303,
+          301,
+          302,
+          304
+        ],
+        "outside_in": [
+          303,
+          301,
+          302,
+          304
+        ]
+      },
+      "type:Sunstrip active mkII": {
+        "left_to_right": [
+          401,
+          402
+        ],
+        "right_to_left": [
+          401,
+          402
+        ],
+        "foh_to_stage": [
+          401,
+          402
+        ],
+        "stage_to_foh": [
+          402,
+          401
+        ],
+        "bottom_to_top": [
+          401,
+          402
+        ],
+        "top_to_bottom": [
+          401,
+          402
+        ],
+        "center_out": [
+          401,
+          402
+        ],
+        "outside_in": [
+          401,
+          402
+        ]
+      },
+      "cap:pan": {
+        "left_to_right": [
+          101,
+          102,
+          103,
+          104
+        ],
+        "right_to_left": [
+          103,
+          104,
+          101,
+          102
+        ],
+        "foh_to_stage": [
+          101,
+          103,
+          102,
+          104
+        ],
+        "stage_to_foh": [
+          102,
+          104,
+          101,
+          103
+        ],
+        "bottom_to_top": [
+          101,
+          102,
+          103,
+          104
+        ],
+        "top_to_bottom": [
+          101,
+          102,
+          103,
+          104
+        ],
+        "center_out": [
+          101,
+          103,
+          102,
+          104
+        ],
+        "outside_in": [
+          101,
+          103,
+          102,
+          104
+        ],
+        "mirror": [
+          101,
+          102,
+          104,
+          103
+        ]
+      },
+      "cap:tilt": {
+        "left_to_right": [
+          101,
+          102,
+          103,
+          104
+        ],
+        "right_to_left": [
+          103,
+          104,
+          101,
+          102
+        ],
+        "foh_to_stage": [
+          101,
+          103,
+          102,
+          104
+        ],
+        "stage_to_foh": [
+          102,
+          104,
+          101,
+          103
+        ],
+        "bottom_to_top": [
+          101,
+          102,
+          103,
+          104
+        ],
+        "top_to_bottom": [
+          101,
+          102,
+          103,
+          104
+        ],
+        "center_out": [
+          101,
+          103,
+          102,
+          104
+        ],
+        "outside_in": [
+          101,
+          103,
+          102,
+          104
+        ],
+        "mirror": [
+          101,
+          102,
+          104,
+          103
+        ]
+      },
+      "cap:dimmer": {
+        "left_to_right": [
+          401,
+          402,
+          301,
+          302,
+          303,
+          304,
+          101,
+          102,
+          103,
+          104,
+          201,
+          202,
+          203,
+          204
+        ],
+        "right_to_left": [
+          203,
+          204,
+          201,
+          202,
+          103,
+          104,
+          101,
+          102,
+          303,
+          304,
+          301,
+          302,
+          401,
+          402
+        ],
+        "foh_to_stage": [
+          101,
+          103,
+          201,
+          203,
+          303,
+          301,
+          401,
+          302,
+          402,
+          304,
+          102,
+          104,
+          202,
+          204
+        ],
+        "stage_to_foh": [
+          102,
+          104,
+          202,
+          204,
+          304,
+          402,
+          302,
+          401,
+          301,
+          303,
+          101,
+          103,
+          201,
+          203
+        ],
+        "bottom_to_top": [
+          401,
+          402,
+          303,
+          304,
+          101,
+          102,
+          103,
+          104,
+          201,
+          202,
+          203,
+          204,
+          301,
+          302
+        ],
+        "top_to_bottom": [
+          301,
+          302,
+          201,
+          202,
+          203,
+          204,
+          101,
+          102,
+          103,
+          104,
+          303,
+          304,
+          401,
+          402
+        ],
+        "center_out": [
+          101,
+          102,
+          103,
+          104,
+          303,
+          304,
+          201,
+          202,
+          301,
+          302,
+          203,
+          401,
+          402,
+          204
+        ],
+        "outside_in": [
+          203,
+          401,
+          402,
+          204,
+          301,
+          302,
+          201,
+          202,
+          303,
+          304,
+          103,
+          104,
+          101,
+          102
+        ]
+      },
+      "cap:color_mix": {
+        "left_to_right": [
+          301,
+          302,
+          303,
+          304,
+          101,
+          102,
+          103,
+          104,
+          201,
+          202,
+          203,
+          204
+        ],
+        "right_to_left": [
+          203,
+          204,
+          201,
+          202,
+          103,
+          104,
+          101,
+          102,
+          303,
+          304,
+          301,
+          302
+        ],
+        "foh_to_stage": [
+          101,
+          103,
+          201,
+          203,
+          303,
+          301,
+          302,
+          304,
+          102,
+          104,
+          202,
+          204
+        ],
+        "stage_to_foh": [
+          102,
+          104,
+          202,
+          204,
+          304,
+          302,
+          301,
+          303,
+          101,
+          103,
+          201,
+          203
+        ],
+        "bottom_to_top": [
+          303,
+          304,
+          101,
+          102,
+          103,
+          104,
+          201,
+          202,
+          203,
+          204,
+          301,
+          302
+        ],
+        "top_to_bottom": [
+          301,
+          302,
+          201,
+          202,
+          203,
+          204,
+          101,
+          102,
+          103,
+          104,
+          303,
+          304
+        ],
+        "center_out": [
+          103,
+          104,
+          101,
+          102,
+          201,
+          202,
+          303,
+          304,
+          203,
+          301,
+          302,
+          204
+        ],
+        "outside_in": [
+          203,
+          301,
+          302,
+          204,
+          303,
+          304,
+          201,
+          202,
+          101,
+          102,
+          103,
+          104
+        ]
+      },
+      "cap:shutter": {
+        "left_to_right": [
+          301,
+          302,
+          303,
+          304,
+          101,
+          102,
+          103,
+          104
+        ],
+        "right_to_left": [
+          103,
+          104,
+          101,
+          102,
+          303,
+          304,
+          301,
+          302
+        ],
+        "foh_to_stage": [
+          101,
+          103,
+          303,
+          301,
+          302,
+          304,
+          102,
+          104
+        ],
+        "stage_to_foh": [
+          102,
+          104,
+          304,
+          302,
+          301,
+          303,
+          101,
+          103
+        ],
+        "bottom_to_top": [
+          303,
+          304,
+          101,
+          102,
+          103,
+          104,
+          301,
+          302
+        ],
+        "top_to_bottom": [
+          301,
+          302,
+          101,
+          102,
+          103,
+          104,
+          303,
+          304
+        ],
+        "center_out": [
+          101,
+          102,
+          303,
+          304,
+          103,
+          301,
+          302,
+          104
+        ],
+        "outside_in": [
+          103,
+          301,
+          302,
+          104,
+          303,
+          304,
+          101,
+          102
+        ]
+      }
+    },
+    "pairs": {
+      "all": [
+        [
+          101,
+          103
+        ],
+        [
+          102,
+          104
+        ]
+      ],
+      "type:MH 100 Beam": [
+        [
+          101,
+          103
+        ],
+        [
+          102,
+          104
+        ]
+      ],
+      "type:Root Par 6": [
+        [
+          201,
+          203
+        ],
+        [
+          202,
+          204
+        ]
+      ],
+      "cap:pan": [
+        [
+          101,
+          103
+        ],
+        [
+          102,
+          104
+        ]
+      ],
+      "cap:tilt": [
+        [
+          101,
+          103
+        ],
+        [
+          102,
+          104
+        ]
+      ],
+      "cap:dimmer": [
+        [
+          101,
+          103
+        ],
+        [
+          102,
+          104
+        ]
+      ]
+    }
+  },
+  "warnings": []
+}

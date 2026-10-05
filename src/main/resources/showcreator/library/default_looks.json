@@ -1,0 +1,21 @@
+{
+  "format": "automa3-looks",
+  "version": 1,
+  "exportedBy": "MA3 Show Creator (copy of AutoMA3's built-in defaults, ../auto_ma3/src/main/java/automa3/config/ConfigStore.java)",
+  "looks": [
+    { "name": "Base low",     "role": "BASE",     "ma3": { "page": 1, "exec": 101 }, "sections": ["INTRO", "BREAKDOWN", "OUTRO"], "energy": { "min": 0,   "max": 0.5 } },
+    { "name": "Base full",    "role": "BASE",     "ma3": { "page": 1, "exec": 102 }, "energy": { "min": 0.4, "max": 1 } },
+    { "name": "Colour A",     "role": "COLOR",    "ma3": { "page": 1, "exec": 103 } },
+    { "name": "Colour B",     "role": "COLOR",    "ma3": { "page": 1, "exec": 104 } },
+    { "name": "Move slow",    "role": "MOVEMENT", "ma3": { "page": 1, "exec": 105 }, "energy": { "min": 0,   "max": 0.6 } },
+    { "name": "Move fast",    "role": "MOVEMENT", "ma3": { "page": 1, "exec": 106 }, "energy": { "min": 0.5, "max": 1 } },
+    { "name": "Dimmer chase", "role": "EFFECT",   "ma3": { "page": 1, "exec": 107 }, "energy": { "min": 0.4, "max": 1 } },
+    { "name": "Riser",        "role": "RISER",    "ma3": { "page": 1, "exec": 108 } },
+    { "name": "Drop hit",     "role": "ACCENT",   "ma3": { "page": 1, "exec": 109 } },
+    { "name": "Strobe",       "role": "STROBE",   "ma3": { "page": 1, "exec": 110 } },
+    { "name": "Blinder",      "role": "BLINDER",  "ma3": { "page": 1, "exec": 111 } },
+    { "name": "Blackout",     "role": "BLACKOUT", "ma3": { "page": 1, "exec": 112 } },
+    { "name": "Haze",         "role": "HAZE",     "ma3": { "page": 1, "exec": 113 } },
+    { "name": "Fog",          "role": "FOG",      "ma3": { "page": 1, "exec": 114 } }
+  ]
+}

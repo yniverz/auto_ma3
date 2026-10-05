@@ -1,0 +1,31 @@
+{
+  "format": "ma3sc-plan",
+  "version": 1,
+  "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+  "groups": [
+    { "key": "spots_lr", "name": "SC Spots LR", "fixtures": { "set": "class:Spots", "order": "left_to_right" } }
+  ],
+  "sequences": [
+    {
+      "key": "dimmer_wave",
+      "name": "SC Dimmer wave",
+      "cues": [
+        { "name": "Sinus", "lines": [ { "group": "spots_lr", "preset": "dim_sinus" } ] },
+        { "name": "Chase", "lines": [ { "group": "spots_lr", "preset": "chase", "phase": { "from": 0, "to": 360 } } ] }
+      ]
+    }
+  ],
+  "looks": [
+    {
+      "key": "dimmer_wave",
+      "sequence": "dimmer_wave",
+      "role": "EFFECT",
+      "name": "Dimmer chase",
+      "description": "dimmer sinus, then a left-to-right chase",
+      "sections": ["GROOVE", "PEAK"],
+      "energy": { "min": 0.4, "max": 1.0 },
+      "automa3_id": "bd94297e",
+      "exec": 107
+    }
+  ]
+}

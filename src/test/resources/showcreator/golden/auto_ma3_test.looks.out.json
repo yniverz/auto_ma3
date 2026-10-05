@@ -1,0 +1,1149 @@
+{
+  "format": "automa3-looks",
+  "version": 1,
+  "exportedBy": "ma3-showcreator",
+  "exportedAt": "TIME",
+  "context": {
+    "speedMaster": 1
+  },
+  "looks": [
+    {
+      "id": "sc_base_low",
+      "name": "Base low",
+      "role": "BASE",
+      "ma3": {
+        "page": 1,
+        "exec": 101,
+        "sequence": 501
+      },
+      "description": "heads 50, stage pars 35; front pars and sunstrips dark",
+      "sections": [
+        "INTRO",
+        "BREAKDOWN",
+        "OUTRO"
+      ],
+      "energy": {
+        "min": 0,
+        "max": 0.5
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "base_low",
+          "sequence": "base_low"
+        }
+      }
+    },
+    {
+      "id": "sc_base_back",
+      "name": "Base back",
+      "role": "BASE",
+      "ma3": {
+        "page": 1,
+        "exec": 113,
+        "sequence": 502
+      },
+      "description": "heads and stage pars full, sunstrips 60, front pars dark: silhouettes",
+      "sections": [
+        "GROOVE",
+        "BUILD"
+      ],
+      "energy": {
+        "min": 0.3,
+        "max": 0.7
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "base_back",
+          "sequence": "base_back"
+        }
+      }
+    },
+    {
+      "id": "sc_base_beams",
+      "name": "Beams only",
+      "role": "BASE",
+      "ma3": {
+        "page": 1,
+        "exec": 114,
+        "sequence": 503
+      },
+      "description": "only the four heads at full, everything else dark",
+      "sections": [
+        "GROOVE",
+        "DROP",
+        "PEAK"
+      ],
+      "energy": {
+        "min": 0.5,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "base_beams",
+          "sequence": "base_beams"
+        }
+      }
+    },
+    {
+      "id": "sc_base_cross",
+      "name": "Base front cross",
+      "role": "BASE",
+      "ma3": {
+        "page": 1,
+        "exec": 115,
+        "sequence": 504
+      },
+      "description": "heads full and front pars 80, upstage dark",
+      "sections": [
+        "GROOVE",
+        "PEAK"
+      ],
+      "energy": {
+        "min": 0.4,
+        "max": 0.9
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "base_cross",
+          "sequence": "base_cross"
+        }
+      }
+    },
+    {
+      "id": "sc_base_full",
+      "name": "Base full",
+      "role": "BASE",
+      "ma3": {
+        "page": 1,
+        "exec": 102,
+        "sequence": 505
+      },
+      "description": "heads and stage pars full, sunstrips 80, front pars 50",
+      "energy": {
+        "min": 0.4,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "base_full",
+          "sequence": "base_full"
+        }
+      }
+    },
+    {
+      "id": "sc_color_red_white",
+      "name": "Colour A",
+      "role": "COLOR",
+      "ma3": {
+        "page": 1,
+        "exec": 103,
+        "sequence": 506
+      },
+      "description": "white beams over deep red pars",
+      "energy": {
+        "min": 0,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "color_red_white",
+          "sequence": "color_red_white"
+        }
+      }
+    },
+    {
+      "id": "sc_color_cyan_magenta",
+      "name": "Colour B",
+      "role": "COLOR",
+      "ma3": {
+        "page": 1,
+        "exec": 104,
+        "sequence": 507
+      },
+      "description": "left side magenta, right side cyan (seen from FOH)",
+      "energy": {
+        "min": 0,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "color_cyan_magenta",
+          "sequence": "color_cyan_magenta"
+        }
+      }
+    },
+    {
+      "id": "sc_color_red_mono",
+      "name": "Colour C deep red",
+      "role": "COLOR",
+      "ma3": {
+        "page": 1,
+        "exec": 116,
+        "sequence": 508
+      },
+      "description": "every colour fixture saturated red",
+      "sections": [
+        "INTRO",
+        "BREAKDOWN",
+        "OUTRO"
+      ],
+      "energy": {
+        "min": 0,
+        "max": 0.5
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "color_red_mono",
+          "sequence": "color_red_mono"
+        }
+      }
+    },
+    {
+      "id": "sc_color_acid",
+      "name": "Colour D acid",
+      "role": "COLOR",
+      "ma3": {
+        "page": 1,
+        "exec": 117,
+        "sequence": 509
+      },
+      "description": "green heads over magenta pars",
+      "sections": [
+        "GROOVE",
+        "DROP",
+        "PEAK"
+      ],
+      "energy": {
+        "min": 0.5,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "color_acid",
+          "sequence": "color_acid"
+        }
+      }
+    },
+    {
+      "id": "sc_color_blue_amber",
+      "name": "Colour E blue amber",
+      "role": "COLOR",
+      "ma3": {
+        "page": 1,
+        "exec": 118,
+        "sequence": 510
+      },
+      "description": "amber front pars against deep blue heads and stage pars",
+      "sections": [
+        "INTRO",
+        "GROOVE",
+        "BUILD",
+        "OUTRO"
+      ],
+      "energy": {
+        "min": 0.2,
+        "max": 0.8
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "color_blue_amber",
+          "sequence": "color_blue_amber"
+        }
+      }
+    },
+    {
+      "id": "sc_color_fire_ice",
+      "name": "Colour F fire and ice",
+      "role": "COLOR",
+      "ma3": {
+        "page": 1,
+        "exec": 119,
+        "sequence": 511
+      },
+      "description": "outer pairs red, inner pairs cyan on every fixture type",
+      "sections": [
+        "BUILD",
+        "DROP",
+        "PEAK"
+      ],
+      "energy": {
+        "min": 0.6,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "color_fire_ice",
+          "sequence": "color_fire_ice"
+        }
+      }
+    },
+    {
+      "id": "sc_color_cold",
+      "name": "Colour G cold white blue",
+      "role": "COLOR",
+      "ma3": {
+        "page": 1,
+        "exec": 120,
+        "sequence": 512
+      },
+      "description": "white beams over deep blue pars",
+      "sections": [
+        "DROP",
+        "PEAK"
+      ],
+      "energy": {
+        "min": 0.6,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "color_cold",
+          "sequence": "color_cold"
+        }
+      }
+    },
+    {
+      "id": "sc_cfx_heads",
+      "name": "Heads white red",
+      "role": "EFFECT",
+      "ma3": {
+        "page": 1,
+        "exec": 121,
+        "sequence": 513
+      },
+      "description": "heads swap white and red in mirror pairs, One",
+      "layer": "Colour FX",
+      "sections": [
+        "DROP",
+        "PEAK"
+      ],
+      "energy": {
+        "min": 0.7,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "cfx_heads",
+          "sequence": "cfx_heads"
+        }
+      }
+    },
+    {
+      "id": "sc_cfx_front",
+      "name": "Front pars cyan magenta",
+      "role": "EFFECT",
+      "ma3": {
+        "page": 1,
+        "exec": 122,
+        "sequence": 514
+      },
+      "description": "front pars swap cyan and magenta, mirrored full cycle, Div2",
+      "layer": "Colour FX",
+      "sections": [
+        "GROOVE",
+        "BUILD"
+      ],
+      "energy": {
+        "min": 0.3,
+        "max": 0.8
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "cfx_front",
+          "sequence": "cfx_front"
+        }
+      }
+    },
+    {
+      "id": "sc_cfx_stage",
+      "name": "Stage pars red blue",
+      "role": "EFFECT",
+      "ma3": {
+        "page": 1,
+        "exec": 123,
+        "sequence": 515
+      },
+      "description": "stage pars swap red and blue, spread left to right, Div2",
+      "layer": "Colour FX",
+      "sections": [
+        "GROOVE",
+        "BUILD",
+        "PEAK"
+      ],
+      "energy": {
+        "min": 0.4,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "cfx_stage",
+          "sequence": "cfx_stage"
+        }
+      }
+    },
+    {
+      "id": "sc_move_slow",
+      "name": "Move slow",
+      "role": "MOVEMENT",
+      "ma3": {
+        "page": 1,
+        "exec": 105,
+        "sequence": 516
+      },
+      "description": "back heads, low tilt over the stage, mirrored pan sway, Div4",
+      "energy": {
+        "min": 0,
+        "max": 0.6
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "move_slow",
+          "sequence": "move_slow"
+        }
+      }
+    },
+    {
+      "id": "sc_move_circle",
+      "name": "Move circle",
+      "role": "MOVEMENT",
+      "ma3": {
+        "page": 1,
+        "exec": 124,
+        "sequence": 517
+      },
+      "description": "back heads, mirrored circles fanned out, Div2",
+      "sections": [
+        "GROOVE",
+        "BUILD"
+      ],
+      "energy": {
+        "min": 0.35,
+        "max": 0.75
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "move_circle",
+          "sequence": "move_circle"
+        }
+      }
+    },
+    {
+      "id": "sc_move_fast",
+      "name": "Move fast",
+      "role": "MOVEMENT",
+      "ma3": {
+        "page": 1,
+        "exec": 106,
+        "sequence": 518
+      },
+      "description": "back heads, mirrored figure eights tilted towards the audience, Div2",
+      "energy": {
+        "min": 0.5,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "move_fast",
+          "sequence": "move_fast"
+        }
+      }
+    },
+    {
+      "id": "sc_front_nod",
+      "name": "Front heads nod",
+      "role": "MOVEMENT",
+      "ma3": {
+        "page": 1,
+        "exec": 125,
+        "sequence": 519
+      },
+      "description": "front heads, alternating tilt nod over the stage, Div4",
+      "layer": "Front heads",
+      "sections": [
+        "INTRO",
+        "BREAKDOWN",
+        "OUTRO"
+      ],
+      "energy": {
+        "min": 0,
+        "max": 0.5
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "front_nod",
+          "sequence": "front_nod"
+        }
+      }
+    },
+    {
+      "id": "sc_front_fan",
+      "name": "Front heads fan",
+      "role": "MOVEMENT",
+      "ma3": {
+        "page": 1,
+        "exec": 126,
+        "sequence": 520
+      },
+      "description": "front heads fanned wide, mirrored pan sway, Div2",
+      "layer": "Front heads",
+      "sections": [
+        "GROOVE",
+        "BUILD"
+      ],
+      "energy": {
+        "min": 0.3,
+        "max": 0.8
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "front_fan",
+          "sequence": "front_fan"
+        }
+      }
+    },
+    {
+      "id": "sc_front_peak",
+      "name": "Front heads peak",
+      "role": "MOVEMENT",
+      "ma3": {
+        "page": 1,
+        "exec": 127,
+        "sequence": 521
+      },
+      "description": "front heads, fast mirrored circles high over the audience, One",
+      "layer": "Front heads",
+      "sections": [
+        "DROP",
+        "PEAK"
+      ],
+      "energy": {
+        "min": 0.7,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "front_peak",
+          "sequence": "front_peak"
+        }
+      }
+    },
+    {
+      "id": "sc_fx_slow_chase",
+      "name": "Heads slow chase",
+      "role": "EFFECT",
+      "ma3": {
+        "page": 1,
+        "exec": 128,
+        "sequence": 522
+      },
+      "description": "one head at a time from FOH to the stage, hard on/off, Div2",
+      "sections": [
+        "INTRO",
+        "BREAKDOWN",
+        "OUTRO"
+      ],
+      "energy": {
+        "min": 0,
+        "max": 0.5
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "fx_slow_chase",
+          "sequence": "fx_slow_chase"
+        }
+      }
+    },
+    {
+      "id": "sc_fx_pingpong",
+      "name": "Heads ping pong",
+      "role": "EFFECT",
+      "ma3": {
+        "page": 1,
+        "exec": 129,
+        "sequence": 523
+      },
+      "description": "left heads and right heads snap in turn, sunstrips against them, One",
+      "sections": [
+        "GROOVE",
+        "BUILD"
+      ],
+      "energy": {
+        "min": 0.3,
+        "max": 0.8
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "fx_pingpong",
+          "sequence": "fx_pingpong"
+        }
+      }
+    },
+    {
+      "id": "sc_fx_chase",
+      "name": "Dimmer chase",
+      "role": "EFFECT",
+      "ma3": {
+        "page": 1,
+        "exec": 107,
+        "sequence": 524
+      },
+      "description": "heads and sunstrips chase left to right, One",
+      "energy": {
+        "min": 0.4,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "fx_chase",
+          "sequence": "fx_chase"
+        }
+      }
+    },
+    {
+      "id": "sc_fx_snap",
+      "name": "Heads snap",
+      "role": "EFFECT",
+      "ma3": {
+        "page": 1,
+        "exec": 130,
+        "sequence": 525
+      },
+      "description": "heads snap on in mirror pairs, sunstrips snap off, Mul2",
+      "sections": [
+        "DROP",
+        "PEAK"
+      ],
+      "energy": {
+        "min": 0.7,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "fx_snap",
+          "sequence": "fx_snap"
+        }
+      }
+    },
+    {
+      "id": "sc_px_slow",
+      "name": "Stage pars slow chase",
+      "role": "EFFECT",
+      "ma3": {
+        "page": 1,
+        "exec": 131,
+        "sequence": 526
+      },
+      "description": "stage pars only, one at a time left to right, Div2",
+      "layer": "Pars",
+      "sections": [
+        "INTRO",
+        "BREAKDOWN",
+        "OUTRO"
+      ],
+      "energy": {
+        "min": 0,
+        "max": 0.5
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "px_slow",
+          "sequence": "px_slow"
+        }
+      }
+    },
+    {
+      "id": "sc_px_mirror",
+      "name": "Pars mirror chase",
+      "role": "EFFECT",
+      "ma3": {
+        "page": 1,
+        "exec": 132,
+        "sequence": 527
+      },
+      "description": "front and stage pars chase in mirror pairs, half a cycle apart, One",
+      "layer": "Pars",
+      "sections": [
+        "GROOVE",
+        "BUILD"
+      ],
+      "energy": {
+        "min": 0.4,
+        "max": 0.8
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "px_mirror",
+          "sequence": "px_mirror"
+        }
+      }
+    },
+    {
+      "id": "sc_px_cross",
+      "name": "Pars cross ping pong",
+      "role": "EFFECT",
+      "ma3": {
+        "page": 1,
+        "exec": 133,
+        "sequence": 528
+      },
+      "description": "diagonals: front left + stage right, then front right + stage left, One",
+      "layer": "Pars",
+      "sections": [
+        "GROOVE",
+        "DROP",
+        "PEAK"
+      ],
+      "energy": {
+        "min": 0.5,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "px_cross",
+          "sequence": "px_cross"
+        }
+      }
+    },
+    {
+      "id": "sc_px_depth",
+      "name": "Pars depth chase",
+      "role": "EFFECT",
+      "ma3": {
+        "page": 1,
+        "exec": 134,
+        "sequence": 529
+      },
+      "description": "all pars chase from FOH to the stage, Mul2",
+      "layer": "Pars",
+      "sections": [
+        "DROP",
+        "PEAK"
+      ],
+      "energy": {
+        "min": 0.7,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "px_depth",
+          "sequence": "px_depth"
+        }
+      }
+    },
+    {
+      "id": "sc_riser_soft",
+      "name": "Riser soft",
+      "role": "RISER",
+      "ma3": {
+        "page": 1,
+        "exec": 135,
+        "sequence": 530
+      },
+      "description": "stage pars chase from the centre out, sunstrips with them, Div2",
+      "sections": [
+        "BUILD"
+      ],
+      "energy": {
+        "min": 0,
+        "max": 0.5
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "riser_soft",
+          "sequence": "riser_soft"
+        }
+      }
+    },
+    {
+      "id": "sc_riser",
+      "name": "Riser",
+      "role": "RISER",
+      "ma3": {
+        "page": 1,
+        "exec": 108,
+        "sequence": 531
+      },
+      "description": "whole rig chases from the centre out, One",
+      "energy": {
+        "min": 0,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "riser",
+          "sequence": "riser"
+        }
+      }
+    },
+    {
+      "id": "sc_riser_strobe",
+      "name": "Riser strobe",
+      "role": "RISER",
+      "ma3": {
+        "page": 1,
+        "exec": 136,
+        "sequence": 532
+      },
+      "description": "dimmer strobe on the whole rig fading in with the build, in the running colour, Mul2",
+      "sections": [
+        "BUILD"
+      ],
+      "energy": {
+        "min": 0.6,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "riser_strobe",
+          "sequence": "riser_strobe"
+        }
+      }
+    },
+    {
+      "id": "sc_drop_hit",
+      "name": "Drop hit",
+      "role": "ACCENT",
+      "ma3": {
+        "page": 1,
+        "exec": 109,
+        "sequence": 533
+      },
+      "description": "everything to full",
+      "energy": {
+        "min": 0,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "drop_hit",
+          "sequence": "drop_hit"
+        }
+      }
+    },
+    {
+      "id": "sc_accent_beams",
+      "name": "Hit beams white",
+      "role": "ACCENT",
+      "ma3": {
+        "page": 1,
+        "exec": 137,
+        "sequence": 534
+      },
+      "description": "heads full white plus sunstrips",
+      "sections": [
+        "GROOVE",
+        "BUILD",
+        "DROP"
+      ],
+      "energy": {
+        "min": 0.3,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "accent_beams",
+          "sequence": "accent_beams"
+        }
+      }
+    },
+    {
+      "id": "sc_accent_back",
+      "name": "Hit back silhouette",
+      "role": "ACCENT",
+      "ma3": {
+        "page": 1,
+        "exec": 138,
+        "sequence": 535
+      },
+      "description": "stage pars full white plus sunstrips behind the performers",
+      "sections": [
+        "INTRO",
+        "BREAKDOWN",
+        "BUILD"
+      ],
+      "energy": {
+        "min": 0,
+        "max": 0.6
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "accent_back",
+          "sequence": "accent_back"
+        }
+      }
+    },
+    {
+      "id": "sc_accent_red",
+      "name": "Hit red",
+      "role": "ACCENT",
+      "ma3": {
+        "page": 1,
+        "exec": 139,
+        "sequence": 536
+      },
+      "description": "every colour fixture full saturated red, sunstrips full",
+      "sections": [
+        "DROP",
+        "PEAK"
+      ],
+      "energy": {
+        "min": 0.6,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "accent_red",
+          "sequence": "accent_red"
+        }
+      }
+    },
+    {
+      "id": "sc_strobe",
+      "name": "Strobe",
+      "role": "STROBE",
+      "ma3": {
+        "page": 1,
+        "exec": 110,
+        "sequence": 537
+      },
+      "description": "whole rig dimmer strobe in the running colour, four flashes per beat (Mul4)",
+      "energy": {
+        "min": 0,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "strobe",
+          "sequence": "strobe"
+        }
+      }
+    },
+    {
+      "id": "sc_strobe_beams",
+      "name": "Strobe beams",
+      "role": "STROBE",
+      "ma3": {
+        "page": 1,
+        "exec": 140,
+        "sequence": 538
+      },
+      "description": "heads and stage pars dimmer strobe, Mul4",
+      "sections": [
+        "BUILD"
+      ],
+      "energy": {
+        "min": 0.5,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "strobe_beams",
+          "sequence": "strobe_beams"
+        }
+      }
+    },
+    {
+      "id": "sc_strobe_rnd",
+      "name": "Random strobe",
+      "role": "STROBE",
+      "ma3": {
+        "page": 1,
+        "exec": 141,
+        "sequence": 539
+      },
+      "description": "whole rig random dimmer strobe, Mul4",
+      "sections": [
+        "DROP",
+        "PEAK"
+      ],
+      "energy": {
+        "min": 0.7,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "strobe_rnd",
+          "sequence": "strobe_rnd"
+        }
+      }
+    },
+    {
+      "id": "sc_blinder",
+      "name": "Blinder",
+      "role": "BLINDER",
+      "ma3": {
+        "page": 1,
+        "exec": 111,
+        "sequence": 540
+      },
+      "description": "front pars full white plus sunstrips",
+      "energy": {
+        "min": 0,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "blinder",
+          "sequence": "blinder"
+        }
+      }
+    },
+    {
+      "id": "sc_blinder_full",
+      "name": "Blinder full",
+      "role": "BLINDER",
+      "ma3": {
+        "page": 1,
+        "exec": 142,
+        "sequence": 541
+      },
+      "description": "front and stage pars full white plus sunstrips",
+      "sections": [
+        "DROP",
+        "PEAK"
+      ],
+      "energy": {
+        "min": 0.8,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "blinder_full",
+          "sequence": "blinder_full"
+        }
+      }
+    },
+    {
+      "id": "sc_blackout",
+      "name": "Blackout",
+      "role": "BLACKOUT",
+      "ma3": {
+        "page": 1,
+        "exec": 112,
+        "sequence": 542
+      },
+      "description": "all dimmers 0, High priority",
+      "energy": {
+        "min": 0,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "blackout",
+          "sequence": "blackout"
+        }
+      }
+    },
+    {
+      "id": "sc_blackout_silhouette",
+      "name": "Blackout silhouette",
+      "role": "BLACKOUT",
+      "ma3": {
+        "page": 1,
+        "exec": 143,
+        "sequence": 543
+      },
+      "description": "everything dark except the sunstrips at full, High priority",
+      "sections": [
+        "BREAKDOWN",
+        "DROP"
+      ],
+      "energy": {
+        "min": 0.3,
+        "max": 1
+      },
+      "enabled": true,
+      "meta": {
+        "generator": {
+          "tool": "ma3-showcreator",
+          "look": "blackout_silhouette",
+          "sequence": "blackout_silhouette"
+        }
+      }
+    }
+  ]
+}

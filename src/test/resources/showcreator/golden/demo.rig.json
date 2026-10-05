@@ -1,0 +1,17 @@
+{
+  "format": "ma3sc-rig",
+  "version": 1,
+  "source": { "file": "hand-written demo rig; fids 101-104 = Stairville MH 360 in auto_ma3_test (from inspect log)" },
+  "axes": { "x": "audience left -> right (seen from FOH)", "y": "downstage -> upstage", "z": "up", "unit": "mm" },
+  "fixtures": [
+    { "fid": 101, "name": "Spot 1", "type": "Stairville MH 360", "class": "Spots", "pos": [-3000, 2000, 4000], "rot": [0, 0, 0], "caps": ["dimmer", "pan", "tilt", "color_mix"] },
+    { "fid": 102, "name": "Spot 2", "type": "Stairville MH 360", "class": "Spots", "pos": [-1000, 2000, 4000], "rot": [0, 0, 0], "caps": ["dimmer", "pan", "tilt", "color_mix"] },
+    { "fid": 103, "name": "Spot 3", "type": "Stairville MH 360", "class": "Spots", "pos": [1000, 2000, 4000], "rot": [0, 0, 0], "caps": ["dimmer", "pan", "tilt", "color_mix"] },
+    { "fid": 104, "name": "Spot 4", "type": "Stairville MH 360", "class": "Spots", "pos": [3000, 2000, 4000], "rot": [0, 0, 0], "caps": ["dimmer", "pan", "tilt", "color_mix"] }
+  ],
+  "sets": { "all": [101, 102, 103, 104], "class:Spots": [101, 102, 103, 104] },
+  "orderings": {
+    "class:Spots": { "left_to_right": [101, 102, 103, 104], "center_out": [102, 103, 101, 104] }
+  },
+  "pairs": { "class:Spots": [[101, 104], [102, 103]] }
+}

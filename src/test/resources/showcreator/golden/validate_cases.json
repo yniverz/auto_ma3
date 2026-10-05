@@ -1,0 +1,5764 @@
+[
+ {
+  "name": "valid",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": []
+ },
+ {
+  "name": "schema",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "LASER",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": [
+   {
+    "level": "error",
+    "path": "$.groups[0]",
+    "code": "schema",
+    "message": "missing required field 'name'",
+    "hint": ""
+   },
+   {
+    "level": "error",
+    "path": "$.looks[0].role",
+    "code": "schema",
+    "message": "'LASER' is not one of ['BASE', 'COLOR', 'MOVEMENT', 'EFFECT', 'RISER', 'ACCENT', 'STROBE', 'BLINDER', 'BLACKOUT', 'HAZE', 'FOG', 'SPECIAL']",
+    "hint": ""
+   }
+  ]
+ },
+ {
+  "name": "forbidden_name",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus. fast",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": [
+   {
+    "level": "error",
+    "path": "$.sequences[0].cues[0].name",
+    "code": "schema",
+    "message": "grandMA3 names must not contain \\ \" $ & * ? , . ; ^ { | } ~",
+    "hint": ""
+   }
+  ]
+ },
+ {
+  "name": "unknown_preset_group",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "laser_show"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "nope",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": [
+   {
+    "level": "error",
+    "path": "$.sequences[0].cues[0].lines[0].preset",
+    "code": "unknown_preset",
+    "message": "no preset with key 'laser_show' in library.json",
+    "hint": ""
+   },
+   {
+    "level": "error",
+    "path": "$.sequences[0].cues[1].lines[0].group",
+    "code": "unknown_group",
+    "message": "no group with key 'nope'",
+    "hint": "defined groups: spots_lr"
+   }
+  ]
+ },
+ {
+  "name": "capability",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "circle"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": [
+   {
+    "level": "error",
+    "path": "$.sequences[0].cues[0].lines[0].preset",
+    "code": "capability",
+    "message": "preset 'circle' needs ['pan', 'tilt'] but 102 lacks pan/tilt",
+    "hint": "use a group whose fixtures all have these capabilities"
+   },
+   {
+    "level": "warning",
+    "path": "$.sequences[0].cues[0].lines[0]",
+    "code": "movement_without_tilt",
+    "message": "position phaser 'circle' on 'spots_lr' without a static tilt in the same cue",
+    "hint": "moving heads rest at tilt midpoint (beam straight down), where pan is invisible: add a line with values {\"tilt\": ...} for the same group before the phaser line"
+   }
+  ]
+ },
+ {
+  "name": "static_ok",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "values": {
+          "dimmer": 100
+         }
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": []
+ },
+ {
+  "name": "static_bad",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "values": {
+          "dimmer": 120,
+          "haze": 50
+         }
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": [
+   {
+    "level": "error",
+    "path": "$.sequences[0].cues[0].lines[0].values.dimmer",
+    "code": "out_of_range",
+    "message": "120 outside 0..100",
+    "hint": ""
+   },
+   {
+    "level": "error",
+    "path": "$.sequences[0].cues[0].lines[0].values.haze",
+    "code": "capability",
+    "message": "fixtures [101, 102, 103, 104] have no haze",
+    "hint": ""
+   }
+  ]
+ },
+ {
+  "name": "phase_needs_phaser",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "static_red",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": [
+   {
+    "level": "error",
+    "path": "$.sequences[0].cues[1].lines[0].phase",
+    "code": "phase_needs_phaser",
+    "message": "preset 'static_red' is not a phaser; phase spread needs one",
+    "hint": ""
+   }
+  ]
+ },
+ {
+  "name": "preset_xor_values",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus",
+         "values": {
+          "dimmer": 50
+         }
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": [
+   {
+    "level": "error",
+    "path": "$.sequences[0].cues[0].lines[0]",
+    "code": "preset_or_values",
+    "message": "a line needs exactly one of 'preset' or 'values'",
+    "hint": ""
+   }
+  ]
+ },
+ {
+  "name": "unknown_set",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "zigzag"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": [
+   {
+    "level": "error",
+    "path": "$.groups[0].fixtures",
+    "code": "unknown_set",
+    "message": "set 'class:Spots' has no ordering 'zigzag' (available: center_out, left_to_right)",
+    "hint": "use a set and ordering listed in rig.json 'orderings'"
+   }
+  ]
+ },
+ {
+  "name": "unknown_fixture",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "fids": [
+       101,
+       999
+      ]
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": [
+   {
+    "level": "error",
+    "path": "$.groups[0].fixtures",
+    "code": "unknown_fixture",
+    "message": "fixture ids not in the rig: [999]",
+    "hint": ""
+   }
+  ]
+ },
+ {
+  "name": "duplicate_fixture_schema",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "fids": [
+       101,
+       101
+      ]
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": [
+   {
+    "level": "error",
+    "path": "$.groups[0].fixtures",
+    "code": "schema",
+    "message": "invalid value: Either {\"fids\": [...]} in the wanted order, or {\"set\": <rig set>, \"order\": <rig ordering of that set>}.",
+    "hint": ""
+   }
+  ]
+ },
+ {
+  "name": "exec_keys",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 300
+    },
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 300
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": [
+   {
+    "level": "error",
+    "path": "$.looks[1].key",
+    "code": "duplicate_key",
+    "message": "look key 'dimmer_wave' already used at $.looks[0]",
+    "hint": ""
+   },
+   {
+    "level": "error",
+    "path": "$.looks[0].exec",
+    "code": "exec_out_of_range",
+    "message": "executor 300 is outside the reserved range 101..199",
+    "hint": "omit 'exec' to let the compiler allocate one"
+   },
+   {
+    "level": "warning",
+    "path": "$.looks[1].sequence",
+    "code": "sequence_reused",
+    "message": "sequence 'dimmer_wave' is on more than one executor",
+    "hint": ""
+   },
+   {
+    "level": "error",
+    "path": "$.looks[1].exec",
+    "code": "exec_out_of_range",
+    "message": "executor 300 is outside the reserved range 101..199",
+    "hint": "omit 'exec' to let the compiler allocate one"
+   },
+   {
+    "level": "error",
+    "path": "$.looks[1].exec",
+    "code": "exec_taken",
+    "message": "executor 300 already used by $.looks[0]",
+    "hint": ""
+   }
+  ]
+ },
+ {
+  "name": "energy_unused",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "key": "spare",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.9,
+      "max": 0.1
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": [
+   {
+    "level": "error",
+    "path": "$.looks[0].energy",
+    "code": "energy_range",
+    "message": "energy.min is greater than energy.max",
+    "hint": ""
+   },
+   {
+    "level": "warning",
+    "path": "$.sequences[1]",
+    "code": "unused_sequence",
+    "message": "sequence 'spare' is not on any executor (no look uses it)",
+    "hint": ""
+   }
+  ]
+ },
+ {
+  "name": "enums",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ],
+     "speed_scale": "Mul3",
+     "priority": "Super"
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": [
+   {
+    "level": "error",
+    "path": "$.sequences[0].speed_scale",
+    "code": "schema",
+    "message": "'Mul3' is not one of ['Div4', 'Div2', 'One', 'Mul2', 'Mul4']",
+    "hint": ""
+   },
+   {
+    "level": "error",
+    "path": "$.sequences[0].priority",
+    "code": "schema",
+    "message": "'Super' is not one of ['Lowest', 'Low', 'LTP', 'High', 'Highest', 'HTP']",
+    "hint": ""
+   }
+  ]
+ },
+ {
+  "name": "movement_no_tilt",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "circle"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": [
+   {
+    "level": "warning",
+    "path": "$.sequences[0].cues[0].lines[0]",
+    "code": "movement_without_tilt",
+    "message": "position phaser 'circle' on 'spots_lr' without a static tilt in the same cue",
+    "hint": "moving heads rest at tilt midpoint (beam straight down), where pan is invisible: add a line with values {\"tilt\": ...} for the same group before the phaser line"
+   }
+  ]
+ },
+ {
+  "name": "movement_tilt",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "values": {
+          "tilt": 45
+         }
+        },
+        {
+         "group": "spots_lr",
+         "preset": "circle"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": []
+ },
+ {
+  "name": "whole_rig_one_type",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "C0",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase"
+        }
+       ]
+      },
+      {
+       "name": "C1",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase"
+        }
+       ]
+      },
+      {
+       "name": "C2",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase"
+        }
+       ]
+      },
+      {
+       "name": "C3",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": []
+ },
+ {
+  "name": "whole_rig_overuse",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "C0",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase"
+        }
+       ]
+      },
+      {
+       "name": "C1",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase"
+        }
+       ]
+      },
+      {
+       "name": "C2",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase"
+        }
+       ]
+      },
+      {
+       "name": "C3",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Other",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": [
+   {
+    "level": "warning",
+    "path": "$.sequences",
+    "code": "whole_rig_overuse",
+    "message": "4 of 4 effect lines use the whole rig",
+    "hint": "use fixture-type groups, foh_to_stage / mirror orderings and different effects per group"
+   }
+  ]
+ },
+ {
+  "name": "top_level_schema",
+  "plan": {
+   "format": "x",
+   "version": 2,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ],
+   "unknown": 1
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": [
+   {
+    "level": "error",
+    "path": "$.format",
+    "code": "schema",
+    "message": "must be 'ma3sc-plan'",
+    "hint": ""
+   },
+   {
+    "level": "error",
+    "path": "$.version",
+    "code": "schema",
+    "message": "must be 1",
+    "hint": ""
+   },
+   {
+    "level": "error",
+    "path": "$.unknown",
+    "code": "schema",
+    "message": "unknown field 'unknown' (allowed: format, version, notes, groups, sequences, looks)",
+    "hint": ""
+   }
+  ]
+ },
+ {
+  "name": "no_groups",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": [
+   {
+    "level": "error",
+    "path": "$.sequences[0].cues[0].lines[0].group",
+    "code": "unknown_group",
+    "message": "no group with key 'spots_lr'",
+    "hint": "defined groups: none"
+   },
+   {
+    "level": "error",
+    "path": "$.sequences[0].cues[1].lines[0].group",
+    "code": "unknown_group",
+    "message": "no group with key 'spots_lr'",
+    "hint": "defined groups: none"
+   }
+  ]
+ },
+ {
+  "name": "phase_missing_to",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus",
+         "phase": {
+          "from": 0
+         }
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": [
+   {
+    "level": "error",
+    "path": "$.sequences[0].cues[0].lines[0].phase",
+    "code": "schema",
+    "message": "missing required field 'to'",
+    "hint": ""
+   }
+  ]
+ },
+ {
+  "name": "unique_items",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "GROOVE"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {},
+  "issues": [
+   {
+    "level": "error",
+    "path": "$.looks[0].sections",
+    "code": "schema",
+    "message": "items must be unique",
+    "hint": ""
+   }
+  ]
+ },
+ {
+  "name": "looks_in",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 107
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": [
+   {
+    "id": "bd94297e",
+    "name": "Dimmer chase",
+    "role": "EFFECT",
+    "ma3": {
+     "page": 1,
+     "exec": 107
+    }
+   },
+   {
+    "name": "Haze",
+    "role": "HAZE",
+    "ma3": {
+     "page": 1,
+     "exec": 113
+    }
+   },
+   {
+    "name": "Base",
+    "role": "BASE",
+    "exec": 101
+   },
+   {
+    "id": "zz",
+    "name": "Move",
+    "role": "MOVEMENT"
+   }
+  ],
+  "cfg": {},
+  "issues": [
+   {
+    "level": "warning",
+    "path": "$.looks",
+    "code": "look_not_filled",
+    "message": "look #2 'Base' (BASE) of the look list is not in the plan",
+    "hint": "add a look with its automa3_id (or exec), or explain in notes why it is left out"
+   },
+   {
+    "level": "warning",
+    "path": "$.looks",
+    "code": "look_not_filled",
+    "message": "look #3 'Move' (MOVEMENT) of the look list is not in the plan",
+    "hint": "add a look with its automa3_id (or exec), or explain in notes why it is left out"
+   }
+  ]
+ },
+ {
+  "name": "range_full",
+  "plan": {
+   "format": "ma3sc-plan",
+   "version": 1,
+   "notes": "Phase 1 walking skeleton: 1 group, 1 sequence with 2 cues, 1 executor.",
+   "groups": [
+    {
+     "key": "spots_lr",
+     "name": "SC Spots LR",
+     "fixtures": {
+      "set": "class:Spots",
+      "order": "left_to_right"
+     }
+    }
+   ],
+   "sequences": [
+    {
+     "key": "dimmer_wave",
+     "name": "SC Dimmer wave",
+     "cues": [
+      {
+       "name": "Sinus",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "dim_sinus"
+        }
+       ]
+      },
+      {
+       "name": "Chase",
+       "lines": [
+        {
+         "group": "spots_lr",
+         "preset": "chase",
+         "phase": {
+          "from": 0,
+          "to": 360
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "looks": [
+    {
+     "key": "dimmer_wave",
+     "sequence": "dimmer_wave",
+     "role": "EFFECT",
+     "name": "Dimmer chase",
+     "description": "dimmer sinus, then a left-to-right chase",
+     "sections": [
+      "GROOVE",
+      "PEAK"
+     ],
+     "energy": {
+      "min": 0.4,
+      "max": 1.0
+     },
+     "automa3_id": "bd94297e",
+     "exec": 150
+    }
+   ]
+  },
+  "rig": {
+   "format": "ma3sc-rig",
+   "version": 1,
+   "source": {
+    "file": "hand-written demo rig (replace fids with 4 fixtures of your test show)"
+   },
+   "axes": {
+    "x": "audience left -> right (seen from FOH)",
+    "y": "downstage -> upstage",
+    "z": "up",
+    "unit": "mm"
+   },
+   "fixtures": [
+    {
+     "fid": 101,
+     "name": "Spot 1",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 102,
+     "name": "Spot 2",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      -1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 103,
+     "name": "Spot 3",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      1000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    },
+    {
+     "fid": 104,
+     "name": "Spot 4",
+     "type": "Demo Spot",
+     "class": "Spots",
+     "pos": [
+      3000,
+      2000,
+      4000
+     ],
+     "rot": [
+      0,
+      0,
+      0
+     ],
+     "caps": [
+      "dimmer",
+      "pan",
+      "tilt",
+      "color_mix"
+     ]
+    }
+   ],
+   "sets": {
+    "all": [
+     101,
+     102,
+     103,
+     104
+    ],
+    "class:Spots": [
+     101,
+     102,
+     103,
+     104
+    ]
+   },
+   "orderings": {
+    "class:Spots": {
+     "left_to_right": [
+      101,
+      102,
+      103,
+      104
+     ],
+     "center_out": [
+      102,
+      103,
+      101,
+      104
+     ]
+    }
+   },
+   "pairs": {
+    "class:Spots": [
+     [
+      101,
+      104
+     ],
+     [
+      102,
+      103
+     ]
+    ]
+   }
+  },
+  "looks_in": null,
+  "cfg": {
+   "executors": [
+    101,
+    101
+   ],
+   "groups": [
+    501,
+    501
+   ]
+  },
+  "issues": [
+   {
+    "level": "error",
+    "path": "$.looks[0].exec",
+    "code": "exec_out_of_range",
+    "message": "executor 150 is outside the reserved range 101..101",
+    "hint": "omit 'exec' to let the compiler allocate one"
+   }
+  ]
+ }
+]

@@ -1,0 +1,79 @@
+[
+  {
+    "level": "warning",
+    "path": "$.looks",
+    "code": "look_not_filled",
+    "message": "look #0 'Base low' (BASE) of the look list is not in the plan",
+    "hint": "add a look with its automa3_id (or exec), or explain in notes why it is left out"
+  },
+  {
+    "level": "warning",
+    "path": "$.looks",
+    "code": "look_not_filled",
+    "message": "look #1 'Base full' (BASE) of the look list is not in the plan",
+    "hint": "add a look with its automa3_id (or exec), or explain in notes why it is left out"
+  },
+  {
+    "level": "warning",
+    "path": "$.looks",
+    "code": "look_not_filled",
+    "message": "look #2 'Colour A' (COLOR) of the look list is not in the plan",
+    "hint": "add a look with its automa3_id (or exec), or explain in notes why it is left out"
+  },
+  {
+    "level": "warning",
+    "path": "$.looks",
+    "code": "look_not_filled",
+    "message": "look #3 'Colour B' (COLOR) of the look list is not in the plan",
+    "hint": "add a look with its automa3_id (or exec), or explain in notes why it is left out"
+  },
+  {
+    "level": "warning",
+    "path": "$.looks",
+    "code": "look_not_filled",
+    "message": "look #4 'Move slow' (MOVEMENT) of the look list is not in the plan",
+    "hint": "add a look with its automa3_id (or exec), or explain in notes why it is left out"
+  },
+  {
+    "level": "warning",
+    "path": "$.looks",
+    "code": "look_not_filled",
+    "message": "look #5 'Move fast' (MOVEMENT) of the look list is not in the plan",
+    "hint": "add a look with its automa3_id (or exec), or explain in notes why it is left out"
+  },
+  {
+    "level": "warning",
+    "path": "$.looks",
+    "code": "look_not_filled",
+    "message": "look #7 'Riser' (RISER) of the look list is not in the plan",
+    "hint": "add a look with its automa3_id (or exec), or explain in notes why it is left out"
+  },
+  {
+    "level": "warning",
+    "path": "$.looks",
+    "code": "look_not_filled",
+    "message": "look #8 'Drop hit' (ACCENT) of the look list is not in the plan",
+    "hint": "add a look with its automa3_id (or exec), or explain in notes why it is left out"
+  },
+  {
+    "level": "warning",
+    "path": "$.looks",
+    "code": "look_not_filled",
+    "message": "look #9 'Strobe' (STROBE) of the look list is not in the plan",
+    "hint": "add a look with its automa3_id (or exec), or explain in notes why it is left out"
+  },
+  {
+    "level": "warning",
+    "path": "$.looks",
+    "code": "look_not_filled",
+    "message": "look #10 'Blinder' (BLINDER) of the look list is not in the plan",
+    "hint": "add a look with its automa3_id (or exec), or explain in notes why it is left out"
+  },
+  {
+    "level": "warning",
+    "path": "$.looks",
+    "code": "look_not_filled",
+    "message": "look #11 'Blackout' (BLACKOUT) of the look list is not in the plan",
+    "hint": "add a look with its automa3_id (or exec), or explain in notes why it is left out"
+  }
+]

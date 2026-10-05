@@ -32,10 +32,12 @@ public class WebServer {
     private static final Logger log = LoggerFactory.getLogger(WebServer.class);
 
     private final App app;
+    private final ShowApi showApi;
     private HttpServer server;
 
     public WebServer(App app) {
         this.app = app;
+        this.showApi = new ShowApi(app.shows());
     }
 
     private int port;
@@ -80,6 +82,8 @@ public class WebServer {
             Map<String, String> query = query(ex.getRequestURI().getRawQuery());
             if (path.equals("/") || path.equals("/index.html")) {
                 staticFile(ex, "/web/index.html", "text/html; charset=utf-8");
+            } else if (path.startsWith("/api/show/")) {
+                showApi.handle(ex, path, method, query, this::json);
             } else if (path.equals("/api/stream")) {
                 stream(ex);
             } else if (path.equals("/api/state")) {
@@ -269,6 +273,7 @@ public class WebServer {
             m.put("speedMasterCount", p.speedMasterCount);
             m.put("reservedSpeedMasters", p.reservedSpeedMasters);
             m.put("templates", p.templates);
+            m.put("buildTemplates", automa3.show.BuildProfile.defaultTemplates());
             m.put("notes", p.notes);
             out.add(m);
         }

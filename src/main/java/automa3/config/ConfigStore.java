@@ -84,6 +84,10 @@ public class ConfigStore {
         c.engine.dropBars = Math.max(1, c.engine.dropBars);
         c.speed.master = Math.max(1, c.speed.master);
         if (c.speed.multiplier <= 0) c.speed.multiplier = 1;
+        if (c.showCreator == null) c.showCreator = new Config.ShowCreatorConfig();
+        if (c.showCreator.console == null) c.showCreator.console = "";
+        if (c.showCreator.ma3Folder == null) c.showCreator.ma3Folder = "";
+        if (c.showCreator.claude == null || c.showCreator.claude.isBlank()) c.showCreator.claude = "claude";
         return c;
     }
 

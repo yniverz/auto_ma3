@@ -66,6 +66,13 @@ public class ConsoleHub {
         }
     }
 
+    /** One command line to one console (show building), logged like the others. Returns false in dry run. */
+    public boolean sendTo(Config.ConsoleConfig console, String command, String reason) {
+        boolean sent = !dryRun && sendCommand(console, command);
+        record(new LogEntry(System.currentTimeMillis(), command, reason, console.name, sent));
+        return sent;
+    }
+
     private boolean sendCommand(Config.ConsoleConfig console, String command) {
         String prefix = console.prefix == null || console.prefix.isBlank() ? "" : "/" + console.prefix.replace("/", "");
         byte[] data = OscCodec.encode(prefix + "/cmd", command);

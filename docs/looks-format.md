@@ -110,6 +110,7 @@ always contains every field.
 | `flashBeats` | number ≥ 0 | `0` | Flash looks: beats to stay on; `0` = AutoMA3's default for the role. |
 | `level` | integer 0..100 | `100` | Looks AutoMA3 controls by fader (`HAZE`, `RISER`, mode `FADER`): the maximum fader level. |
 | `enabled` | boolean | `true` | Whether AutoMA3 uses the look at all. |
+| `disableOnly` | boolean | `false` | Import only: the sender no longer has this look (e.g. a show build left its executor empty). With merge, a matching look here is switched off and otherwise left as it is; with no match, or with add / replace, the entry is skipped. Never adds a look. |
 | `tags` | array of string | `[]` | Free tags. Kept and exported again; AutoMA3 does not interpret them. |
 | `meta` | object | `{}` | Free data for other tools (any JSON). Kept untouched and exported again. Use it to remember what you created, e.g. `{"generator": {"preset": "4.12", "group": 3}}`. |
 

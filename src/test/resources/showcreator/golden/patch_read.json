@@ -1,0 +1,359 @@
+{
+  "fixtures": [
+    {
+      "fid": 101,
+      "name": "Stairville MH 360",
+      "fixturetype": "MH 100 Beam",
+      "mode": "14 channel",
+      "layer": "FixtureLayer 1",
+      "class": "FixtureClass 1",
+      "pos": [
+        1020.1,
+        2517.3,
+        2876.1
+      ],
+      "rot": [
+        0.0,
+        0.0,
+        -90.0
+      ]
+    },
+    {
+      "fid": 102,
+      "name": "Stairville MH 360",
+      "fixturetype": "MH 100 Beam",
+      "mode": "14 channel",
+      "layer": "FixtureLayer 1",
+      "class": "FixtureClass 1",
+      "pos": [
+        3813.7,
+        2516.8,
+        2876.1
+      ],
+      "rot": [
+        0.0,
+        0.0,
+        -90.0
+      ]
+    },
+    {
+      "fid": 103,
+      "name": "Stairville MH 360",
+      "fixturetype": "MH 100 Beam",
+      "mode": "14 channel",
+      "layer": "FixtureLayer 1",
+      "class": "FixtureClass 1",
+      "pos": [
+        1020.1,
+        810.3,
+        2876.1
+      ],
+      "rot": [
+        0.0,
+        0.0,
+        -90.0
+      ]
+    },
+    {
+      "fid": 104,
+      "name": "Stairville MH 360",
+      "fixturetype": "MH 100 Beam",
+      "mode": "14 channel",
+      "layer": "FixtureLayer 1",
+      "class": "FixtureClass 1",
+      "pos": [
+        3813.7,
+        809.8,
+        2876.1
+      ],
+      "rot": [
+        0.0,
+        0.0,
+        -90.0
+      ]
+    },
+    {
+      "fid": 201,
+      "name": "Cameo ROOT Par 6",
+      "fixturetype": "Root Par 6",
+      "mode": "7 channel - Delay Off",
+      "layer": "FixtureLayer 1",
+      "class": "FixtureClass 1",
+      "pos": [
+        1020.3,
+        -852.3,
+        3106.8
+      ],
+      "rot": [
+        0.0,
+        0.0,
+        180.0
+      ]
+    },
+    {
+      "fid": 202,
+      "name": "Cameo ROOT Par 6",
+      "fixturetype": "Root Par 6",
+      "mode": "7 channel - Delay Off",
+      "layer": "FixtureLayer 1",
+      "class": "FixtureClass 1",
+      "pos": [
+        3812.8,
+        -852.3,
+        3106.8
+      ],
+      "rot": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "fid": 203,
+      "name": "Cameo ROOT Par 6",
+      "fixturetype": "Root Par 6",
+      "mode": "7 channel - Delay Off",
+      "layer": "FixtureLayer 1",
+      "class": "FixtureClass 1",
+      "pos": [
+        1003.7,
+        -2827.3,
+        3076.6
+      ],
+      "rot": [
+        0.0,
+        0.0,
+        180.0
+      ]
+    },
+    {
+      "fid": 204,
+      "name": "Cameo ROOT Par 6",
+      "fixturetype": "Root Par 6",
+      "mode": "7 channel - Delay Off",
+      "layer": "FixtureLayer 1",
+      "class": "FixtureClass 1",
+      "pos": [
+        3817.2,
+        -2827.3,
+        3076.6
+      ],
+      "rot": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "fid": 301,
+      "name": "Stairville Outdoor Stage Par 12x3 Tri",
+      "fixturetype": "Stagepar Pro QCL MKII",
+      "mode": "Standard mode",
+      "layer": "FixtureLayer 1",
+      "class": "FixtureClass 1",
+      "pos": [
+        1908.7,
+        5490.0,
+        3223.3
+      ],
+      "rot": [
+        38.999999349305,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "fid": 302,
+      "name": "Stairville Outdoor Stage Par 12x3 Tri",
+      "fixturetype": "Stagepar Pro QCL MKII",
+      "mode": "Standard mode",
+      "layer": "FixtureLayer 1",
+      "class": "FixtureClass 1",
+      "pos": [
+        2888.4,
+        5490.0,
+        3191.4
+      ],
+      "rot": [
+        38.999999349305,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "fid": 303,
+      "name": "Stairville Outdoor Stage Par 12x3 Tri",
+      "fixturetype": "Stagepar Pro QCL MKII",
+      "mode": "Standard mode",
+      "layer": "FixtureLayer 1",
+      "class": "FixtureClass 1",
+      "pos": [
+        1255.3,
+        4226.7,
+        2810.4
+      ],
+      "rot": [
+        89.999999302827,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "fid": 304,
+      "name": "Stairville Outdoor Stage Par 12x3 Tri",
+      "fixturetype": "Stagepar Pro QCL MKII",
+      "mode": "Standard mode",
+      "layer": "FixtureLayer 1",
+      "class": "FixtureClass 1",
+      "pos": [
+        3573.7,
+        4225.3,
+        2810.4
+      ],
+      "rot": [
+        89.999999302827,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "fid": 401,
+      "name": "Showtec SunStrip II",
+      "fixturetype": "Sunstrip active mkII",
+      "mode": "10 Ch",
+      "layer": "FixtureLayer 1",
+      "class": "FixtureClass 1",
+      "pos": [
+        2000.0,
+        6306.3,
+        681.0
+      ],
+      "rot": [
+        -179.99999930283,
+        -61.000000921818,
+        90.0
+      ]
+    },
+    {
+      "fid": 402,
+      "name": "Showtec SunStrip II",
+      "fixturetype": "Sunstrip active mkII",
+      "mode": "10 Ch",
+      "layer": "FixtureLayer 1",
+      "class": "FixtureClass 1",
+      "pos": [
+        3000.0,
+        6306.6,
+        702.3
+      ],
+      "rot": [
+        -179.99999930283,
+        -61.000000921818,
+        90.0
+      ]
+    }
+  ],
+  "types": {
+    "Universal": {
+      "Default": [
+        "Dimmer",
+        "Pan",
+        "Tilt",
+        "ColorRGB_R",
+        "ColorRGB_G",
+        "ColorRGB_B",
+        "Zoom",
+        "Iris"
+      ]
+    },
+    "Vert001": {
+      "Default": []
+    },
+    "Vert002": {
+      "Default": []
+    },
+    "Vert003": {
+      "Default": []
+    },
+    "Vert004": {
+      "Default": []
+    },
+    "Vert005": {
+      "Default": []
+    },
+    "Venue": {
+      "Default": []
+    },
+    "PA": {
+      "Default": []
+    },
+    "Curtain": {
+      "Default": []
+    },
+    "F31-150": {
+      "Default": []
+    },
+    "F43-200": {
+      "Default": []
+    },
+    "F34-100": {
+      "Default": []
+    },
+    "Stairville MH 360": {},
+    "Traversenverbindung": {
+      "Default": []
+    },
+    "Bühnenpodest": {
+      "Default": []
+    },
+    "Showtec SunStrip II": {},
+    "MH 100 Beam": {
+      "14 channel": [
+        "Pan",
+        "Tilt",
+        "PositionMSpeed",
+        "Dimmer",
+        "ColorRGB_R",
+        "ColorRGB_G",
+        "ColorRGB_B",
+        "ColorRGB_W",
+        "COLORTEMPERATURE",
+        "COLORMIXER",
+        "Shutter1",
+        "FixtureGlobalReset"
+      ]
+    },
+    "Sunstrip active mkII": {
+      "10 Ch": [
+        "Dimmer"
+      ]
+    },
+    "Stagepar Pro QCL MKII": {
+      "Standard mode": [
+        "Dimmer",
+        "ColorRGB_R",
+        "ColorRGB_G",
+        "ColorRGB_B",
+        "ColorRGB_W",
+        "StrobeRate",
+        "NoFeature"
+      ]
+    },
+    "Grouping": {
+      "Default": []
+    },
+    "Root Par 6": {
+      "7 channel - Delay Off": [
+        "ColorRGB_R",
+        "ColorRGB_G",
+        "ColorRGB_B",
+        "ColorRGB_W",
+        "ColorRGB_RY",
+        "ColorRGB_UV",
+        "Dimmer"
+      ]
+    }
+  },
+  "job_id": "patch-20261005T174620Z-f9085f65",
+  "ma3": "2.3.2.0"
+}

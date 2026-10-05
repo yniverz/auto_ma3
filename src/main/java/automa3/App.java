@@ -34,6 +34,7 @@ public class App {
     private MusicListener musicListener;
     private final SessionRecorder recorder;
     private final WebServer web;
+    private final automa3.show.ShowService shows;
     private volatile AudioAnalyzer audio;
     private String audioKey = "";
 
@@ -42,6 +43,7 @@ public class App {
         this.library = new ConfigLibrary(config, config.path().toAbsolutePath().getParent().resolve("configs"));
         this.source = source;
         this.hub = new ConsoleHub(config);
+        this.shows = new automa3.show.ShowService(config, dataDir(config), hub);
         this.recorder = new SessionRecorder(recordingsDir);
         this.engine = new ShowEngine(config, scheduler, hub::send, new OperatorState(),
                 () -> audio == null ? AudioAnalyzer.AudioState.OFF : audio.state(), new Random());
@@ -135,6 +137,11 @@ public class App {
 
     public ConfigLibrary library() {
         return library;
+    }
+
+    /** Show creation (Show tab). */
+    public automa3.show.ShowService shows() {
+        return shows;
     }
 
     public ConsoleHub hub() {

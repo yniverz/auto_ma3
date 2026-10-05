@@ -153,6 +153,29 @@
              align-items: center; border-top: 1px solid var(--line); margin-top: 16px; }
   input.needs { border-color: var(--accent); }
   .kv { display: flex; gap: 8px; margin-bottom: 4px; align-items: center; }
+  /* Show tab */
+  .step-n { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: var(--panel2); color: var(--muted);
+            align-items: center; justify-content: center; font-size: 11px; margin-right: 6px; }
+  .sc-log { font: 12px/1.6 ui-monospace, "SF Mono", Menlo, Monaco, monospace; max-height: 260px; overflow: auto;
+            background: var(--bg); border-radius: 6px; padding: 8px 10px; margin-top: 8px; white-space: pre-wrap; }
+  .sc-log .error { color: var(--bad); } .sc-log .warn { color: var(--accent); } .sc-log .ok { color: #63c174; }
+  .sc-log .say { color: var(--text); font-family: inherit; margin: 4px 0; } .sc-log .tool, .sc-log .debug { color: var(--faint); }
+  .sc-log .cmd { display: flex; gap: 8px; align-items: center; margin: 4px 0; } .sc-log code { color: var(--text); }
+  .activity { display: flex; gap: 10px; align-items: center; margin-top: 8px; padding: 8px 10px; border-radius: 6px;
+              background: var(--panel2); font-size: 13px; }
+  .activity .label { font-weight: 700; } .activity .detail { color: var(--muted); overflow: hidden; text-overflow: ellipsis;
+              white-space: nowrap; min-width: 0; flex: 1; } .activity .timer { color: var(--faint); margin-left: auto; white-space: nowrap; }
+  .spinner { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--accent);
+             animation: spin .8s linear infinite; flex: none; }
+  .activity[data-phase="thinking"] .spinner { animation-duration: 1.6s; }
+  .activity[data-phase="writing"] .spinner, .activity[data-phase="replying"] .spinner { border-top-color: var(--ok); }
+  .bar { height: 4px; border-radius: 2px; background: var(--line); margin-top: 4px; overflow: hidden; }
+  .bar > div { height: 100%; background: var(--accent); transition: width .3s; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+  .pill { display: inline-block; padding: 0 6px; border-radius: 4px; background: var(--panel2); color: var(--muted); font-size: 11px; }
+  .issues { margin: 8px 0; padding-left: 18px; font-size: 12px; } .issues .error { color: var(--bad); } .issues .warning { color: var(--accent); }
+  ul.lines { margin: 4px 0 0; padding-left: 16px; color: var(--muted); font-size: 12px; }
   @media (max-width: 600px) { main { padding: 12px; } header, nav { padding-left: 12px; padding-right: 12px; }
     .section-big { font-size: 32px; } button.ctl { flex: 1 1 40%; } }
 </style>
@@ -179,6 +202,7 @@
   <button data-tab="consoles">Consoles</button>
   <button data-tab="settings">Settings</button>
   <button data-tab="setups">Setups</button>
+  <button data-tab="show">Show</button>
   <button data-tab="setup">MA3 setup</button>
 </nav>
 <main>
@@ -310,6 +334,82 @@
   </section>
 
   <!-- SETUP -->
+  <section id="tab-show" class="hidden">
+    <div class="panel" style="margin-bottom:12px">
+      <h2>Show creation</h2>
+      <p class="muted small">Builds groups, effect sequences and executors in grandMA3 onPC on this Mac from its patch, designed by the
+        planner (Claude Code), and hands the looks to the Looks tab. Optional: AutoMA3 runs the same without it.
+        Shows are kept separately from the setups; copy one to try another version without touching it.</p>
+      <div class="row">
+        <label class="small muted">Show <select id="scShow"></select></label>
+        <button class="small" id="scNew">New…</button>
+        <button class="small" id="scCopy" title="Copy patch, look list and plan to a new show; the original stays as it is">Copy…</button>
+        <button class="small" id="scRename">Rename…</button>
+        <button class="small" id="scDelete">Delete…</button>
+        <span style="flex:1"></span>
+        <span class="badge" id="scMa3">grandMA3</span>
+        <span class="badge" id="scClaude">Claude Code</span>
+      </div>
+      <div class="muted small" id="scStatusMsg" style="margin-top:8px"></div>
+    </div>
+    <div id="scSteps">
+    <div class="panel" style="margin-bottom:12px">
+      <h2><span class="step-n">1</span>Rig</h2>
+      <p class="muted small">Reads fixtures, types, attributes and 3D positions from the show open in grandMA3. An MVR export is optional (cross-check of positions).</p>
+      <div class="row">
+        <button class="primary" id="scPatch">Read patch from grandMA3</button>
+        <label class="small" style="cursor:pointer"><span class="btn-like">Add MVR…</span><input type="file" id="scMvr" accept=".mvr" class="hidden"></label>
+        <span class="muted small" id="scRigInfo"></span>
+      </div>
+      <div class="sc-log hidden" data-task="patch"></div>
+      <div class="table-wrap" id="scRig" style="margin-top:8px"></div>
+    </div>
+    <div class="panel" style="margin-bottom:12px">
+      <h2><span class="step-n">2</span>Look list</h2>
+      <p class="muted small">The executors AutoMA3 should fire. Without a list, AutoMA3's default looks are used.</p>
+      <div class="row">
+        <button class="small" id="scLooksAuto">Use the current looks</button>
+        <label class="small" style="cursor:pointer"><span class="btn-like">Load file…</span><input type="file" id="scLooksFile" accept=".json" class="hidden"></label>
+        <button class="small" id="scLooksDefault">Use the defaults</button>
+        <span class="muted small" id="scLooksInfo"></span>
+      </div>
+      <div class="table-wrap" id="scLooks" style="margin-top:8px"></div>
+    </div>
+    <div class="panel" style="margin-bottom:12px">
+      <h2><span class="step-n">3</span>Plan</h2>
+      <p class="muted small">The planner (Claude Code) designs groups, effects and looks for this rig and checks its plan until it is valid. Ask for changes in plain words.</p>
+      <div class="row">
+        <button class="small" data-prompt="Plan the show: fill the look list.">Fill the look list</button>
+        <button class="small" data-prompt="Plan a bigger show: 2–3 looks per role with different sections and energy ranges, plus extra layers (e.g. a MOVEMENT layer for the heads and an EFFECT layer for the pars).">Bigger show</button>
+      </div>
+      <textarea id="scPrompt" rows="3" style="width:100%;margin-top:8px" placeholder="What should the planner do? e.g. “Plan the show”, “make the movement slower in breakdowns”"></textarea>
+      <div class="row" style="margin-top:8px">
+        <button class="primary" id="scPlan">Run planner</button>
+        <label class="small muted hidden" id="scResumeWrap"><input type="checkbox" id="scResume" checked> continue the last planner conversation</label>
+        <button class="small hidden" id="scCancel">Stop</button>
+      </div>
+      <div class="sc-log hidden" data-task="plan"></div>
+      <div id="scPlanView" style="margin-top:8px"></div>
+    </div>
+    <div class="panel" style="margin-bottom:12px">
+      <h2><span class="step-n">4</span>Build in grandMA3</h2>
+      <p class="muted small">Deletes and rebuilds the reserved ranges (groups, sequences, MAtricks) and assigns the executors. Nothing outside them is touched.
+        <b>This replaces what a previous build put there, also during a show.</b> <span id="scRanges"></span></p>
+      <div class="row"><button class="primary" id="scBuild">Build</button></div>
+      <div class="sc-log hidden" data-task="build"></div>
+    </div>
+    <div class="panel">
+      <h2><span class="step-n">5</span>Looks in AutoMA3</h2>
+      <p class="muted small">Takes the built looks into the Looks tab with a preview: choose what to take, then Save changes. Or download them as a file.</p>
+      <div class="row">
+        <button class="primary" id="scUse">Use in AutoMA3…</button>
+        <button class="small" id="scDownload">Download look file</button>
+        <span class="muted small" id="scUseInfo"></span>
+      </div>
+    </div>
+    </div>
+  </section>
+
   <section id="tab-setup" class="hidden">
     <div class="panel" id="setupText"></div>
   </section>
@@ -343,6 +443,7 @@ document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
   document.querySelectorAll("main > section").forEach(s => s.classList.toggle("hidden", s.id !== "tab-" + b.dataset.tab));
   if (b.dataset.tab === "setup") renderSetup();
   if (b.dataset.tab === "live" && state) renderLive();
+  if (b.dataset.tab === "show") scLoadAll().catch(e => { $("scStatusMsg").textContent = e.message; });
 });
 
 // ---------- live
@@ -733,14 +834,20 @@ $("importLooksFile").onchange = async ev => {
     $("lookMsg").textContent = "Not a JSON file: " + e.message;
     return;
   }
-  $("importInfo").textContent = `${file.name}: ${(importFile.looks || []).length} looks` +
+  await startImport(importFile, file.name);
+};
+
+/** Open the import panel for a look file (from disk, or built in the Show tab). */
+async function startImport(data, label) {
+  importFile = data;
+  $("importInfo").textContent = `${label}: ${(importFile.looks || []).length} looks` +
     (importFile.exportedBy ? ` from ${importFile.exportedBy}` : "") + ". Choose the looks to import:";
   $("importContextLabel").classList.toggle("hidden", !importFile.context);
   $("importContext").checked = false;
   $("importPanel").classList.remove("hidden");
   await previewImport(null);
   $("importPanel").scrollIntoView({behavior: "smooth"});
-};
+}
 
 async function previewImport(select) {
   try {
@@ -764,8 +871,8 @@ function renderImportTable(r) {
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.dataset.index = e.index;
-    cb.checked = e.action !== "error";
-    cb.disabled = e.action === "error";
+    cb.checked = e.action !== "error" && e.action !== "skipped";
+    cb.disabled = e.action === "error" || e.action === "skipped";
     const action = e.action === "added" ? "new look" : e.action === "updated" ? "updates existing look" : e.action;
     const color = e.action === "error" ? "var(--bad)" : e.action === "updated" ? "var(--accent)" : "var(--ok)";
     tr.append(td(cb), td(e.label), td(Object.assign(document.createElement("span"), {textContent: action, style: `color:${color}`})),
@@ -838,10 +945,19 @@ function renderConsoles() {
       inp.oninput = () => { c.commandOverrides = c.commandOverrides || {}; if (inp.value) c.commandOverrides[k] = inp.value; else delete c.commandOverrides[k]; setDirty(true); };
       row.append(lab, inp); ov.append(row);
     });
+    const bov = document.createElement("details");
+    bov.innerHTML = "<summary class='small muted'>Show build command overrides (Show tab)</summary>";
+    Object.entries(prof.buildTemplates || {}).forEach(([k, v]) => {
+      const row = document.createElement("div"); row.className = "kv";
+      const lab = document.createElement("span"); lab.className = "small muted"; lab.style.width = "130px"; lab.textContent = k;
+      const inp = document.createElement("input"); inp.style.flex = "1"; inp.placeholder = v; inp.value = (c.commandOverrides || {})[k] || "";
+      inp.oninput = () => { c.commandOverrides = c.commandOverrides || {}; if (inp.value) c.commandOverrides[k] = inp.value; else delete c.commandOverrides[k]; setDirty(true); };
+      row.append(lab, inp); bov.append(row);
+    });
     const del = document.createElement("button");
     del.className = "small"; del.textContent = "Remove console";
     del.onclick = () => { draft.consoles.splice(i, 1); setDirty(true); renderConsoles(); };
-    d.append(g, info, ov, del);
+    d.append(g, info, ov, bov, del);
     box.append(d);
   });
   let dl = $("versions");
@@ -897,6 +1013,13 @@ const SETTINGS = [
     waveformAnalysis: "Detect sections from waveform when no phrase analysis",
     readUsbFiles: "Read rekordbox files off the USB over the network (restart needed; can fail with rekordbox 7)"}],
   ["oscIn", "OSC from console", {enabled: "Listen for OSC", port: "Listen port", controlPrefix: "Control address prefix"}],
+  ["showCreator", "Show creation (Show tab)", {
+    console: "Console to build on (name; empty = the console at 127.0.0.1)", ma3Folder: "grandMA3 folder (empty = ~/MALightingTechnology)",
+    groupsFrom: "Reserved groups from", groupsTo: "Reserved groups to", sequencesFrom: "Reserved sequences from", sequencesTo: "Reserved sequences to",
+    matricksFrom: "Reserved MAtricks from", matricksTo: "Reserved MAtricks to", page: "Executor page", executorsFrom: "Executors from", executorsTo: "Executors to",
+    cueMethod: ["How effects get into cues", [["recipe", "Cue recipes (tested on 2.3.2)"], ["programmer", "Programmer"]]],
+    audience: ["Where FOH is in the patch coordinates", [["-y", "-y (FOH at negative y)"], ["+y", "+y"], ["-x", "-x"], ["+x", "+x"]]],
+    claude: "Claude Code command or path (planner)"}],
 ];
 
 function renderSettings() {
@@ -1109,6 +1232,235 @@ $("setupUpload").onchange = async ev => {
 $("downloadRunning").onclick = () => download("/api/configs/download");
 
 $("setupBadge").onclick = () => document.querySelector('nav button[data-tab="setups"]').click();
+
+// ---------- Show tab: show creation (optional; needs grandMA3 onPC on this Mac and, for the planner, Claude Code)
+let scShow = null, scState = null, scPolling = null;
+
+/** Show API call: changes carry X-AutoMA3 (only this Mac may build or run the planner). */
+async function scApi(path, opts = {}) {
+  const url = path + (path.includes("?") ? "&" : "?") + "show=" + encodeURIComponent(scShow || "");
+  const init = {method: opts.method || "GET", headers: {}};
+  if (init.method !== "GET") init.headers["X-AutoMA3"] = "1";
+  if (opts.json !== undefined) { init.body = JSON.stringify(opts.json); init.headers["Content-Type"] = "application/json"; }
+  if (opts.body !== undefined) init.body = opts.body;
+  const r = await fetch(url, init);
+  const ct = r.headers.get("Content-Type") || "";
+  const data = ct.includes("json") ? await r.json() : await r.text();
+  if (!r.ok) throw new Error((data && data.error) || r.statusText);
+  return data;
+}
+
+async function scLoadState() {
+  scState = await scApi("/api/show/state");
+  scShow = scState.show;
+  const sel = $("scShow");
+  sel.innerHTML = scState.shows.length ? scState.shows.map(n => `<option ${n === scShow ? "selected" : ""}>${esc(n)}</option>`).join("")
+    : "<option value=''>no show yet</option>";
+  const has = !!scShow;
+  ["scCopy", "scRename", "scDelete"].forEach(id => $(id).disabled = !has);
+  $("scSteps").classList.toggle("hidden", !has);
+  const m = scState.status.ma3;
+  const ma3ok = !m.error && m.rootOk && m.libraryOk;
+  $("scMa3").className = "badge " + (ma3ok ? "ok" : "warn");
+  $("scMa3").textContent = m.error ? "grandMA3: not set up" : `grandMA3 ${m.version} on ${m.console}` + (m.pluginInstalled ? "" : " · plugin installs on first use");
+  $("scMa3").title = m.error || [m.root, ...(m.warnings || [])].join("\n");
+  $("scClaude").className = "badge " + (scState.status.claude ? "ok" : "warn");
+  $("scClaude").textContent = scState.status.claude ? "Claude Code" : "Claude Code not found";
+  $("scClaude").title = scState.status.claude ? "The planner is ready" : "Install Claude Code and log in to use the planner (Settings → Show creation sets its path). Everything else works without it.";
+  const msgs = [];
+  if (!has) msgs.push("Create a show to start.");
+  if (m.error) msgs.push(m.error);
+  if (scState.status.dryRun) msgs.push("Dry run is on: reading the patch and building send nothing to grandMA3.");
+  $("scStatusMsg").textContent = msgs.join(" ");
+  const r = scState.status.ranges;
+  $("scRanges").textContent = r ? `Groups ${r.groups}, sequences ${r.sequences}, MAtricks ${r.matricks}, executors page ${r.page} ${r.executors}.` : "";
+  $("scResumeWrap").classList.toggle("hidden", !scState.plannerSession);
+  $("scPlan").disabled = !scState.status.claude;
+  const built = !!(scState.files && scState.files.looks_out);
+  $("scUse").disabled = !built; $("scDownload").disabled = !built;
+  $("scUseInfo").textContent = built ? "" : "Build the show first.";
+  if (scState.task && scState.task.state === "running") scFollow(scState.task);
+}
+
+async function scLoadAll() {
+  await scLoadState();
+  if (!scShow) { $("scRig").innerHTML = ""; $("scLooks").innerHTML = ""; $("scPlanView").innerHTML = ""; return; }
+  await Promise.all([scLoadRig(), scLoadLooks(), scLoadPlan()]);
+}
+
+async function scLoadRig() {
+  const rig = await scApi("/api/show/rig");
+  if (!rig) { $("scRig").innerHTML = ""; $("scRigInfo").textContent = "No rig yet."; return; }
+  const src = rig.source || {};
+  $("scRigInfo").textContent = `${rig.fixtures.length} fixtures` + (src.mvr ? ` · MVR` : "") + (src.console ? " · read from grandMA3" : "");
+  const rows = rig.fixtures.map(f => `<tr><td>${f.fid}</td><td>${esc(f.type)}</td>
+    <td>${f.caps.map(c => `<span class="pill">${esc(c)}</span>`).join(" ")}</td>
+    <td>${(f.pos || []).map(v => Math.round(v)).join(" / ")}</td></tr>`).join("");
+  $("scRig").innerHTML = `<table><tr><th>Fixture</th><th>Type</th><th>Can do</th><th>x / y / z mm (x left→right from FOH, y from FOH)</th></tr>${rows}</table>
+    <p class="muted small">Sets for the planner: ${Object.keys(rig.sets).map(esc).join(", ")}</p>`;
+}
+
+async function scLoadLooks() {
+  const l = await scApi("/api/show/looks");
+  $("scLooksInfo").textContent = l.source;
+  $("scLooksDefault").disabled = !l.custom;
+  const rows = l.looks.map(k => {
+    const m = k.ma3 || {}, e = k.energy || {};
+    return `<tr><td>${esc(k.name || "")}</td><td>${esc(k.role || "")}${k.layer ? ` <span class="pill">${esc(k.layer)}</span>` : ""}</td>
+      <td>${m.exec ? `${m.page || 1}.${m.exec}` : "–"}</td><td>${esc((k.sections || []).join(", ") || "any")}</td>
+      <td>${e.min ?? k.energyMin ?? 0}–${e.max ?? k.energyMax ?? 1}</td></tr>`;
+  }).join("");
+  $("scLooks").innerHTML = `<table><tr><th>Look</th><th>Role</th><th>Executor</th><th>Sections</th><th>Energy</th></tr>${rows}</table>`;
+}
+
+async function scLoadPlan() {
+  const v = $("scPlanView");
+  let p;
+  try { p = await scApi("/api/show/plan"); } catch (e) { v.innerHTML = `<p class="small" style="color:var(--bad)">${esc(e.message)}</p>`; $("scBuild").disabled = true; return; }
+  if (!p) { v.innerHTML = `<p class="muted small">No plan yet.</p>`; $("scBuild").disabled = true; return; }
+  const errs = p.issues.filter(i => i.level === "error");
+  const rows = p.looks.map(k => `<tr><td>${k.exec ?? "–"}</td>
+    <td><b>${esc(k.name)}</b>${k.description ? `<br><span class="muted small">${esc(k.description)}</span>` : ""}</td>
+    <td>${esc(k.role)}${k.layer ? ` <span class="pill">${esc(k.layer)}</span>` : ""}</td>
+    <td>${esc(k.sections.join(", ") || "any")}<br><span class="muted small">energy ${k.energy ? `${k.energy.min}–${k.energy.max}` : "0–1"}</span></td>
+    <td>${k.speed !== "One" ? `<span class="pill">speed ${esc(k.speed)}</span> ` : ""}${k.priority ? `<span class="pill">${esc(k.priority)}</span>` : ""}
+      <ul class="lines">${k.lines.map(x => `<li>${esc(x)}</li>`).join("")}</ul></td></tr>`).join("");
+  v.innerHTML = `<div class="row"><span class="badge ${errs.length ? "warn" : "ok"}">${p.looks.length} looks · ${p.groups} groups · ${errs.length} error(s), ${p.issues.length - errs.length} warning(s)</span></div>
+    ${p.issues.length ? `<ul class="issues">${p.issues.map(i => `<li class="${i.level}">${esc(i.path)}: ${esc(i.message)}</li>`).join("")}</ul>` : ""}
+    ${p.notes ? `<p class="muted small" style="white-space:pre-wrap">${esc(p.notes)}</p>` : ""}
+    <div class="table-wrap"><table><tr><th>Exec</th><th>Look</th><th>Role</th><th>When</th><th>Content</th></tr>${rows}</table></div>`;
+  $("scBuild").disabled = errs.length > 0 || (scPolling !== null);
+}
+
+// ---- background tasks (read patch, plan, build): live status and log
+function scLogBox(kind) { return document.querySelector(`.sc-log[data-task="${kind}"]`); }
+function scActivityBox(box) {
+  let a = box.previousElementSibling;
+  if (!a || !a.classList.contains("activity-wrap")) {
+    a = document.createElement("div");
+    a.className = "activity-wrap";
+    a.innerHTML = `<div class="activity"><span class="spinner"></span><span class="label"></span><span class="detail"></span><span class="timer"></span></div><div class="bar hidden"><div></div></div>`;
+    box.parentNode.insertBefore(a, box);
+  }
+  return a;
+}
+function scTime(s) { s = Math.floor(s); return s >= 60 ? `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, "0")}s` : `${s}s`; }
+function scActivity(box, t) {
+  const wrap = scActivityBox(box);
+  wrap.classList.toggle("hidden", t.state !== "running");
+  if (t.state !== "running") return;
+  const a = t.activity || {phase: "waiting", label: "Working…", detail: "", for: 0};
+  wrap.querySelector(".activity").dataset.phase = a.phase;
+  wrap.querySelector(".label").textContent = a.label;
+  wrap.querySelector(".detail").textContent = a.detail || "";
+  wrap.querySelector(".timer").textContent = (t.activity ? scTime(a.for) + " · " : "") + "total " + scTime(t.elapsed);
+  const bar = wrap.querySelector(".bar");
+  bar.classList.toggle("hidden", a.progress == null);
+  if (a.progress != null) bar.firstElementChild.style.width = Math.round(a.progress * 100) + "%";
+}
+function scLines(box, lines) {
+  for (const l of lines) {
+    const div = document.createElement("div");
+    div.className = l.level;
+    if (l.command) {
+      div.innerHTML = `${esc(l.text)}<div class="cmd"><code>${esc(l.command)}</code><button class="small" type="button">Copy</button></div>`;
+      div.querySelector("button").onclick = () => navigator.clipboard.writeText(l.command);
+    } else {
+      div.textContent = (l.level === "say" ? "" : `[${l.t}s] `) + l.text;
+    }
+    box.append(div);
+  }
+  box.scrollTop = box.scrollHeight;
+}
+function scBusy(busy) {
+  ["scPatch", "scPlan", "scBuild", "scRename", "scDelete"].forEach(id => $(id).disabled = busy);
+  $("scCancel").classList.toggle("hidden", !busy);
+}
+function scFollow(task) {
+  if (scPolling) return;
+  const box = scLogBox(task.kind);
+  box.classList.remove("hidden"); box.innerHTML = "";
+  let since = 0;
+  scBusy(true);
+  scActivity(box, task);
+  $("scCancel").onclick = () => scApi(`/api/show/task/${task.id}/cancel`, {method: "POST"}).catch(() => {});
+  scPolling = setInterval(async () => {
+    let t;
+    try { t = await scApi(`/api/show/task/${task.id}?since=${since}`); } catch (e) { return; }
+    scLines(box, t.lines); since = t.next;
+    scActivity(box, t);
+    if (t.state !== "running") {
+      clearInterval(scPolling); scPolling = null; scBusy(false);
+      scLines(box, [{t: t.elapsed, level: t.state === "ok" ? "ok" : "error",
+        text: t.state === "ok" ? "Finished." : (t.state === "cancelled" ? "Stopped." : "Failed: " + (t.error || ""))}]);
+      await scLoadAll();
+      if (t.state === "ok" && t.kind === "plan") $("scPrompt").value = "";
+    }
+  }, 500);
+}
+async function scStart(path, json) {
+  try { scFollow(await scApi(path, {method: "POST", json})); } catch (e) { alert(e.message); }
+}
+
+// ---- show management
+async function scShowAction(path, json) {
+  try { const s = await scApi(path, {method: "POST", json}); scShow = s.show; await scLoadAll(); } catch (e) { alert(e.message); }
+}
+$("scShow").onchange = async e => { scShow = e.target.value; await scShowAction("/api/show/select", {name: scShow}); };
+$("scNew").onclick = () => {
+  const name = prompt("Name of the new show (letters, digits, - and _):");
+  if (name) scShowAction("/api/show/create", {name});
+};
+$("scCopy").onclick = () => {
+  const name = prompt(`Copy "${scShow}" to a new show (patch, look list and plan; the original stays as it is). New name:`, scShow + "-2");
+  if (name) scShowAction("/api/show/copy", {from: scShow, to: name});
+};
+$("scRename").onclick = () => {
+  const name = prompt(`Rename "${scShow}" to:`, scShow);
+  if (name && name !== scShow) scShowAction("/api/show/rename", {from: scShow, to: name});
+};
+$("scDelete").onclick = () => {
+  if (confirm(`Delete the show "${scShow}"? It is moved to the shows/.deleted folder in the data folder, nothing on the console changes.`)) {
+    scShowAction("/api/show/delete", {name: scShow});
+  }
+};
+
+// ---- steps
+$("scPatch").onclick = () => scStart("/api/show/patch");
+$("scPlan").onclick = () => scStart("/api/show/plan/run", {prompt: $("scPrompt").value,
+  resume: !$("scResumeWrap").classList.contains("hidden") && $("scResume").checked});
+document.querySelectorAll("[data-prompt]").forEach(b => b.onclick = () => { $("scPrompt").value = b.dataset.prompt; });
+$("scBuild").onclick = () => {
+  const playing = state && state.engine && state.engine.primaryPlayer > 0 && state.engine.auto;
+  const warn = playing ? "\n\nMusic is playing and AUTO is on: the executors the show uses change while the build runs." : "";
+  if (confirm(`Build "${scShow}" in grandMA3? The reserved ranges are deleted and rebuilt.${warn}`)) scStart("/api/show/build");
+};
+$("scMvr").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = "";
+  if (!f) return;
+  try { await scApi("/api/show/mvr", {method: "POST", body: await f.arrayBuffer()}); await scLoadAll(); } catch (err) { alert(err.message); }
+};
+$("scLooksFile").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = "";
+  if (!f) return;
+  try { await scApi("/api/show/looks/upload", {method: "POST", body: await f.text()}); await scLoadAll(); } catch (err) { alert(err.message); }
+};
+$("scLooksAuto").onclick = async () => {
+  try { await scApi("/api/show/looks/automa3", {method: "POST"}); await scLoadAll(); } catch (e) { alert(e.message); }
+};
+$("scLooksDefault").onclick = async () => {
+  if (!confirm("Forget the show's look list and use AutoMA3's defaults?")) return;
+  try { await scApi("/api/show/looks/defaults", {method: "POST"}); await scLoadAll(); } catch (e) { alert(e.message); }
+};
+$("scUse").onclick = async () => {
+  try {
+    const file = await scApi("/api/show/looks-out");
+    document.querySelector('nav button[data-tab="looks"]').click();
+    await startImport(file, `Show "${scShow}"`);
+  } catch (e) { alert(e.message); }
+};
+$("scDownload").onclick = () => download("/api/show/looks-out?download=1&show=" + encodeURIComponent(scShow || ""));
+setInterval(() => { if (!scPolling && !$("tab-show").classList.contains("hidden")) scLoadState().catch(() => {}); }, 15000);
 
 window.addEventListener("beforeunload", e => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
 loadConfig();

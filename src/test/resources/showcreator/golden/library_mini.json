@@ -1,0 +1,151 @@
+{
+  "format": "ma3sc-library",
+  "version": 1,
+  "source": {
+    "file": "predefined_phaser_mini.xml",
+    "ma3_version": "2.3.2",
+    "count": 5
+  },
+  "presets": {
+    "dim_sinus": {
+      "pool": 21,
+      "index": 1,
+      "name": "Dim Sinus",
+      "kind": "phaser",
+      "attributes": [
+        "Dimmer"
+      ],
+      "affects": [
+        "dimmer"
+      ],
+      "requires": [
+        "dimmer"
+      ],
+      "energy": null,
+      "tags": []
+    },
+    "chase": {
+      "pool": 21,
+      "index": 2,
+      "name": "Chase",
+      "kind": "phaser",
+      "attributes": [
+        "Dimmer"
+      ],
+      "affects": [
+        "dimmer"
+      ],
+      "requires": [
+        "dimmer"
+      ],
+      "energy": null,
+      "tags": []
+    },
+    "circle": {
+      "pool": 21,
+      "index": 3,
+      "name": "Circle",
+      "kind": "phaser",
+      "attributes": [
+        "Pan",
+        "Tilt"
+      ],
+      "affects": [
+        "position"
+      ],
+      "requires": [
+        "pan",
+        "tilt"
+      ],
+      "energy": null,
+      "tags": []
+    },
+    "zoom_blue_white": {
+      "pool": 21,
+      "index": 4,
+      "name": "Zoom - Blue White",
+      "kind": "phaser",
+      "attributes": [
+        "ColorRGB_B",
+        "Zoom"
+      ],
+      "affects": [
+        "color",
+        "beam"
+      ],
+      "requires": [
+        "color_mix",
+        "zoom"
+      ],
+      "energy": null,
+      "tags": []
+    },
+    "static_red": {
+      "pool": 21,
+      "index": 5,
+      "name": "Static Red",
+      "kind": "static",
+      "attributes": [],
+      "affects": [],
+      "requires": [],
+      "energy": null,
+      "tags": []
+    }
+  },
+  "static_attributes": {
+    "dimmer": {
+      "ma3": "Dimmer",
+      "cap": "dimmer",
+      "min": 0,
+      "max": 100
+    },
+    "pan": {
+      "ma3": "Pan",
+      "cap": "pan",
+      "min": -270,
+      "max": 270
+    },
+    "tilt": {
+      "ma3": "Tilt",
+      "cap": "tilt",
+      "min": -135,
+      "max": 135
+    },
+    "color_r": {
+      "ma3": "ColorRGB_R",
+      "cap": "color_mix",
+      "min": 0,
+      "max": 100
+    },
+    "color_g": {
+      "ma3": "ColorRGB_G",
+      "cap": "color_mix",
+      "min": 0,
+      "max": 100
+    },
+    "color_b": {
+      "ma3": "ColorRGB_B",
+      "cap": "color_mix",
+      "min": 0,
+      "max": 100
+    },
+    "color_w": {
+      "ma3": "ColorRGB_W",
+      "cap": "color_mix",
+      "min": 0,
+      "max": 100
+    },
+    "haze": {
+      "ma3": "Haze",
+      "cap": "haze",
+      "min": 0,
+      "max": 100
+    },
+    "fog": {
+      "ma3": "Fog",
+      "cap": "fog",
+      "min": 0,
+      "max": 100
+    }
+  }
+}

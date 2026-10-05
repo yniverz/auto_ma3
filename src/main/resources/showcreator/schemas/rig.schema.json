@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MA3 Show Creator rig",
+  "description": "Generated from the MVR patch export by `showcreator rig`. Never edited by the planner.",
+  "type": "object",
+  "required": ["format", "version", "fixtures", "sets", "orderings"],
+  "additionalProperties": false,
+  "properties": {
+    "format": { "const": "ma3sc-rig" },
+    "version": { "const": 1 },
+    "source": { "type": "object", "description": "File the rig was generated from (name, sha256, generator)." },
+    "axes": {
+      "type": "object",
+      "description": "Meaning of pos: x = audience left -> right as seen from FOH, y = downstage -> upstage, z = up. Unit mm.",
+      "properties": {
+        "x": { "type": "string" }, "y": { "type": "string" }, "z": { "type": "string" }, "unit": { "type": "string" }
+      }
+    },
+    "fixtures": { "type": "array", "items": { "$ref": "#/$defs/fixture" } },
+    "sets": {
+      "type": "object",
+      "description": "Named fixture sets (e.g. 'all', 'type:<name>', 'class:<name>', 'layer:<name>'), fixture ids in left->right order.",
+      "additionalProperties": { "type": "array", "items": { "type": "integer" } }
+    },
+    "orderings": {
+      "type": "object",
+      "description": "Per set name: ordering name -> fixture ids in that order.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": { "type": "array", "items": { "type": "integer" } }
+      }
+    },
+    "pairs": {
+      "type": "object",
+      "description": "Per set name: mirror pairs [left, right] across the stage centre line, outermost first.",
+      "additionalProperties": { "type": "array", "items": { "type": "array", "items": { "type": "integer" } } }
+    }
+  },
+  "$defs": {
+    "cap": {
+      "enum": ["dimmer", "pan", "tilt", "color_mix", "color_wheel", "zoom", "focus", "gobo", "prism", "shutter", "strobe", "iris", "frost", "haze", "fog"]
+    },
+    "fixture": {
+      "type": "object",
+      "required": ["fid", "name", "type", "caps"],
+      "properties": {
+        "fid": { "type": "integer", "minimum": 1, "description": "grandMA3 fixture ID." },
+        "name": { "type": "string" },
+        "type": { "type": "string", "description": "Fixture type (manufacturer, name, mode)." },
+        "layer": { "type": "string" },
+        "class": { "type": "string" },
+        "pos": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3 },
+        "rot": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3 },
+        "caps": { "type": "array", "items": { "$ref": "#/$defs/cap" }, "uniqueItems": true },
+        "attributes": { "type": "array", "items": { "type": "string" }, "description": "Raw GDTF attribute names." },
+        "functions": { "type": "array", "items": { "type": "string" }, "description": "Attributes of the channel functions (sub-attributes such as Shutter1Strobe)." }
+      }
+    }
+  }
+}
