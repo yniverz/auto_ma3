@@ -96,6 +96,10 @@ public class ShowEngine implements MusicListener {
     private final Map<String, Look> trackColors = new HashMap<>();
     private Look activeRiser;
     private int rotationIndex;
+    /** Global beat of the last look change; the timed change counts from here. */
+    private long rotateFromGlobal;
+    /** Global beat when the drop's blinder hit is over and a look changes (-1 = none). */
+    private long changeAfterFlashGlobal = -1;
     private boolean needsRefresh = true;
     private boolean wasAuto = true;
     private boolean wasHold = false;
@@ -461,6 +465,8 @@ public class ShowEngine implements MusicListener {
             else if (lullStartGlobal < 0) lullStartGlobal = nextGlobal;
             currentSection = section;
             sectionStartGlobal = nextGlobal;
+            rotateFromGlobal = nextGlobal;
+            changeAfterFlashGlobal = -1; // a new section brings its own looks
             event("Beat " + (next > 0 ? next : "?") + ": " + section + " (" + reason + ")");
         }
 
@@ -484,16 +490,22 @@ public class ShowEngine implements MusicListener {
         }
         long barsIn = (nextGlobal - sectionStartGlobal) / 4;
         boolean barStart = nextBwb == 1;
-        if (!sectionChanged && barStart && barsIn > 0 && section != Section.BUILD) {
-            int every = section == Section.DROP || section == Section.PEAK ? cfg.engine.rotateBarsPeak : cfg.engine.rotateBarsGroove;
-            if ((nextGlobal - sectionStartGlobal) % (every * 4L) == 0) force.add(nextRotationLayer(cfg));
+        // the drop's blinder hit is over: something new underneath
+        if (changeAfterFlashGlobal >= 0 && nextGlobal >= changeAfterFlashGlobal) {
+            boolean onTime = nextGlobal - changeAfterFlashGlobal < 4; // not a leftover from before HOLD
+            boolean fresh = nextGlobal - rotateFromGlobal < 16; // the look just changed (e.g. kick back from a break)
+            changeAfterFlashGlobal = -1;
+            if (onTime && !fresh) {
+                event("Beat " + next + ": blinder hit over, new look");
+                force.add(nextRotationLayer(cfg, section, energy, force));
+            }
         }
         if (op.nextRequested) {
             op.nextRequested = false;
-            force.add(nextRotationLayer(cfg));
+            force.add(nextRotationLayer(cfg, section, energy, force));
         }
-        // keep long peaks and builds moving: change a layer when the kick returns after a break (two after a bar or
-        // a stop) and at each step of a build
+        // keep long peaks and builds moving: change a layer when the kick returns after a break (after a bar or a
+        // stop: a new look on every layer, or two layers) and at each step of a build
         if (st != null && next > 0 && !(sectionChanged && section == Section.DROP)) { // a drop changes everything anyway
             for (BeatMoments.Moment m : trackMoments(primary)) {
                 if (m.startBeat() > next) break;
@@ -501,16 +513,30 @@ public class ShowEngine implements MusicListener {
                         && m.endBeat() == next && section.isKicking() && breakCounts(st, m);
                 boolean step = m.kind() == BeatMoments.Kind.STEP && m.startBeat() == next && section == Section.BUILD;
                 if (back) {
-                    force.add(nextRotationLayer(cfg));
-                    if (m.kind() == BeatMoments.Kind.STOP || m.length() >= 4) force.add(nextRotationLayer(cfg));
+                    boolean longBreak = m.kind() == BeatMoments.Kind.STOP || m.length() >= 4;
+                    if (longBreak && cfg.engine.freshLookAfterLongBreak) {
+                        event("Beat " + next + ": kick back after a long break, new look");
+                        for (String layer : sceneLayers(cfg).keySet()) {
+                            if (!isColorLayer(cfg, layer) || !cfg.engine.colorPerTrack) force.add(layer);
+                        }
+                    } else {
+                        force.add(nextRotationLayer(cfg, section, energy, force));
+                        if (longBreak) force.add(nextRotationLayer(cfg, section, energy, force));
+                    }
                 }
                 if (step) {
                     event("Beat " + next + ": build gets harder");
-                    force.add(nextRotationLayer(cfg));
+                    force.add(nextRotationLayer(cfg, section, energy, force));
                 }
             }
         }
+        // the timed change, counted from the last change (a break or a flash restarts it, so changes never bunch up)
+        if (force.isEmpty() && !sectionChanged && barStart && barsIn > 0 && section != Section.BUILD) {
+            int every = section == Section.DROP || section == Section.PEAK ? cfg.engine.rotateBarsPeak : cfg.engine.rotateBarsGroove;
+            if (nextGlobal - rotateFromGlobal >= every * 4L) force.add(nextRotationLayer(cfg, section, energy, force));
+        }
         force.remove(null);
+        if (!force.isEmpty()) rotateFromGlobal = nextGlobal;
 
         if (sectionChanged || trackChanged || needsRefresh || !force.isEmpty()) {
             needsRefresh = false;
@@ -527,7 +553,8 @@ public class ShowEngine implements MusicListener {
         if (sectionChanged) sectionEvents(cfg, section, seg, next, nextGlobal, toDrop, period, steps);
         if (section == Section.DROP && !sectionChanged && barStart && cfg.engine.dropBlinderEveryBars > 0
                 && barsIn > 0 && barsIn % cfg.engine.dropBlinderEveryBars == 0) {
-            blinder(cfg, period, 0, steps, "drop phrase");
+            long ms = blinder(cfg, period, 0, steps, "drop phrase");
+            if (ms > 0 && cfg.engine.changeAfterDropFlash) changeAfterFlashGlobal = nextGlobal + Math.max(1, Math.round(ms / period));
         }
         lookAhead(cfg, st, toDrop, next, nextGlobal, period, steps);
         momentEvents(cfg, st, section, sectionChanged, next, period, steps);
@@ -573,14 +600,31 @@ public class ShowEngine implements MusicListener {
         return out;
     }
 
-    private String nextRotationLayer(Config cfg) {
+    /**
+     * The next layer to change, in turn: one that is not changing already and has another look that fits the
+     * section and energy (otherwise the change would be lost, e.g. BASE in a drop with a single loud base look).
+     */
+    private String nextRotationLayer(Config cfg, Section section, double energy, Set<String> taken) {
+        Map<String, List<Look>> layers = sceneLayers(cfg);
         List<String> rot = new ArrayList<>();
-        sceneLayers(cfg).forEach((layer, looks) -> {
+        layers.forEach((layer, looks) -> {
             boolean color = looks.get(0).role == Role.COLOR;
             if (looks.size() > 1 && (!color || !cfg.engine.colorPerTrack)) rot.add(layer);
         });
-        if (rot.isEmpty()) return null;
-        return rot.get(rotationIndex++ % rot.size());
+        for (int i = 0; i < rot.size(); i++) {
+            String layer = rot.get(rotationIndex++ % rot.size());
+            if (taken.contains(layer) || locked(layer)) continue;
+            Look cur = active.get(layer);
+            if (candidates(layers.get(layer), section, energy).stream().anyMatch(l -> cur == null || !l.id.equals(cur.id))) return layer;
+        }
+        return null;
+    }
+
+    /** Looks of a layer that fit the section and energy; effects are optional, so no fallback for them. */
+    private static List<Look> candidates(List<Look> looks, Section section, double energy) {
+        return looks.get(0).role == Role.EFFECT
+                ? looks.stream().filter(l -> LookSelector.fits(l, section, energy)).toList()
+                : LookSelector.candidates(looks, section, energy);
     }
 
     private boolean locked(String layer) {
@@ -611,9 +655,7 @@ public class ShowEngine implements MusicListener {
             boolean forced = force.contains(layer);
             Look chosen;
             // effects are optional: no fallback, the layer goes dark when nothing fits
-            List<Look> cands = looks.get(0).role == Role.EFFECT
-                    ? looks.stream().filter(l -> LookSelector.fits(l, section, energy)).toList()
-                    : LookSelector.candidates(looks, section, energy);
+            List<Look> cands = candidates(looks, section, energy);
             Look held = color && cfg.engine.colorPerTrack ? trackColors.get(layer) : null;
             if (held != null && !forced && cands.stream().anyMatch(l -> l.id.equals(held.id))) {
                 chosen = held;
@@ -783,13 +825,15 @@ public class ShowEngine implements MusicListener {
         return false;
     }
 
-    private void blinder(Config cfg, double period, double delayMs, List<Step> steps, String why) {
+    /** Fires the blinder (within the safety limits); returns how long it is on (ms), 0 if not fired. */
+    private long blinder(Config cfg, double period, double delayMs, List<Step> steps, String why) {
         Look l = pickEvent(cfg, Role.BLINDER, currentSection);
-        if (l == null) return;
+        if (l == null) return 0;
         double wanted = (l.flashBeats > 0 ? l.flashBeats : 1) * period;
         long ms = blinderLimiter.request(sched.currentTimeMillis(), (long) wanted, cfg.safety.blinderMaxOnSec,
                 cfg.safety.blinderMinGapSec, 1.0);
         if (ms > 0) pulse(l, delayMs, ms, steps, "blinder " + why);
+        return ms;
     }
 
     private void fog(Config cfg, List<Step> steps, String why) {

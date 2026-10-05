@@ -168,6 +168,112 @@ class ShowEngineTest {
         assertStrobeSafe();
     }
 
+    /** A second copy of every scene look but the colours, so every layer has something to change to. */
+    private void secondLookOnEveryLayer() throws Exception {
+        Config c = ConfigStore.copy(store.get());
+        int exec = 190;
+        for (Config.Look l : ConfigStore.copy(store.get()).looks) {
+            if (!l.role.sceneRole || l.role == Role.COLOR) continue;
+            l.id = "second-" + l.id;
+            l.name = l.name + " 2";
+            l.exec = exec++;
+            c.looks.add(l);
+        }
+        store.replace(c);
+    }
+
+    private List<String> sceneLayersWithChoice() {
+        return store.get().looks.stream().filter(l -> l.role.sceneRole && l.role != Role.COLOR).map(Config.Look::layerName).distinct()
+                .filter(layer -> store.get().looks.stream().filter(l -> l.layerName().equals(layer)).count() > 1).sorted().toList();
+    }
+
+    /** February 7: after the 1-bar breaks in the peak every layer gets a new look; changes never come right after each other. */
+    @Test
+    void newLookOnEveryLayerAfterALongBreak() throws Exception {
+        automa3.music.AnalysisDump d = automa3.music.AnalysisDump.load(
+                Path.of(ShowEngineTest.class.getResource("/tracks/february-7.json").toURI()));
+        TrackStructure st = automa3.music.WaveformAnalyzer.analyzeBeats(d.trackKey(), d.beatBands(), d.firstDownbeat(), 64);
+        secondLookOnEveryLayer();
+        play(d.trackKey(), st, 520);
+        Map<Integer, List<String>> changes = changes();
+        for (int beat : new int[]{166, 198, 230, 438, 502}) { // the kick back after a bar without bass
+            assertEquals(sceneLayersWithChoice(), changes.get(beat).stream().sorted().toList(), "every layer at " + beat);
+        }
+        List<Integer> beats = new ArrayList<>(changes.keySet());
+        beats.remove(Integer.valueOf(2)); // the track's colour
+        for (int i = 1; i < beats.size(); i++) {
+            assertTrue(beats.get(i) - beats.get(i - 1) >= 16, "changes too close: " + beats.get(i - 1) + " and " + beats.get(i) + " in " + changes);
+        }
+        assertSceneConsistent();
+    }
+
+    @Test
+    void withTheFreshLookOffOnlyTwoLayersChange() throws Exception {
+        automa3.music.AnalysisDump d = automa3.music.AnalysisDump.load(
+                Path.of(ShowEngineTest.class.getResource("/tracks/february-7.json").toURI()));
+        TrackStructure st = automa3.music.WaveformAnalyzer.analyzeBeats(d.trackKey(), d.beatBands(), d.firstDownbeat(), 64);
+        secondLookOnEveryLayer();
+        Config c = ConfigStore.copy(store.get());
+        c.engine.freshLookAfterLongBreak = false;
+        store.replace(c);
+        play(d.trackKey(), st, 240);
+        assertEquals(2, changes().get(166).size(), changes().toString());
+    }
+
+    /** A drop without breaks: a new look when the blinder hit on bar 8 is over, then the timed change counts from there. */
+    @Test
+    void changeWhenTheDropsBlinderHitIsOver() throws Exception {
+        SimulatedSource.Template t = SimulatedSource.TEMPLATES.get(0);
+        TrackStructure st = SimulatedSource.exactStructure("track1", t, 64);
+        secondLookOnEveryLayer();
+        play("track1", st, t.bars() * 4);
+        Map<Integer, List<String>> changes = changes();
+        Config.Look blinder = look(Role.BLINDER);
+        int flash = (int) Math.max(1, Math.round(blinder.flashBeats > 0 ? blinder.flashBeats : 1));
+        for (TrackStructure.Segment drop : st.segments().stream().filter(s -> s.section() == automa3.model.Section.DROP).toList()) {
+            if (drop.lengthBeats() <= 32 + flash) continue;
+            int bar8 = drop.startBeat() + 32;
+            assertTrue(flashedAt(blinder, bar8), "blinder on bar 8 of the drop at " + drop.startBeat());
+            assertTrue(changes.containsKey(bar8 + flash), "new look when the blinder is over (beat " + (bar8 + flash) + "): " + changes);
+            for (int b = drop.startBeat() + 1; b < bar8 + flash; b++) assertFalse(changes.containsKey(b), "no change at " + b);
+        }
+        // a peak without breaks: the timed change every 16 bars from the peak's start
+        int every = store.get().engine.rotateBarsPeak * 4;
+        for (TrackStructure.Segment peak : st.segments().stream().filter(s -> s.section() == automa3.model.Section.PEAK).toList()) {
+            if (peak.lengthBeats() <= every) continue;
+            for (int b = peak.startBeat() + 1; b < peak.startBeat() + every; b++) assertFalse(changes.containsKey(b), "no change at " + b);
+            assertTrue(changes.containsKey(peak.startBeat() + every), "timed change in the peak: " + changes);
+        }
+
+        // switched off: nothing changes after the blinder
+        sent.clear();
+        Config c = ConfigStore.copy(store.get());
+        c.engine.changeAfterDropFlash = false;
+        store.replace(c);
+        play("track2", SimulatedSource.exactStructure("track2", t, 64), t.bars() * 4);
+        TrackStructure.Segment drop = SimulatedSource.exactStructure("track2", t, 64).segments().stream()
+                .filter(s -> s.section() == automa3.model.Section.DROP).findFirst().orElseThrow();
+        assertFalse(changes().containsKey(drop.startBeat() + 32 + flash), changes().toString());
+    }
+
+    /** Beats on which scene looks changed (forced changes, not section starts), with the layers that changed. */
+    private Map<Integer, List<String>> changes() {
+        Map<Integer, List<String>> out = new java.util.TreeMap<>();
+        long latencyNs = store.get().engine.latencyMs * 1_000_000L;
+        for (Sent s : sent) {
+            if (s.action.kind() != Kind.GO || s.action.reason() == null || !s.action.reason().contains("(change)")) continue;
+            for (Map.Entry<Integer, Long> b : beatTimes.entrySet()) {
+                if (Math.abs(b.getValue() - latencyNs - s.timeNanos) >= 2_000_000L) continue;
+                for (Config.Look l : store.get().looks) {
+                    if (l.role.sceneRole && l.page == s.action.page() && l.exec == s.action.exec()) {
+                        out.computeIfAbsent(b.getKey(), k -> new ArrayList<>()).add(l.layerName());
+                    }
+                }
+            }
+        }
+        return out;
+    }
+
     /** A scene look started (Go) on this beat. */
     private boolean newLookAt(int beat) {
         long at = beatTimes.get(beat) - store.get().engine.latencyMs * 1_000_000L;

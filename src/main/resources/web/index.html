@@ -992,11 +992,12 @@ $("addConsole").onclick = () => {
 
 const SETTINGS = [
   ["engine", "Engine", {
-    latencyMs: "Send early by (ms) so light lands on the beat", rotateBarsGroove: "Change a look every N bars (groove)", rotateBarsPeak: "Change a look every N bars (drop/peak)",
+    latencyMs: "Send early by (ms) so light lands on the beat", rotateBarsGroove: "Change a look every N bars (groove; counted from the last change)", rotateBarsPeak: "Change a look every N bars (drop/peak; counted from the last change)",
     dropBars: "Bars that count as 'drop'", colorPerTrack: "Keep one colour per track", colorChangeOnDrop: "New colour on every drop",
     preDropBlackout: "Blackout on the beat before a drop", buildStrobeBeats: "Strobe the last N beats of a build", dropStrobeBeats: "Strobe N beats on the drop",
     dropBlinderEveryBars: "Blinder hit every N bars in a drop", accentBeats: "Drop hit length (beats)",
     breakBlackout: "Blackout during short breaks (bass out for a few beats, or silence)", breakReturnAccent: "Accent when the kick comes back after a break",
+    freshLookAfterLongBreak: "New look on every layer when the kick comes back after a long break (a bar or more) or a stop", changeAfterDropFlash: "Change a look when the drop's blinder hit is over",
     bassHitFlash: "Accent flash on single bass hits in builds / breakdowns", bassHitBeats: "Bass hit flash length (beats)", operatorLockBars: "Leave a layer alone after you touch it (bars)",
     crossfadeOffDelayMs: "Delay before the old look goes off (ms)", releaseWhenStoppedSec: "Stop the show's looks this many s after the music stops (0 = never)", releaseOnAutoOff: "Stop auto looks when AUTO goes off", bpmSyncWhenManual: "BPM sync also when AUTO is off"}],
   ["safety", "Safety", {

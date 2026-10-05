@@ -160,11 +160,14 @@ Inside the sections, the per-beat waveform also gives short **moments** (shown o
 - **Build steps**: where a long build gets clearly harder from one 4-bar phrase to the next (more bass, a steadier
   kick, louder mids). One look layer changes there.
 
-When the kick comes back after a break, one look layer changes too (two after a whole bar or a stop), so long peaks
-with regular breaks keep moving. This needs more than one look on a layer (e.g. two MOVEMENT looks for the loud
-parts). If the end of a build is a break or a stop, it stays dark there and the strobe starts on the drop instead.
+When the kick comes back after a break, one look layer changes too; after a whole bar or a stop every layer gets a
+new look (the colour stays per track), so long peaks with regular breaks keep moving. The same happens when the drop's
+blinder hit (every 8 bars) is over. The timed change (every 16 bars in a drop or peak, 32 in a groove) counts from the
+last change, so changes never come right after each other. This needs more than one look on a layer (e.g. two
+MOVEMENT looks for the loud parts). If the end of a build is a break or a stop, it stays dark there and the strobe starts on the drop instead.
 
-The blackout, accent and flash for breaks and bass hits can be switched off in Settings → Engine.
+The blackout, accent and flash for breaks and bass hits, the new look after long breaks and the change after the
+blinder hit can be switched off in Settings → Engine.
 
 When no deck drives the lights any more (deck paused or stopped, track ran out or ejected, every fader down in
 *mixer* mode, player gone from the network), AutoMA3 stops everything it started after 3 seconds: the scene looks,

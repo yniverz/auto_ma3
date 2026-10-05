@@ -133,6 +133,10 @@ public class Config {
         public boolean breakBlackout = true;
         /** Accent hit when the kick comes back after a short break. */
         public boolean breakReturnAccent = true;
+        /** A new look on every layer when the kick comes back after a long break (a bar or more) or a stop. */
+        public boolean freshLookAfterLongBreak = true;
+        /** Change a look when the drop's blinder hit is over. */
+        public boolean changeAfterDropFlash = true;
         /** Accent flash on each single bass hit in builds and breakdowns. */
         public boolean bassHitFlash = true;
         /** Length of a bass hit flash (beats). */
