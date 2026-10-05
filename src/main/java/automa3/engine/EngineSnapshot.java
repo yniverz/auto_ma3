@@ -18,7 +18,8 @@ public record EngineSnapshot(boolean auto, boolean hold, boolean strobeAllowed, 
 
     public record Deck(int player, String device, boolean playing, boolean onAir, boolean master, boolean primary,
                        double bpm, int beat, String title, String artist, String trackKey, String section, String analysis,
-                       List<String> availableAnalyses, List<TrackStructure.Segment> segments, int lastBeat) {
+                       List<String> availableAnalyses, List<TrackStructure.Segment> segments, int lastBeat,
+                       int analysisRevision) {
     }
 
     public static final EngineSnapshot EMPTY = new EngineSnapshot(true, false, true, false, 0, -1, "", 0, false, null, "", 0, 0,

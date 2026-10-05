@@ -68,6 +68,8 @@ public class ShowEngine implements MusicListener {
     private final Map<Integer, Map<String, TrackStructure>> structures = new java.util.concurrent.ConcurrentHashMap<>();
     /** player -> breaks and bass hits of its track. Concurrent: also read by the web UI. */
     private final Map<Integer, TrackMoments> moments = new java.util.concurrent.ConcurrentHashMap<>();
+    /** player -> number of analyses received, so the UI knows when to fetch the graph again. */
+    private final Map<Integer, Integer> analysisRevision = new java.util.concurrent.ConcurrentHashMap<>();
     /** "player|analysis source" -> build steps (they depend on where that analysis puts the builds). */
     private final Map<String, TrackMoments> buildSteps = new java.util.concurrent.ConcurrentHashMap<>();
     private final Map<Integer, Integer> lastBeatNumber = new HashMap<>();
@@ -182,8 +184,9 @@ public class ShowEngine implements MusicListener {
             Map<String, TrackStructure> bySource = structures.computeIfAbsent(player, p -> new java.util.concurrent.ConcurrentHashMap<>());
             bySource.values().removeIf(old -> !Objects.equals(old.trackKey(), structure.trackKey())); // new track
             bySource.put(structure.source(), structure);
-            TrackMoments known = moments.get(player);
-            if (!structure.beatBands().isEmpty() && (known == null || !Objects.equals(known.trackKey(), structure.trackKey()))) {
+            analysisRevision.merge(player, 1, Integer::sum);
+            // again for every analysis: the waveform of a track the player is still analysing fills in over time
+            if (!structure.beatBands().isEmpty()) {
                 moments.put(player, new TrackMoments(structure.trackKey(), BeatMoments.detect(structure.beatBands())));
             }
             buildSteps.put(player + "|" + structure.source(), new TrackMoments(structure.trackKey(),
@@ -1075,7 +1078,8 @@ public class ShowEngine implements MusicListener {
             deckList.add(new EngineSnapshot.Deck(d.player(), d.deviceName(), isPlaying(d, now), d.onAir(), d.tempoMaster(),
                     d.player() == primary, Math.round(d.bpm() * 10) / 10.0, beat == null ? -1 : beat,
                     d.title(), d.artist(), d.trackKey(), s == null ? null : s.name(), st == null ? "none" : st.source(),
-                    availableAnalyses(d.player()), st == null ? List.of() : st.segments(), st == null ? 0 : st.lastBeat()));
+                    availableAnalyses(d.player()), st == null ? List.of() : st.segments(), st == null ? 0 : st.lastBeat(),
+                    analysisRevision.getOrDefault(d.player(), 0)));
         });
         Map<String, String> activeLabels = new LinkedHashMap<>();
         active.forEach((k, v) -> activeLabels.put(k, v.label()));

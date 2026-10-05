@@ -19,6 +19,8 @@ import org.deepsymmetry.beatlink.data.TrackMetadata;
 import org.deepsymmetry.beatlink.data.WaveformDetail;
 import org.deepsymmetry.beatlink.data.WaveformFinder;
 import org.deepsymmetry.beatlink.dbserver.ConnectionManager;
+import org.deepsymmetry.beatlink.dbserver.Message;
+import org.deepsymmetry.beatlink.dbserver.NumberField;
 import org.deepsymmetry.cratedigger.pdb.RekordboxAnlz;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,14 +67,32 @@ public class ProDjLinkSource implements MusicSource {
 
     /** How often, and how long after loading, to ask again for a beat grid / waveform the player has not delivered. */
     private static final long FETCH_INTERVAL_MS = 5000, FETCH_GIVE_UP_MS = 10 * 60_000;
-    /** Beat grid and waveform asked for directly, for tracks the player was still analysing when they were loaded. */
-    private record Fetched(String key, BeatGrid grid, WaveformDetail detail) {
+    /** A waveform with data up to this share of the track (to its last beat) is complete. */
+    private static final double WAVEFORM_COMPLETE = 0.9;
+    /** A waveform that did not grow over this many requests in a row is as complete as it gets (e.g. a silent end). */
+    private static final int WAVEFORM_STALLS = 3;
+    /**
+     * Beat grid and waveform asked for directly, for tracks the player was still analysing when they were loaded
+     * (beat-link keeps the first, half-filled waveform it got). Per track, the title and length tell a reloaded
+     * USB stick with other tracks under the same ids apart.
+     */
+    private record Fetched(String title, long durationSec, BeatGrid grid, WaveformDetail detail) {
     }
-    private final Map<Integer, Fetched> fetched = new ConcurrentHashMap<>();
+    /** track key -> best data so far, for the last tracks loaded (also when one is loaded again later). */
+    private final Map<String, Fetched> fetched = java.util.Collections.synchronizedMap(new java.util.LinkedHashMap<>(16, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<String, Fetched> eldest) {
+            return size() > 50;
+        }
+    });
     private final Map<Integer, Long> lastFetch = new ConcurrentHashMap<>();
     private final java.util.Set<Integer> fetchPending = ConcurrentHashMap.newKeySet();
-    /** track key -> time (ms) its beat grid or waveform was first found missing. */
+    /** track key -> time (ms) it was first seen with metadata. */
     private final Map<String, Long> missingSince = new ConcurrentHashMap<>();
+    /** Track keys whose beat grid and waveform are complete. */
+    private final java.util.Set<String> trackDataDone = ConcurrentHashMap.newKeySet();
+    /** track key -> {filled share in per mille at the last request, requests in a row without growth}. */
+    private final Map<String, int[]> waveformProgress = new ConcurrentHashMap<>();
     private final ExecutorService fetchWorker = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r, "track-data-fetch");
         t.setDaemon(true);
@@ -223,10 +243,7 @@ public class ProDjLinkSource implements MusicSource {
         String key = s.isTrackLoaded() && s.getRekordboxId() != 0
                 ? s.getTrackSourcePlayer() + ":" + s.getTrackSourceSlot() + ":" + s.getRekordboxId() : null;
         String previous = key == null ? trackKeys.remove(player) : trackKeys.put(player, key);
-        if (key != null && !key.equals(previous)) {
-            fetched.remove(player);
-            scheduleAnalysis(player);
-        }
+        if (key != null && !key.equals(previous)) scheduleAnalysis(player);
         if (key != null) checkTrackData(s, key);
         // rekordbox phrase data can arrive after the waveform: switch to it as soon as it is there
         if (key != null && !phraseSent.contains(key) && AnalysisTagFinder.getInstance().isRunning()
@@ -345,42 +362,38 @@ public class ProDjLinkSource implements MusicSource {
         return grid != null || f == null ? grid : f.grid();
     }
 
-    /** The waveform detail of the loaded track, preferring the three-band one. */
+    /** The waveform detail of the loaded track: the most complete one asked for directly, else beat-link's. */
     private WaveformDetail detailFor(int player) {
-        WaveformDetail detail = WaveformFinder.getInstance().isRunning() ? WaveformFinder.getInstance().getLatestDetailFor(player) : null;
         Fetched f = currentFetch(player);
-        WaveformDetail other = f == null ? null : f.detail();
-        if (detail == null) return other;
-        boolean otherBetter = other != null && other.style == WaveformFinder.WaveformStyle.THREE_BAND
-                && detail.style != WaveformFinder.WaveformStyle.THREE_BAND;
-        return otherBetter ? other : detail;
+        if (f != null && f.detail() != null) return f.detail();
+        return WaveformFinder.getInstance().isRunning() ? WaveformFinder.getInstance().getLatestDetailFor(player) : null;
     }
 
     private Fetched currentFetch(int player) {
-        Fetched f = fetched.get(player);
-        return f != null && f.key().equals(trackKeys.get(player)) ? f : null;
+        String key = trackKeys.get(player);
+        Fetched f = key == null ? null : fetched.get(key);
+        if (f == null || !MetadataFinder.getInstance().isRunning()) return null;
+        TrackMetadata md = MetadataFinder.getInstance().getLatestMetadataFor(player);
+        return md != null && java.util.Objects.equals(md.getTitle(), f.title()) && md.getDuration() == f.durationSec() ? f : null;
     }
 
     /**
-     * A CDJ-3000 analyses tracks that were not analysed in rekordbox while they are loaded. beat-link asks for the
-     * beat grid and waveform right away and only retries for a short while, so ask again until the player has them.
+     * A CDJ-3000 analyses tracks that were not analysed in rekordbox while they are loaded, and meanwhile hands out a
+     * waveform that is only filled up to where it got. beat-link asks once (and keeps that copy), so ask again until
+     * the beat grid is there and the waveform is complete.
      */
     private void checkTrackData(CdjStatus s, String key) {
         int player = s.getDeviceNumber();
-        if (!MetadataFinder.getInstance().isRunning()) return;
+        if (trackDataDone.contains(key) || !MetadataFinder.getInstance().isRunning()) return;
         TrackMetadata md = MetadataFinder.getInstance().getLatestMetadataFor(player);
         if (md == null || md.trackReference.rekordboxId != s.getRekordboxId()
                 || md.trackReference.player != s.getTrackSourcePlayer() || md.trackReference.slot != s.getTrackSourceSlot()) {
             return; // beat-link is still asking for the metadata, and keeps doing so by itself
         }
-        if (complete(gridFor(player), detailFor(player), md)) return;
         long now = System.currentTimeMillis();
-        long since = missingSince.computeIfAbsent(key, k -> {
-            log.info("Player {}: no beat grid / waveform for \"{}\" yet (the player may still be analysing it), "
-                    + "asking again every {} s", player, md.getTitle(), FETCH_INTERVAL_MS / 1000);
-            return now;
-        });
+        long since = missingSince.computeIfAbsent(key, k -> now);
         if (now - since > FETCH_GIVE_UP_MS) return;
+        if (now - since < 3000) return; // first look after a few seconds: beat-link usually has an analysed track by then
         Long last = lastFetch.get(player);
         if (last != null && now - last < FETCH_INTERVAL_MS) return;
         if (!fetchPending.add(player)) return;
@@ -396,41 +409,99 @@ public class ProDjLinkSource implements MusicSource {
         });
     }
 
-    /** Beat grid and waveform are there; on a track the player analyses itself, wait for its three-band waveform. */
-    private static boolean complete(BeatGrid grid, WaveformDetail detail, TrackMetadata md) {
-        return grid != null && detail != null && (detail.style == WaveformFinder.WaveformStyle.THREE_BAND
-                || md.trackReference.trackType != CdjStatus.TrackType.UNANALYZED);
-    }
-
-    private void fetchTrackData(int player, String key, TrackMetadata md) {
-        if (!key.equals(trackKeys.get(player))) return;
+    private void fetchTrackData(int player, String key, TrackMetadata md) throws Exception {
+        if (!key.equals(trackKeys.get(player)) || trackDataDone.contains(key)) return;
+        Fetched known = currentFetch(player);
         BeatGrid grid = gridFor(player);
-        WaveformDetail detail = detailFor(player);
-        boolean newGrid = false, newDetail = false;
         if (grid == null) {
             BeatGrid g = BeatGridFinder.getInstance().requestBeatGridFrom(md.trackReference);
-            if (g != null && g.beatCount > 0) {
-                grid = g;
-                newGrid = true;
-            }
+            if (g != null && g.beatCount > 0) grid = g;
         }
-        if (detail == null || detail.style != WaveformFinder.WaveformStyle.THREE_BAND) {
-            WaveformDetail d = WaveformFinder.getInstance().requestWaveformDetailFrom(md.trackReference);
-            if (d != null && (detail == null || d.style == WaveformFinder.WaveformStyle.THREE_BAND)) {
-                detail = d;
-                newDetail = true;
-            }
+        WaveformDetail fromFinder = WaveformFinder.getInstance().isRunning() ? WaveformFinder.getInstance().getLatestDetailFor(player) : null;
+        WaveformDetail best = better(known == null ? null : known.detail(), fromFinder, grid);
+        boolean unanalyzed = md.trackReference.trackType == CdjStatus.TrackType.UNANALYZED;
+        if (!complete(best, grid, unanalyzed)) {
+            WaveformDetail fresh = requestThreeBand(md.trackReference); // straight from the player, past beat-link's copy
+            if (fresh == null && best == null) fresh = WaveformFinder.getInstance().requestWaveformDetailFrom(md.trackReference);
+            best = better(best, fresh, grid);
         }
-        if (!(newGrid || newDetail) || !key.equals(trackKeys.get(player))) return;
-        fetched.put(player, new Fetched(key, grid, detail));
-        log.info("Player {}: received {} for \"{}\"", player, !newDetail ? "the beat grid"
-                : (newGrid ? "beat grid and " : "") + detail.style.name().toLowerCase().replace('_', '-') + " waveform", md.getTitle());
-        scheduleAnalysis(player);
+        if (!key.equals(trackKeys.get(player))) return;
+        int share = (int) Math.round(filledShare(best, grid) * 1000);
+        boolean done = complete(best, grid, unanalyzed);
+        if (!done && grid != null && best != null) {
+            int[] p = waveformProgress.computeIfAbsent(key, k -> new int[]{-1, 0});
+            p[1] = share > p[0] ? 0 : p[1] + 1;
+            p[0] = Math.max(p[0], share);
+            done = p[1] >= WAVEFORM_STALLS; // stopped growing: that is all there is
+        }
+        boolean changed = known == null || known.grid() != grid || known.detail() != best;
+        if (changed) fetched.put(key, new Fetched(md.getTitle(), md.getDuration(), grid, best));
+        if (done) {
+            trackDataDone.add(key);
+            if (unanalyzed || known != null) {
+                log.info("Player {}: beat grid and {} waveform of \"{}\" complete ({}% filled)", player,
+                        best.style.name().toLowerCase().replace('_', '-'), md.getTitle(), share / 10);
+            }
+        } else if (unanalyzed && changed) {
+            log.info("Player {}: \"{}\" {}, waveform filled to {}% (the player is still analysing it), asking again every {} s",
+                    player, md.getTitle(), grid == null ? "no beat grid yet" : "beat grid there", share / 10, FETCH_INTERVAL_MS / 1000);
+        }
+        if (changed) scheduleAnalysis(player);
+    }
+
+    /** Beat grid there and the waveform filled to the end (a non three-band waveform of an analysed track counts as is). */
+    private static boolean complete(WaveformDetail detail, BeatGrid grid, boolean unanalyzed) {
+        if (grid == null || detail == null) return false;
+        if (detail.style != WaveformFinder.WaveformStyle.THREE_BAND) return !unanalyzed;
+        return filledShare(detail, grid) >= WAVEFORM_COMPLETE;
+    }
+
+    /** The more useful of two waveforms: three-band first, then the one filled further. */
+    static WaveformDetail better(WaveformDetail a, WaveformDetail b, BeatGrid grid) {
+        if (a == null) return b;
+        if (b == null) return a;
+        boolean a3 = a.style == WaveformFinder.WaveformStyle.THREE_BAND, b3 = b.style == WaveformFinder.WaveformStyle.THREE_BAND;
+        if (a3 != b3) return a3 ? a : b;
+        return lastFilledFrame(b) > lastFilledFrame(a) ? b : a;
+    }
+
+    /** Share (0..1) of the track up to its last beat for which the waveform has data. */
+    static double filledShare(WaveformDetail detail, BeatGrid grid) {
+        if (detail == null || grid == null || grid.beatCount < 1) return 0;
+        int end = Util.timeToHalfFrame(grid.getTimeWithinTrack(grid.beatCount));
+        return end <= 0 ? 1 : Math.min(1, (lastFilledFrame(detail) + 1) / (double) end);
+    }
+
+    /** Last half-frame with any level in it, -1 if the waveform is empty. */
+    static int lastFilledFrame(WaveformDetail detail) {
+        ThreeBandWaveform three = ThreeBandWaveform.of(detail);
+        if (three != null) {
+            for (int f = three.frames() - 1; f >= 0; f--) if (three.low(f) + three.mid(f) + three.high(f) > 0) return f;
+            return -1;
+        }
+        ByteBuffer data = detail.getData();
+        int frames = detail.getFrameCount();
+        if (frames <= 0) return -1;
+        int bytes = Math.max(1, data.limit() / frames);
+        for (int i = data.limit() - 1; i >= 0; i--) if (data.get(i) != 0) return i / bytes;
+        return -1;
+    }
+
+    /** The three-band waveform straight from the player (CDJ-3000), or null if it has none. */
+    private static WaveformDetail requestThreeBand(org.deepsymmetry.beatlink.data.DataReference ref) throws Exception {
+        return ConnectionManager.getInstance().invokeWithClientSession(ref.player, client -> {
+            Message response = client.simpleRequest(Message.KnownType.ANLZ_TAG_REQ, Message.KnownType.ANLZ_TAG,
+                    client.buildRMST(Message.MenuIdentifier.MAIN_MENU, ref.slot, ref.trackType), new NumberField(ref.rekordboxId),
+                    new NumberField(Message.ANLZ_FILE_TAG_3BAND_WAVEFORM_DETAIL), new NumberField(Message.ALNZ_FILE_TYPE_2EX));
+            if (response.knownType == Message.KnownType.UNAVAILABLE || response.arguments.get(3).getSize() == 0) return null;
+            return new WaveformDetail(ref, response, WaveformFinder.WaveformStyle.THREE_BAND);
+        }, "requesting the three-band waveform");
     }
 
     /** Send a structure unless the same one was already sent for this player. */
     private boolean send(MusicListener l, int player, String key, TrackStructure structure) {
-        String sig = key + "|" + structure.segments() + "|" + structure.beatBands().size();
+        // the waveform fills in while the player analyses a track: also resend when only the levels changed
+        String sig = key + "|" + structure.segments() + "|" + structure.beatBands().size() + "|" + structure.beatBands().hashCode();
         if (sig.equals(sentStructure.put(player + "|" + structure.source(), sig))) return false;
         log.info("Player {}: {} sections from {}", player, structure.segments().size(),
                 structure.source().equals("phrase") ? "rekordbox phrase analysis" : "waveform");

@@ -507,7 +507,7 @@ function deckGraphHtml(d, total) {
 const analysisCache = {};  // player -> {key, data}
 
 function wantAnalysis(d) {
-  const key = d.trackKey + "|" + d.analysis + "|" + d.segments.length;
+  const key = d.trackKey + "|" + d.analysis + "|" + d.analysisRevision;
   const c = analysisCache[d.player];
   if (c && c.key === key) return c.data;
   analysisCache[d.player] = {key, data: null};
