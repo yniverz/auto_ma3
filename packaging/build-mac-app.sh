@@ -53,7 +53,12 @@ xattr -cr "$APP"
 codesign --force --deep --sign - "$APP"
 codesign --verify --deep "$APP"
 
-hdiutil create -quiet -volname "AutoMA3" -srcfolder "$APP" -ov -format UDZO "$WORK/AutoMA3-$VERSION.dmg"
+# hdiutil fails now and then on build machines ("Resource busy"): retry a few times
+for attempt in 1 2 3; do
+  if hdiutil create -quiet -volname "AutoMA3" -srcfolder "$APP" -ov -format UDZO "$WORK/AutoMA3-$VERSION.dmg"; then break; fi
+  [ "$attempt" = 3 ] && { echo "hdiutil failed 3 times" >&2; exit 1; }
+  echo "hdiutil failed, retrying ($attempt)"; sleep 5
+done
 # zip of the app for the in-app updater (ditto keeps the bundle and its signature intact)
 ditto -c -k --keepParent "$APP" "$WORK/AutoMA3-$VERSION-mac-$ARCH.zip"
 ditto "$APP" "$DIST/AutoMA3.app"
