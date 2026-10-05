@@ -1,5 +1,6 @@
-# Builds the Mac app and publishes a GitHub Release whenever the "release" branch is pushed
-# (e.g. after merging main into release). The installed app finds the release and offers the update.
+# Builds the Mac release (AutoMA3.command with its own Java runtime) and publishes a GitHub Release whenever the
+# "release" branch is pushed (e.g. after merging main into release). Running copies print a notice when a newer
+# release exists.
 #
 # Version: major.minor from pom.xml + the run number of this workflow, e.g. 1.0.7.
 name: Release
@@ -38,10 +39,10 @@ jobs:
       - name: Tests
         run: mvn -B -q clean verify
 
-      - name: Build app
+      - name: Build release
         env:
           APP_VERSION: ${{ steps.version.outputs.version }}
-        run: packaging/build-mac-app.sh
+        run: packaging/build-mac-release.sh
 
       - name: Publish release
         env:
@@ -49,7 +50,6 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           gh release create "v$VERSION" \
-            "target/dist/AutoMA3-$VERSION.dmg" \
             "target/dist/AutoMA3-$VERSION-mac-arm64.zip" \
             --target "$GITHUB_SHA" \
             --title "AutoMA3 $VERSION" \

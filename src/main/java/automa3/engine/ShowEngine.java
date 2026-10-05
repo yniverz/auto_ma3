@@ -9,6 +9,7 @@ import automa3.ma3.OscCodec;
 import automa3.model.Role;
 import automa3.model.Section;
 import automa3.music.BeatEvent;
+import automa3.music.BeatMoments;
 import automa3.music.DeckState;
 import automa3.music.MusicListener;
 import automa3.music.TrackStructure;
@@ -38,7 +39,8 @@ import java.util.regex.Pattern;
  * <p>Layers: every scene role (BASE, COLOR, MOVEMENT, EFFECT, or custom layer names) keeps one
  * running look chosen for the current section and energy. Events (RISER, ACCENT, STROBE, BLINDER,
  * BLACKOUT, FOG, SPECIAL) are fired around builds and drops, with look-ahead from the track
- * structure. All engine state is touched only on the scheduler thread.</p>
+ * structure, and on short moments inside sections (breaks, bass hits). All engine state is touched
+ * only on the scheduler thread.</p>
  */
 public class ShowEngine implements MusicListener {
 
@@ -48,6 +50,9 @@ public class ShowEngine implements MusicListener {
 
     /** A command to send {@code delayMs} after the planned beat time. */
     record Step(double delayMs, Ma3Action action, Look look) {
+    }
+
+    private record TrackMoments(String trackKey, List<BeatMoments.Moment> list) {
     }
 
     private final ConfigStore configStore;
@@ -61,6 +66,10 @@ public class ShowEngine implements MusicListener {
     private final Map<Integer, DeckState> decks = new HashMap<>();
     /** player -> analysis source ("phrase" / "waveform" / ...) -> structure. Concurrent: also read by the web UI. */
     private final Map<Integer, Map<String, TrackStructure>> structures = new java.util.concurrent.ConcurrentHashMap<>();
+    /** player -> breaks and bass hits of its track. Concurrent: also read by the web UI. */
+    private final Map<Integer, TrackMoments> moments = new java.util.concurrent.ConcurrentHashMap<>();
+    /** "player|analysis source" -> build steps (they depend on where that analysis puts the builds). */
+    private final Map<String, TrackMoments> buildSteps = new java.util.concurrent.ConcurrentHashMap<>();
     private final Map<Integer, Integer> lastBeatNumber = new HashMap<>();
     private final Map<Integer, Long> lastBeatMs = new HashMap<>();
     private int primary = -1;
@@ -89,6 +98,12 @@ public class ShowEngine implements MusicListener {
     private boolean wasAuto = true;
     private boolean wasHold = false;
     private Integer lastHazePct;
+    /** Since when no deck drives the lights (ms), -1 while music is playing. */
+    private long silentSinceMs = -1;
+    /** The show's looks were stopped because the music stopped; restore them when it plays again. */
+    private boolean stoppedForSilence;
+    /** player -> engine time (ms) of its last status update (the deck's own timestamp can come from a replay). */
+    private final Map<Integer, Long> lastDeckMs = new HashMap<>();
     private Section upcomingSection;
     private int beatsToUpcoming = -1;
 
@@ -148,6 +163,7 @@ public class ShowEngine implements MusicListener {
     public void onDeck(DeckState deck) {
         sched.execute(() -> {
             decks.put(deck.player(), deck);
+            lastDeckMs.put(deck.player(), sched.currentTimeMillis());
             if (deck.beatNumber() > 0 && !lastBeatNumber.containsKey(deck.player())) {
                 lastBeatNumber.put(deck.player(), deck.beatNumber());
             }
@@ -166,6 +182,12 @@ public class ShowEngine implements MusicListener {
             Map<String, TrackStructure> bySource = structures.computeIfAbsent(player, p -> new java.util.concurrent.ConcurrentHashMap<>());
             bySource.values().removeIf(old -> !Objects.equals(old.trackKey(), structure.trackKey())); // new track
             bySource.put(structure.source(), structure);
+            TrackMoments known = moments.get(player);
+            if (!structure.beatBands().isEmpty() && (known == null || !Objects.equals(known.trackKey(), structure.trackKey()))) {
+                moments.put(player, new TrackMoments(structure.trackKey(), BeatMoments.detect(structure.beatBands())));
+            }
+            buildSteps.put(player + "|" + structure.source(), new TrackMoments(structure.trackKey(),
+                    structure.beatBands().isEmpty() ? List.of() : BeatMoments.buildSteps(structure)));
             event("Player " + player + ": " + structure.segments().size() + " sections from " + structure.source());
         });
     }
@@ -272,6 +294,32 @@ public class ShowEngine implements MusicListener {
         return null;
     }
 
+    /** Breaks, bass hits and build steps of the player's current track that the show reacts to, for the UI. */
+    public List<BeatMoments.Moment> moments(int player) {
+        TrackStructure st = structureFor(player);
+        if (st == null) return List.of();
+        return trackMoments(player).stream().filter(m -> {
+            if (m.kind() == BeatMoments.Kind.BREAK || m.kind() == BeatMoments.Kind.STOP) return breakCounts(st, m);
+            TrackStructure.Segment seg = st.segmentAt(m.startBeat());
+            if (seg == null) return false;
+            return m.kind() == BeatMoments.Kind.HIT ? hitCounts(seg.section()) : seg.section() == Section.BUILD;
+        }).toList();
+    }
+
+    /** All breaks, bass hits and build steps found in the player's current track (steps of the analysis in use). */
+    private List<BeatMoments.Moment> trackMoments(int player) {
+        DeckState d = decks.get(player);
+        TrackStructure st = structureFor(player);
+        if (d == null) return List.of();
+        List<BeatMoments.Moment> out = new ArrayList<>();
+        TrackMoments tm = moments.get(player);
+        if (tm != null && Objects.equals(tm.trackKey(), d.trackKey())) out.addAll(tm.list());
+        TrackMoments steps = st == null ? null : buildSteps.get(player + "|" + st.source());
+        if (steps != null && Objects.equals(steps.trackKey(), d.trackKey())) out.addAll(steps.list());
+        out.sort((a, b) -> Integer.compare(a.startBeat(), b.startBeat()));
+        return out;
+    }
+
     /** Analyses available for the player's current track. */
     private List<String> availableAnalyses(int player) {
         Map<String, TrackStructure> bySource = structures.get(player);
@@ -362,9 +410,10 @@ public class ShowEngine implements MusicListener {
 
         if (audioReason != null) reason = audioReason;
 
-        // kick back after a long lull = drop (also for analyses that do not label drops)
+        // kick back after a long lull = drop: without an analysis (live audio), or when the music goes straight to full
+        // energy (a DJ filtering the bass out); a groove after a breakdown is not a drop
         boolean lullBefore = currentSection != null && !currentSection.isKicking() && currentSection != Section.INTRO;
-        if (section.isKicking() && section != Section.DROP && lullBefore && lullStartGlobal >= 0
+        if (section.isKicking() && section != Section.DROP && (st == null || section == Section.PEAK) && lullBefore && lullStartGlobal >= 0
                 && nextGlobal - lullStartGlobal >= 32) {
             dropUntilGlobal = nextGlobal + cfg.engine.dropBars * 4L;
             dropReason = "kick returns after " + (nextGlobal - lullStartGlobal) / 4 + " bars";
@@ -440,11 +489,36 @@ public class ShowEngine implements MusicListener {
             op.nextRequested = false;
             force.add(nextRotationLayer(cfg));
         }
+        // keep long peaks and builds moving: change a layer when the kick returns after a break (two after a bar or
+        // a stop) and at each step of a build
+        if (st != null && next > 0 && !(sectionChanged && section == Section.DROP)) { // a drop changes everything anyway
+            for (BeatMoments.Moment m : trackMoments(primary)) {
+                if (m.startBeat() > next) break;
+                boolean back = (m.kind() == BeatMoments.Kind.BREAK || m.kind() == BeatMoments.Kind.STOP)
+                        && m.endBeat() == next && section.isKicking() && breakCounts(st, m);
+                boolean step = m.kind() == BeatMoments.Kind.STEP && m.startBeat() == next && section == Section.BUILD;
+                if (back) {
+                    force.add(nextRotationLayer(cfg));
+                    if (m.kind() == BeatMoments.Kind.STOP || m.length() >= 4) force.add(nextRotationLayer(cfg));
+                }
+                if (step) {
+                    event("Beat " + next + ": build gets harder");
+                    force.add(nextRotationLayer(cfg));
+                }
+            }
+        }
         force.remove(null);
 
         if (sectionChanged || trackChanged || needsRefresh || !force.isEmpty()) {
             needsRefresh = false;
             applyScene(cfg, section, energy, force, steps);
+            if (stoppedForSilence && !sectionChanged) {
+                // the music plays again: the scene is back, and the haze (and in a build the riser) for this section
+                stoppedForSilence = false;
+                if (section == Section.BUILD) sectionEvents(cfg, section, seg, next, nextGlobal, toDrop, period, steps);
+                else haze(cfg, section, steps);
+            }
+            stoppedForSilence = false;
         }
 
         if (sectionChanged) sectionEvents(cfg, section, seg, next, nextGlobal, toDrop, period, steps);
@@ -452,7 +526,8 @@ public class ShowEngine implements MusicListener {
                 && barsIn > 0 && barsIn % cfg.engine.dropBlinderEveryBars == 0) {
             blinder(cfg, period, 0, steps, "drop phrase");
         }
-        lookAhead(cfg, toDrop, nextGlobal, period, steps);
+        lookAhead(cfg, st, toDrop, next, nextGlobal, period, steps);
+        momentEvents(cfg, st, section, sectionChanged, next, period, steps);
     }
 
     // ------------------------------------------------------------------ audio
@@ -599,10 +674,10 @@ public class ShowEngine implements MusicListener {
         haze(cfg, section, steps);
     }
 
-    private void lookAhead(Config cfg, int toDrop, long nextGlobal, double period, List<Step> steps) {
+    private void lookAhead(Config cfg, TrackStructure st, int toDrop, int next, long nextGlobal, double period, List<Step> steps) {
         if (toDrop <= 0) return;
         if (toDrop == cfg.atmos.fogLeadBeats) fog(cfg, steps, "pre-drop (" + toDrop + " beats)");
-        if (cfg.engine.buildStrobeBeats > 0 && toDrop == cfg.engine.buildStrobeBeats) {
+        if (cfg.engine.buildStrobeBeats > 0 && toDrop == cfg.engine.buildStrobeBeats && !breakBefore(st, next, toDrop)) {
             // one continuous burst from the end of the build into the drop (the safety limiter caps it)
             if (strobe(cfg, (toDrop + cfg.engine.dropStrobeBeats) * period, 0, steps, "end of build into drop")) {
                 strobeCoversGlobal = nextGlobal + toDrop;
@@ -612,6 +687,64 @@ public class ShowEngine implements MusicListener {
             Look bo = pickEvent(cfg, Role.BLACKOUT, Section.BUILD);
             if (bo != null) pulse(bo, 0, period, steps, "pre-drop blackout");
         }
+    }
+
+    /**
+     * Short moments inside sections: blackout while the kick is out for a few beats (or everything stops), an
+     * accent when it comes back, and a flash on each single bass hit in builds and breakdowns.
+     */
+    private void momentEvents(Config cfg, TrackStructure st, Section section, boolean sectionChanged, int next,
+                              double period, List<Step> steps) {
+        if (st == null || next <= 0) return;
+        for (BeatMoments.Moment m : trackMoments(primary)) {
+            if (m.startBeat() > next) break;
+            if (m.kind() == BeatMoments.Kind.STEP) continue; // changes looks, see plan()
+            if (m.kind() == BeatMoments.Kind.HIT) {
+                if (m.startBeat() == next && cfg.engine.bassHitFlash && hitCounts(section)) {
+                    Look accent = pickEvent(cfg, Role.ACCENT, section);
+                    if (accent != null) pulse(accent, 0, cfg.engine.bassHitBeats * period, steps, "bass hit");
+                }
+                continue;
+            }
+            if (!breakCounts(st, m)) continue;
+            if (m.startBeat() == next) {
+                event("Beat " + next + ": " + (m.kind() == BeatMoments.Kind.STOP ? "stop" : "break") + ", " + m.length()
+                        + " beats" + (m.kind() == BeatMoments.Kind.STOP ? " (silence)" : " (no bass)"));
+                if (cfg.engine.breakBlackout) {
+                    Look bo = pickEvent(cfg, Role.BLACKOUT, section);
+                    if (bo != null) pulse(bo, 0, m.length() * period, steps, "break");
+                }
+            }
+            // a drop has its own hit
+            if (m.endBeat() == next && cfg.engine.breakReturnAccent && !(sectionChanged && section == Section.DROP)) {
+                Look accent = pickEvent(cfg, Role.ACCENT, section);
+                if (accent != null) pulse(accent, 0, (accent.flashBeats > 0 ? accent.flashBeats : 1) * period, steps, "kick back after break");
+            }
+        }
+    }
+
+    /** Bass hits count where no kick runs: in builds and breakdowns. */
+    private static boolean hitCounts(Section section) {
+        return section == Section.BUILD || section == Section.BREAKDOWN;
+    }
+
+    /**
+     * Breaks count where the kick runs, or right before a drop; a stop (silence) counts everywhere. A missing kick
+     * in an intro or build is part of the section, not a break.
+     */
+    public static boolean breakCounts(TrackStructure st, BeatMoments.Moment m) {
+        if (m.kind() == BeatMoments.Kind.STOP) return true;
+        TrackStructure.Segment at = st.segmentAt(m.startBeat());
+        if (at != null && at.section().isKicking()) return true;
+        TrackStructure.Segment after = st.segmentAt(m.endBeat());
+        return after != null && after.section() == Section.DROP && Math.abs(after.startBeat() - m.endBeat()) <= 1;
+    }
+
+    /** A break or stop starts in the {@code beats} before the drop: dark there, so no strobe into the drop. */
+    private boolean breakBefore(TrackStructure st, int next, int beats) {
+        if (st == null || next <= 0) return false;
+        return trackMoments(primary).stream().anyMatch(m -> (m.kind() == BeatMoments.Kind.BREAK || m.kind() == BeatMoments.Kind.STOP)
+                && m.startBeat() >= next && m.startBeat() < next + beats && breakCounts(st, m));
     }
 
     /** Beats from {@code beat} to the start of the next DROP in the structure, or -1 if none is known. */
@@ -750,6 +883,7 @@ public class ShowEngine implements MusicListener {
         wasAuto = op.auto;
         wasHold = op.hold;
         long now = sched.currentTimeMillis();
+        checkSilence(cfg, now);
         op.layerLocks.entrySet().removeIf(e -> {
             if (e.getValue() <= now) {
                 event("Layer " + e.getKey() + " back to auto");
@@ -759,6 +893,41 @@ public class ShowEngine implements MusicListener {
             return false;
         });
         snapshot = buildSnapshot(cfg);
+    }
+
+    /**
+     * Nothing drives the lights any more (deck paused or stopped, track ran out or was ejected, every fader down,
+     * player gone from the network): after a few seconds stop everything the show started. Only in AUTO without
+     * HOLD; the looks come back with the next beat that drives the lights.
+     */
+    private void checkSilence(Config cfg, long now) {
+        DeckState d = primary >= 0 ? decks.get(primary) : null;
+        boolean music = d != null && d.trackKey() != null
+                && ((d.playing() && now - lastDeckMs.getOrDefault(d.player(), Long.MIN_VALUE / 2) < 3000)
+                || now - lastBeatMs.getOrDefault(d.player(), Long.MIN_VALUE / 2) < 2000);
+        if (music) {
+            silentSinceMs = -1;
+            return;
+        }
+        if (silentSinceMs < 0) silentSinceMs = now;
+        double limit = cfg.engine.releaseWhenStoppedSec;
+        if (limit <= 0 || stoppedForSilence || now - silentSinceMs < limit * 1000 || !op.auto || op.hold) return;
+        boolean hazeOn = lastHazePct != null && lastHazePct > 0;
+        if (active.isEmpty() && activeRiser == null && !hazeOn) return;
+        event("No music playing: stopping the show's looks");
+        Look riser = activeRiser;
+        releaseAll("music stopped");
+        if (riser != null) send(new Step(0, Ma3Action.fader(riser.page, riser.exec, riser.level, 0, "riser reset"), riser));
+        if (hazeOn) {
+            for (Look l : cfg.looks) {
+                if (!l.enabled || l.role != Role.HAZE || locked(Role.HAZE.name())) continue;
+                send(new Step(0, Ma3Action.fader(l.page, l.exec, 0, cfg.atmos.hazeFadeSec, "haze off, music stopped"), l));
+            }
+        }
+        lastHazePct = null;
+        dropUntilGlobal = -1;
+        needsRefresh = true;
+        stoppedForSilence = true;
     }
 
     private void releaseAll(String why) {
@@ -780,8 +949,10 @@ public class ShowEngine implements MusicListener {
         sched.execute(() -> {
             decks.clear();
             structures.clear();
+            moments.clear();
             lastBeatNumber.clear();
             lastBeatMs.clear();
+            lastDeckMs.clear();
             primary = -1;
             primaryReason = "no players found";
             currentTrackKey = null;

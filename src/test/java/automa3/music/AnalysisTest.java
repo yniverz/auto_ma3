@@ -171,6 +171,36 @@ class AnalysisTest {
         assertEquals(Section.OUTRO, at(st, 270));
     }
 
+    /**
+     * Real CDJ-3000 data of Wanton - February 7: a 16-bar build from beat 70 with bass hits but no steady kick and
+     * loud mids, getting harder at 86 and 118 (kick almost there), a silent bar, then the drop on 134.
+     */
+    @Test
+    void realTrackFebruary7LongBuildWithoutSteadyKick() throws Exception {
+        TrackStructure st = analyzeFixture("february-7.json");
+        assertEquals(Section.BUILD, at(st, 70));
+        assertEquals(70, st.segmentAt(70).startBeat(), "build starts where the mids come up");
+        assertEquals(Section.BUILD, at(st, 120), "kick almost running, still the build");
+        assertEquals(Section.DROP, at(st, 134));
+        assertEquals(134, st.segmentAt(134).startBeat(), "drop on the steady kick after the stop");
+        assertEquals(List.of(86, 118), BeatMoments.buildSteps(st).stream()
+                .filter(m -> m.startBeat() < 134).map(BeatMoments.Moment::startBeat).toList(), "build gets harder");
+        // the later build and drops stay where they were
+        assertEquals(Section.BUILD, at(st, 360));
+        assertEquals(406, st.segmentAt(406).startBeat());
+        assertEquals(Section.DROP, at(st, 406));
+    }
+
+    /** Voicemail 225-273: a bass line without a kick between two breakdowns is still the breakdown, not a groove. */
+    @Test
+    void realTrackVoicemailBassWithoutKickIsNoGroove() throws Exception {
+        TrackStructure st = analyzeFixture("voicemail.json");
+        for (int beat : new int[]{170, 225, 250, 300}) assertEquals(Section.BREAKDOWN, at(st, beat), "beat " + beat);
+        assertEquals(Section.BUILD, at(st, 340));
+        assertEquals(Section.DROP, at(st, 361));
+        assertEquals(361, st.segmentAt(361).startBeat());
+    }
+
     private static TrackStructure analyzeFixture(String name) throws Exception {
         java.nio.file.Path file = java.nio.file.Path.of(AnalysisTest.class.getResource("/tracks/" + name).toURI());
         AnalysisDump d = AnalysisDump.load(file);

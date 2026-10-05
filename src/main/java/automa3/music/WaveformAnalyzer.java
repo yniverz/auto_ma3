@@ -16,6 +16,9 @@ import java.util.List;
  *   <li>MID: bass / kick running but clearly below the loudest parts (grooves, builds with kick)</li>
  *   <li>LOW: no bass (breakdowns, quiet intros and outros)</li>
  * </ul>
+ * With per-beat data, bars where the bass is there but the kick is not steady (single hits, a broken
+ * pattern) for at least {@link #MIN_BUILD_BARS} bars stay MID however loud the mids get: that is a
+ * build-up, the drop comes when the steady kick does.
  * Runs of equal level are snapped to the 4-bar phrase grid. A HIGH run that starts with a clear
  * energy jump over the bars before it is a DROP, and what leads into a drop becomes a BUILD.
  * This catches drops in house / EDM where the kick keeps running through the build, as well as
@@ -34,6 +37,14 @@ public final class WaveformAnalyzer {
     static final double DROP_JUMP = 0.12;
     /** Increase of the bass level (two bars after vs. two bars before) that marks a drop. */
     static final double BASS_JUMP = 0.3;
+    /** Per beat: bass at this level (relative to the track's loud beats) counts as a kick. */
+    static final double KICK_BEAT = 0.6;
+    /** A bar has a steady kick when at least this many of its beats have one. */
+    static final int STEADY_KICK_BEATS = 3;
+    /** Bars with bass but no steady kick in a row from which they are a build, not a peak. */
+    static final int MIN_BUILD_BARS = 4;
+    /** How many bars after the start of a loud run the drop (bass jump) can be. */
+    static final int DROP_SEARCH_BARS = 5;
     /** Runs shorter than this many bars are merged into a neighbour. */
     static final int MIN_RUN_BARS = 2;
 
@@ -65,10 +76,28 @@ public final class WaveformAnalyzer {
 
     /** Analyse per-beat waveform bands; the result keeps them for display. */
     public static TrackStructure analyzeBeats(String trackKey, List<BarBands> beats, int firstDownbeat, int dropBeats) {
-        return analyze(trackKey, barsFromBeats(beats, firstDownbeat), firstDownbeat, dropBeats).withBeatBands(beats);
+        List<BarBands> bars = barsFromBeats(beats, firstDownbeat);
+        return analyze(trackKey, bars, firstDownbeat, dropBeats, kickBeats(beats, firstDownbeat, bars.size())).withBeatBands(beats);
+    }
+
+    /** Per bar: how many of its four beats have a kick (bass near the track's loud beats). */
+    static int[] kickBeats(List<BarBands> beats, int firstDownbeat, int barCount) {
+        double[] low = normalize(beats.stream().mapToDouble(BarBands::low).toArray());
+        int[] out = new int[barCount];
+        for (int bar = 0; bar < barCount; bar++) {
+            for (int i = firstDownbeat - 1 + bar * 4; i < firstDownbeat + 3 + bar * 4 && i < low.length; i++) {
+                if (i >= 0 && low[i] >= KICK_BEAT) out[bar]++;
+            }
+        }
+        return out;
     }
 
     public static TrackStructure analyze(String trackKey, List<BarBands> bars, int firstDownbeat, int dropBeats) {
+        return analyze(trackKey, bars, firstDownbeat, dropBeats, null);
+    }
+
+    /** @param kickBeats per bar the number of beats with a kick, or null without per-beat data */
+    static TrackStructure analyze(String trackKey, List<BarBands> bars, int firstDownbeat, int dropBeats, int[] kickBeats) {
         int n = bars.size();
         if (n == 0) return new TrackStructure(trackKey, "waveform", List.of(), List.of(), firstDownbeat, bars);
 
@@ -86,6 +115,19 @@ public final class WaveformAnalyzer {
             boolean bass = low[i] >= BASS_THRESHOLD;
             level[i] = !bass ? LOW : energy[i] >= HIGH_THRESHOLD ? HIGH : MID;
         }
+        if (kickBeats != null) {
+            // bass without a steady kick for a while: a build-up, however loud (a short fill is not)
+            for (int i = 0; i < n; ) {
+                if (low[i] < BASS_THRESHOLD || kickBeats[i] >= STEADY_KICK_BEATS) {
+                    i++;
+                    continue;
+                }
+                int j = i;
+                while (j < n && low[j] >= BASS_THRESHOLD && kickBeats[j] < STEADY_KICK_BEATS) j++;
+                if (j - i >= MIN_BUILD_BARS) for (int k = i; k < j; k++) level[k] = Math.min(level[k], MID);
+                i = j;
+            }
+        }
         level = median3(level);
 
         List<Run> runs = new ArrayList<>(snapToPhrases(mergeShort(runs(level), energy), n));
@@ -97,9 +139,10 @@ public final class WaveformAnalyzer {
             if (run.level != HIGH || runs.get(r - 1).level == HIGH) continue;
             double after = mean(energy, run.start, Math.min(n, run.start + 2));
             double before = mean(energy, Math.max(0, run.start - 4), run.start);
-            // the phrase-grid snap can move a boundary by a bar, so also look one bar either side
-            double bass = Math.max(bassJump(low, run.start),
-                    Math.max(bassJump(low, run.start - 1), bassJump(low, run.start + 1)));
+            // the phrase-grid snap can move a boundary by a bar, so also look one bar before; and the last bars of a
+            // build can already have the kick (then a gap), so the bass jump can come a phrase later
+            double bass = 0;
+            for (int b = run.start - 1; b <= Math.min(run.end - 1, run.start + DROP_SEARCH_BARS); b++) bass = Math.max(bass, bassJump(low, b));
             drop[r] = after - before >= DROP_JUMP || bass >= BASS_JUMP;
         }
         // Builds get loud a few bars early (kick comes in, snare rolls, risers in the mids and highs). The drop
@@ -109,7 +152,7 @@ public final class WaveformAnalyzer {
             Run prev = runs.get(r - 1), run = runs.get(r);
             int best = run.start;
             double bestJump = bassJump(low, run.start);
-            for (int b = Math.max(prev.start + 1, run.start - 4); b <= Math.min(run.end - 1, run.start + 4); b++) {
+            for (int b = Math.max(prev.start + 1, run.start - 4); b <= Math.min(run.end - 1, run.start + DROP_SEARCH_BARS); b++) {
                 double j = bassJump(low, b);
                 if (j > bestJump + 1e-9) {
                     bestJump = j;
@@ -139,15 +182,19 @@ public final class WaveformAnalyzer {
                         drop[r] ? Section.DROP : first ? Section.GROOVE : Section.PEAK,
                         drop[r] ? "energy jump" : "full energy"));
                 case MID -> {
+                    // bass, but no steady kick (bass line or hits only): not a groove, the track is holding back
+                    boolean noKick = noSteadyKick(kickBeats, run.start, run.end);
+                    Section middle = noKick ? Section.BREAKDOWN : Section.GROOVE;
+                    String label = noKick ? "bass, no steady kick" : "bass running";
                     if (beforeDrop && !first && run.len() <= 16) {
                         segs.add(new TrackStructure.Segment(sb, eb, Section.BUILD, "lead-in to drop"));
                     } else if (beforeDrop && run.len() > 8) {
                         int split = firstDownbeat + buildStart(mid, high, run.start, run.end) * 4;
-                        segs.add(new TrackStructure.Segment(sb, split, first ? Section.INTRO : Section.GROOVE, "bass running"));
+                        segs.add(new TrackStructure.Segment(sb, split, first ? Section.INTRO : middle, label));
                         segs.add(new TrackStructure.Segment(split, eb, Section.BUILD, "lead-in to drop"));
                     } else {
                         segs.add(new TrackStructure.Segment(sb, eb,
-                                first ? Section.INTRO : last ? Section.OUTRO : Section.GROOVE, "bass running"));
+                                first ? Section.INTRO : last ? Section.OUTRO : middle, label));
                     }
                 }
                 default -> {
@@ -196,6 +243,14 @@ public final class WaveformAnalyzer {
             if (allAbove) return b;
         }
         return Math.max(start, end - 8);
+    }
+
+    /** Most bars of the run have no steady kick (needs per-beat data; without it a run with bass counts as kicking). */
+    private static boolean noSteadyKick(int[] kickBeats, int start, int end) {
+        if (kickBeats == null) return false;
+        int steady = 0;
+        for (int i = start; i < end; i++) if (kickBeats[i] >= STEADY_KICK_BEATS) steady++;
+        return steady * 2 < end - start;
     }
 
     private static boolean risingHighs(double[] mid, double[] high, int start, int end) {

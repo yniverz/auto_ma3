@@ -122,8 +122,16 @@ public class WebServer {
                 app.config().replace(c);
                 json(ex, 200, Map.of("analysisMode", mode));
             } else if (path.equals("/api/analysis")) {
-                var st = app.engine().structure(Integer.parseInt(query.getOrDefault("player", "0")));
-                json(ex, st == null ? 404 : 200, st == null ? Map.of("error", "no analysis") : st);
+                int player = Integer.parseInt(query.getOrDefault("player", "0"));
+                var st = app.engine().structure(player);
+                if (st == null) {
+                    json(ex, 404, Map.of("error", "no analysis"));
+                } else {
+                    Map<String, Object> body = ConfigStore.JSON.convertValue(st, new com.fasterxml.jackson.core.type.TypeReference<>() {
+                    });
+                    body.put("moments", app.engine().moments(player));
+                    json(ex, 200, body);
+                }
             } else if (path.equals("/api/looks/export")) {
                 byte[] body = ConfigStore.JSON.writeValueAsBytes(LookTransfer.export(app.config().get()));
                 ex.getResponseHeaders().set("Content-Type", "application/json");

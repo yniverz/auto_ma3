@@ -19,25 +19,34 @@ It sends grandMA3 command-line commands over OSC (`/cmd`). You program the looks
 
 ## Run
 
-The easiest way is the Mac app (see below). From the source (Java 21 and Maven: `brew install openjdk@21 maven`):
+AutoMA3 runs in a Terminal window; the UI is a web page (Safari, Chrome, or a tablet on the show network).
+
+**Release** (no Java needed): download `AutoMA3-<version>-mac-arm64.zip` from the
+[releases](https://github.com/yniverz/auto_ma3/releases), unzip it anywhere and double-click `AutoMA3.command`.
+The first time macOS may refuse because it is not from the App Store: right-click → Open, then Open again. It
+starts in Terminal and opens the UI in the browser. The terminal shows the link (Cmd-click it to open it again),
+the data folder and the log. Quit with Ctrl+C or by closing the window. macOS asks once whether Terminal may
+access the local network: allow it, the CDJs and the console need it.
+
+**From the source** (Java 21 and Maven: `brew install openjdk@21 maven`):
 
 ```bash
 mvn clean package
-java -jar target/auto-ma3.jar             # live with CDJs (Mac on the Pro DJ Link network by Ethernet)
+java -jar target/auto-ma3.jar --open      # live with CDJs (Mac on the Pro DJ Link network by Ethernet)
 java -jar target/auto-ma3.jar --sim       # simulated DJ set, no CDJs needed
 ```
 
-Then open http://localhost:8081/ (8080 is left free for grandMA3's own web interface).
+The UI is at http://127.0.0.1:8081/ (8080 is left free for grandMA3's own web interface).
 
-Options: `--sim`, `--replay recordings/session-....jsonl`, `--speed 4` (sim/replay speed), `--dry-run` (send nothing),
-`--record`, `--config FILE`, `--port N`, `--analyze analysis/<track>.json` (print the waveform analysis of a track).
+Options: `--open` (open the UI in the browser), `--sim`, `--replay FILE` (a session from `recordings/`), `--speed 4`
+(sim/replay speed), `--dry-run` (send nothing), `--record`, `--config FILE`, `--port N`,
+`--analyze FILE` (print the waveform analysis of a track from `analysis/`). `--help` lists them.
 
-Run from the source, settings live in `config.json` next to where it is started (created on first start); the Mac
-app keeps them in `~/Library/Application Support/AutoMA3`. Everything is edited in the UI.
+Settings, setups, recordings, analyses and the log (`logs/automa3.log`, the run before as `automa3.previous.log`)
+live in `~/Library/Application Support/AutoMA3` (`--config` uses another folder). Everything is edited in the UI.
 
-In VS Code, **F5** runs the entry selected in Run and Debug: **App** (the desktop window), **Build** (Mac app +
-dmg, or jar + tests), **Terminal** (simulator, live with recording, replay of the last recording in the browser UI)
-and **Debug** (breakpoints, needs the Java extension).
+In VS Code, **F5** runs the entry selected in Run and Debug: **Run** (live, simulator, replay of the last
+recording), **Build** (release zip, or jar + tests) and **Debug** (breakpoints, needs the Java extension).
 
 ## Exchanging looks with other tools
 
@@ -47,34 +56,22 @@ for other tools. Imports can be partial (only some looks, only some fields) and 
 the editor. Other programs can also import directly into a running AutoMA3 (`POST /api/looks/import`).
 Format and API: [docs/looks-format.md](docs/looks-format.md).
 
-## Mac app
-
-`packaging/build-mac-app.sh` (or F5 → "Build: Mac app + dmg") builds `target/dist/AutoMA3.app`,
-`target/dist/AutoMA3-<version>.dmg` and the updater zip. The app contains its own Java runtime: the target Mac
-needs nothing else. Releases are built by GitHub (see below).
-
-- One window, backend inside: closing the window (or Cmd+Q) stops everything.
-- Menu **Source**: Live CDJs, Simulator, Replay Recording…; menu **View**: Reload (Cmd+R), Open in Browser,
-  Open Data Folder, Open Log, Check for Updates…. The reload button in the page header reloads too.
-- Settings, setups, recordings, analyses and the log live in `~/Library/Application Support/AutoMA3`.
-- Built for the CPU of the building Mac (Apple Silicon). The app is signed ad hoc, not by an Apple developer
-  account: on another Mac open it the first time with right-click → Open (or allow it in System Settings →
-  Privacy & Security). macOS asks once for local network access: allow it, the CDJs need it.
-
 ## Releases and updates
 
-Pushing to the branch `release` (e.g. merging `main` into it) makes GitHub build the Mac app
-(`.github/workflows/release.yml`): tests, then `AutoMA3.app`, published as a GitHub Release with the `.dmg`
-(first install) and `AutoMA3-<version>-mac-arm64.zip` (for the updater). Versions are `major.minor` from
-`pom.xml` plus the build number, e.g. `1.0.7`. Raise `major.minor` in `pom.xml` for bigger steps.
+`packaging/build-mac-release.sh` (or F5 → "Build: Mac release") builds `target/dist/AutoMA3/` and
+`target/dist/AutoMA3-<version>-mac-arm64.zip`: `AutoMA3.command`, the app and a small Java runtime of its own.
+Built for the CPU of the building Mac (Apple Silicon).
+
+Pushing to the branch `release` (e.g. merging `main` into it) makes GitHub build it
+(`.github/workflows/release.yml`): tests, then the zip, published as a GitHub Release. Versions are `major.minor`
+from `pom.xml` plus the build number, e.g. `1.0.7`. Raise `major.minor` in `pom.xml` for bigger steps.
 
 ```bash
 git checkout release && git merge main && git push && git checkout main
 ```
 
-The installed app checks for a newer release when it starts (and on View → Check for Updates…) and asks
-before updating. On "Update and restart" it downloads the new version, quits, swaps itself and starts again.
-A copy that cannot replace itself (e.g. started from the disk image) opens the download page instead.
+When a newer release exists, the terminal says so at the start with the link to it (nothing is shown without
+internet). To update, unzip the new release and use its `AutoMA3.command`; settings stay where they are.
 
 ## Setup on the console
 
@@ -111,11 +108,38 @@ The executor commands (`Go+`, `Off`, `Flash On/Off`, `Temp On/Off`, `FaderMaster
    peak), Verse → groove. The waveform adds detail inside long phrases (where the build really starts, groove vs.
    breakdown).
 2. **Waveform** (CDJ-3000 three-band or NXS2 colour), analysed per beat: every bar gets an energy level (no bass /
-   bass / full). A drop is where bass **and** mids jump together (builds get loud early from snare rolls and
-   risers, so the highs are ignored), the build is where mids and highs start rising before it, bars without bass
-   are breakdowns. Boundaries snap to the 4-bar phrase grid.
-3. **Live audio** (optional): if the kick disappears for 2 bars (filter, EQ, cut), it's treated as a breakdown, and the kick returning after a long lull counts as a drop.
+   bass / full). A drop is where the bass jumps (builds get loud early from snare rolls and risers, so their
+   loudness is not used), the build is where mids and highs start rising before it, bars without bass are
+   breakdowns. Bars with bass but no steady kick (single hits, a broken pattern; fewer than 3 of 4 beats with a
+   kick) for 4 bars or more count as a build however loud the mids get: the drop is where the steady kick comes.
+   A groove needs a steady kick; bass without one between other parts is a breakdown (or the build before a drop).
+   Boundaries snap to the 4-bar phrase grid.
+3. **Live audio** (optional): if the kick disappears for 2 bars (filter, EQ, cut), it's treated as a breakdown, and
+   the kick returning after a long lull counts as a drop when it comes back at full energy (or there is no analysis).
+   A groove after a breakdown stays a groove.
 4. No analysis at all: groove with look rotation every 32 bars.
+
+Inside the sections, the per-beat waveform also gives short **moments** (shown on the deck graph):
+
+- **Breaks**: the bass stops for half a bar to two bars between stretches of kick (the 1-bar gaps in a techno peak,
+  the bar before a drop), or the music goes silent. The BLACKOUT look runs for the break and an ACCENT hits when the
+  kick comes back. In an intro or build a missing kick is not a break.
+- **Bass hits**: single bass hits that repeat with the bar, without a running kick (an 808 on the one in a build).
+  Each one gets a short ACCENT flash, in builds and breakdowns.
+- **Build steps**: where a long build gets clearly harder from one 4-bar phrase to the next (more bass, a steadier
+  kick, louder mids). One look layer changes there.
+
+When the kick comes back after a break, one look layer changes too (two after a whole bar or a stop), so long peaks
+with regular breaks keep moving. This needs more than one look on a layer (e.g. two MOVEMENT looks for the loud
+parts). If the end of a build is a break or a stop, it stays dark there and the strobe starts on the drop instead.
+
+The blackout, accent and flash for breaks and bass hits can be switched off in Settings → Engine.
+
+When no deck drives the lights any more (deck paused or stopped, track ran out or ejected, every fader down in
+*mixer* mode, player gone from the network), AutoMA3 stops everything it started after 3 seconds: the scene looks,
+the riser and the haze. Flashes end on their own. With the next beat the looks come back (in a build with the riser,
+haze at the section's level). Nothing is touched with AUTO off or in HOLD. Settings → Engine sets the delay
+(0 = never).
 
 The **Analysis** dropdown in the header picks what drives the show: *Auto* (rekordbox phrases when the track has
 them), *rekordbox phrases* or *Waveform*. Both analyses are kept per track, so switching is instant. Each deck
@@ -129,7 +153,7 @@ mvn clean test
 
 The tests cover OSC encoding, version profiles, phrase and waveform analysis (including real CDJ-3000 / rekordbox
 data of tracks in `src/test/resources/tracks`), full engine runs on virtual time (drop timing, riser, fog lead,
-strobe safety, hold, operator locks, console controls, analysis mode), look export/import and the updater.
+strobe safety, hold, operator locks, console controls, analysis mode), look export/import and the update check.
 `--sim` runs three synthetic tracks that cycle through phrase / waveform / no analysis, with DJ-style overlaps.
 Use `--record` at a gig and `--replay` afterwards to debug with the real data; every analysed track is also saved
 to `analysis/` and can be inspected with `--analyze`.

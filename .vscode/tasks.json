@@ -12,9 +12,9 @@
       "problemMatcher": []
     },
     {
-      "label": "Build Mac app (.app + .dmg)",
+      "label": "Build Mac release (zip)",
       "type": "shell",
-      "command": "packaging/build-mac-app.sh",
+      "command": "packaging/build-mac-release.sh",
       "problemMatcher": []
     },
     {

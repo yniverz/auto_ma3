@@ -24,12 +24,11 @@
     --radius: 8px;
   }
   * { box-sizing: border-box; }
-  /* The Mac system font (San Francisco): -apple-system / BlinkMacSystemFont in Safari and Chrome, "System" in the
-     Mac app's WebView (it does not know the other two, and its "Helvetica Neue" renders as the thin Light cut) */
+  /* the Mac system font (San Francisco): -apple-system in Safari, BlinkMacSystemFont in Chrome */
   body { margin: 0; background: var(--bg); color: var(--text);
-         font: 14px/1.45 -apple-system, BlinkMacSystemFont, "System", Helvetica, Arial, sans-serif;
+         font: 14px/1.45 -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
          font-variant-numeric: tabular-nums; }
-  /* form controls do not inherit the page font by default (the WebView then falls back to a serif font) */
+  /* form controls do not inherit the page font by default */
   button, input, select, textarea { font-family: inherit; }
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; border: 2px solid var(--bg); }
@@ -50,7 +49,7 @@
   main { padding: 20px; max-width: 1440px; margin: 0 auto; }
   .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
   .panel { background: var(--panel); border-radius: var(--radius); padding: 16px; min-width: 0; }
-  /* the WebView has no semi-bold: small labels are bold so they do not render thin */
+  /* small labels bold so they do not render thin */
   .panel h2 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 12px; }
   .panel p { margin: 0 0 12px; }
   .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
@@ -98,6 +97,9 @@
   .timeline > div { height: 100%; border-right: 1px solid rgba(0,0,0,.35); }
   .timeline .head { position: absolute; top: -2px; bottom: -2px; width: 2px; background: #fff; border: none; }
   .wave { display: block; width: 100%; height: 48px; margin-top: 4px; background: #0c0c0c; border-radius: 4px; }
+  .wave-wrap { position: relative; overflow: hidden; }
+  #recBtn.recording { color: var(--bad); }
+  .wave-wrap .head { position: absolute; top: 4px; bottom: 0; width: 2px; margin-left: -1px; background: #fff; }
   .wave-legend { font-size: 11px; color: var(--faint); margin-top: 4px; }
   .wave-legend b { font-weight: 500; }
 
@@ -112,13 +114,13 @@
   th { color: var(--muted); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
   input, select, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 6px;
                             padding: 4px 8px; min-height: 28px; font: inherit; font-size: 13px; max-width: 100%; }
-  /* checkboxes drawn here: the WebView ignores accent-color and draws bright native boxes */
+  /* checkboxes drawn here so they match the dark theme in every browser */
   input[type=checkbox] { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; min-height: 0; padding: 0;
                          margin: 0; border: 1px solid #444; border-radius: 4px; background: var(--bg); cursor: pointer;
                          vertical-align: middle; flex: none; }
   input[type=checkbox]:checked { border-color: var(--accent); background: var(--accent) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='10'><path d='M1 5l3.5 3.5L11 1' fill='none' stroke='%231a1100' stroke-width='2'/></svg>") no-repeat center; }
   input[type=range] { accent-color: var(--accent); border: none; background: none; padding: 0; }
-  /* draw dropdowns ourselves: the WebView's native ones look dated */
+  /* dropdowns drawn here so they match the dark theme in every browser */
   select { -webkit-appearance: none; appearance: none; padding: 4px 28px 4px 8px; cursor: pointer;
            background: var(--bg) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M1 1l4 4 4-4' fill='none' stroke='%23a0a0a0' stroke-width='1.5'/></svg>") no-repeat right 10px center; }
   select:focus, input:focus, textarea:focus { outline: none; border-color: var(--accent); }
@@ -340,6 +342,7 @@ document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
   document.querySelectorAll("nav button").forEach(x => x.classList.toggle("active", x === b));
   document.querySelectorAll("main > section").forEach(s => s.classList.toggle("hidden", s.id !== "tab-" + b.dataset.tab));
   if (b.dataset.tab === "setup") renderSetup();
+  if (b.dataset.tab === "live" && state) renderLive();
 });
 
 // ---------- live
@@ -383,61 +386,105 @@ setInterval(() => { if (es && es.readyState === EventSource.OPEN && Date.now() -
 
 function renderLive() {
   const e = state.engine;
-  $("srcStatus").textContent = state.source.name + ": " + state.source.status;
-  $("appVersion").textContent = state.version && state.version !== "dev" ? "v" + state.version : "";
+  setText($("srcStatus"), state.source.name + ": " + state.source.status);
+  setText($("appVersion"), state.version && state.version !== "dev" ? "v" + state.version : "");
   $("dryBadge").classList.toggle("hidden", !state.dryRun);
-  if (document.activeElement !== $("modeSel") && state.analysisMode) $("modeSel").value = state.analysisMode;
-  $("dryBtn").textContent = state.dryRun ? "Go live" : "Dry run";
-  $("recBtn").textContent = state.recording ? "Stop recording" : "Record";
-  $("recBtn").style.color = state.recording ? "var(--bad)" : "";
-  $("section").textContent = e.section || "-";
-  $("section").style.color = e.section ? `var(--${e.section})` : "";
-  $("reason").textContent = e.sectionReason || "";
-  $("energyBar").style.width = Math.round(e.energy * 100) + "%";
-  $("energyVal").textContent = e.energy.toFixed(2);
-  $("bpm").textContent = (e.bpm || "-") + " BPM";
-  $("next").textContent = e.nextSection ? `next: ${e.nextSection} in ${Math.ceil(e.beatsToNext / 4)} bars` : "next: -";
-  $("player").textContent = e.primaryPlayer > 0
+  if (document.activeElement !== $("modeSel") && state.analysisMode && $("modeSel").value !== state.analysisMode) $("modeSel").value = state.analysisMode;
+  setText($("dryBtn"), state.dryRun ? "Go live" : "Dry run");
+  setText($("recBtn"), state.recording ? "Stop recording" : "Record");
+  $("recBtn").classList.toggle("recording", state.recording);
+  if ($("tab-live").classList.contains("hidden")) return; // the rest is drawn when the tab is shown
+  setText($("section"), e.section || "-");
+  setStyle($("section"), "color", e.section ? `var(--${e.section})` : "");
+  setText($("reason"), e.sectionReason || "");
+  setStyle($("energyBar"), "width", Math.round(e.energy * 100) + "%");
+  setText($("energyVal"), e.energy.toFixed(2));
+  setText($("bpm"), (e.bpm || "-") + " BPM");
+  setText($("next"), e.nextSection ? `next: ${e.nextSection} in ${Math.ceil(e.beatsToNext / 4)} bars` : "next: -");
+  setText($("player"), e.primaryPlayer > 0
     ? `following player ${e.primaryPlayer} (${e.primaryReason})`
-    : `no deck drives the lights (${e.primaryReason})`;
+    : `no deck drives the lights (${e.primaryReason})`);
   $("player").classList.toggle("warn", e.primaryPlayer <= 0 || e.primaryReason.includes("no deck on air"));
   setCtl("c-auto", e.auto, "AUTO ON", "AUTO OFF");
   setCtl("c-hold", e.hold, "HOLDING", "HOLD");
   setCtl("c-strobe", e.strobeAllowed, "STROBE OK", "STROBE OFF");
   setCtl("c-arm", e.specialsArmed, "SPECIALS ARMED", "SPECIALS SAFE");
-  if (document.activeElement !== $("bias")) $("bias").value = Math.round((e.energyBias + 0.5) * 100);
+  const bias = String(Math.round((e.energyBias + 0.5) * 100));
+  if (document.activeElement !== $("bias") && $("bias").value !== bias) $("bias").value = bias;
 
-  $("activeLooks").innerHTML = Object.entries(e.activeLooks).map(([k, v]) => `<div><span class="muted">${esc(k)}</span> ${esc(v)}</div>`).join("") || '<span class="muted">nothing running</span>';
-  $("locks").innerHTML = Object.entries(e.lockedLayersSec).map(([k, v]) => `<span class="badge warn">${esc(k)} manual ${v}s</span>`).join(" ");
+  setHtml($("activeLooks"), Object.entries(e.activeLooks).map(([k, v]) => `<div><span class="muted">${esc(k)}</span> ${esc(v)}</div>`).join("") || '<span class="muted">nothing running</span>');
+  setHtml($("locks"), Object.entries(e.lockedLayersSec).map(([k, v]) => `<span class="badge warn">${esc(k)} manual ${v}s</span>`).join(" "));
   const cons = state.consoles.map(c => `<span class="badge ${c.enabled ? (c.verified ? "ok" : "warn") : ""}" title="${esc(c.profile)}">${esc(c.name)} ${esc(c.target)}${c.enabled ? "" : " (off)"}</span>`).join(" ");
   const oscIn = state.oscInAgeSec < 0 ? "no OSC received yet" : `OSC in ${state.oscInAgeSec}s ago`;
   const audio = e.audio.running ? `audio: ${e.audio.signal ? (e.audio.kick ? "kick" : "no kick") : "no signal"}` : (state.audioError ? "audio error: " + state.audioError : "audio off");
-  $("consoleState").innerHTML = cons + `<div class="muted" style="margin-top:4px">${esc(oscIn)} · ${esc(audio)}${state.sendError ? ' · <span style="color:var(--bad)">' + esc(state.sendError) + "</span>" : ""}</div>`;
+  setHtml($("consoleState"), cons + `<div class="muted" style="margin-top:4px">${esc(oscIn)} · ${esc(audio)}${state.sendError ? ' · <span style="color:var(--bad)">' + esc(state.sendError) + "</span>" : ""}</div>`);
 
-  $("decks").innerHTML = e.decks.length ? e.decks.map(deckHtml).join("") : '<span class="muted">No players yet.</span>';
-  $("events").textContent = e.events.join("\n");
-  $("commands").innerHTML = state.commands.slice().reverse().map(c => {
+  renderDecks(e.decks);
+  setText($("events"), e.events.join("\n"));
+  setHtml($("commands"), state.commands.slice().reverse().map(c => {
     const t = new Date(c.timeMs).toLocaleTimeString();
     return `<div class="${c.sent ? "sent" : "unsent"}">${t} ${esc(c.command)} <span class="muted">· ${esc(c.reason)}${c.sent ? "" : " (not sent)"}</span></div>`;
-  }).join("");
+  }).join(""));
+}
+
+/** Replace an element's content only when it changed (updates arrive up to 25 times a second). */
+function setHtml(el, html) {
+  if (el._html === html) return;
+  el._html = html;
+  el.innerHTML = html;
 }
 
 function setCtl(id, on, onText, offText) {
   const b = $(id);
   b.classList.toggle("on", on);
-  b.textContent = on ? onText : offText;
+  setText(b, on ? onText : offText);
+}
+
+function setText(el, text) {
+  if (el.textContent !== text) el.textContent = text;
+}
+
+function setStyle(el, prop, value) {
+  if (el.style[prop] !== value) el.style[prop] = value;
 }
 
 function analysisName(a) {
   return a === "phrase" ? "rekordbox phrases" : a === "waveform" ? "waveform" : a;
 }
 
-function deckHtml(d) {
-  const total = d.lastBeat || 1;
-  const segs = d.segments.map(s => `<div title="${s.section} (${esc(s.label)})" style="width:${(s.endBeat - s.startBeat) / total * 100}%;background:var(--${s.section})"></div>`).join("");
-  const head = d.beat > 0 && d.segments.length ? `<div class="head" style="left:${Math.min(100, d.beat / total * 100)}%"></div>` : "";
-  return `<div class="deck ${d.primary ? "primary" : ""}">
-    <div class="row"><b>Player ${d.player}</b>
+function renderDecks(decks) {
+  const box = $("decks");
+  if (!decks.length) {
+    box.dataset.players = "";
+    setHtml(box, '<span class="muted">No players yet.</span>');
+    return;
+  }
+  const players = decks.map(d => d.player).join(",");
+  if (box.dataset.players !== players) {
+    box.dataset.players = players;
+    setHtml(box, decks.map(() => '<div class="deck"><div></div><div></div></div>').join(""));
+  }
+  decks.forEach((d, i) => {
+    const el = box.children[i];
+    const total = d.lastBeat || 1;
+    el.classList.toggle("primary", d.primary);
+    setHtml(el.children[0], deckInfoHtml(d));
+    setHtml(el.children[1], deckGraphHtml(d, total));
+    const tl = el.querySelector(".timeline .head");
+    if (tl) {
+      setStyle(tl, "display", d.beat > 0 && d.segments.length ? "" : "none");
+      setStyle(tl, "left", Math.min(100, d.beat / total * 100) + "%");
+    }
+    const wh = el.querySelector(".wave-wrap .head");
+    if (wh) {
+      setStyle(wh, "display", d.beat > 0 ? "" : "none");
+      setStyle(wh, "left", (d.beat / total * 100) + "%");
+    }
+  });
+}
+
+function deckInfoHtml(d) {
+  return `<div class="row"><b>Player ${d.player}</b>
       ${d.playing ? '<span class="badge ok">playing</span>' : '<span class="badge">stopped</span>'}
       ${d.onAir ? '<span class="badge ok">on air</span>' : state.engine.mixerPresent ? '<span class="badge" title="The mixer reports this channel faded out. The DJM uses the channel with the same number as the player.">off air</span>' : ""}
       ${d.master ? '<span class="badge">master</span>' : ""}
@@ -446,10 +493,14 @@ function deckHtml(d) {
         ? '<button class="small" data-follow="0" title="Back to automatic deck selection">Following · Auto</button>'
         : `<button class="small" data-follow="${d.player}" title="Make this deck drive the lights">Follow</button>`}
       <span class="muted">${d.bpm} BPM · beat ${d.beat} · ${esc(d.section || "-")} · analysis: <b>${esc(analysisName(d.analysis))}</b>${d.availableAnalyses.length > 1 ? " (also available: " + d.availableAnalyses.filter(a => a !== d.analysis).map(analysisName).join(", ") + ")" : ""}</span></div>
-    <div class="small">${esc(d.title || "")} <span class="muted">${esc(d.artist || "")}</span></div>
-    <div class="timeline">${segs || '<div style="width:100%;background:var(--panel)"></div>'}${head}</div>
-    ${waveSvg(d, total)}
-  </div>`;
+    <div class="small">${esc(d.title || "")} <span class="muted">${esc(d.artist || "")}</span></div>`;
+}
+
+/** Section timeline and waveform graph, without the playheads (those are moved by renderDecks). */
+function deckGraphHtml(d, total) {
+  const segs = d.segments.map(s => `<div title="${s.section} (${esc(s.label)})" style="width:${(s.endBeat - s.startBeat) / total * 100}%;background:var(--${s.section})"></div>`).join("");
+  return `<div class="timeline">${segs || '<div style="width:100%;background:var(--panel)"></div>'}<div class="head" style="display:none"></div></div>
+    ${waveSvg(d, total)}`;
 }
 
 // ---------- waveform bands per bar (what the analysis sees)
@@ -466,6 +517,19 @@ function wantAnalysis(d) {
 
 function waveSvg(d, total) {
   const a = wantAnalysis(d);
+  // the same for the whole track: build it once
+  const c = analysisCache[d.player];
+  const memo = total + "|" + d.availableAnalyses.join(",");
+  if (a && c.svgKey === memo) return c.svg;
+  const html = buildWaveSvg(d, a, total);
+  if (a) {
+    c.svgKey = memo;
+    c.svg = html;
+  }
+  return html;
+}
+
+function buildWaveSvg(d, a, total) {
   // per beat if available (index 0 = beat 1), else per bar
   const perBeat = a && a.beatBands && a.beatBands.length;
   const pts = !a ? [] : perBeat ? a.beatBands : (a.bands || []);
@@ -484,11 +548,17 @@ function waveSvg(d, total) {
     const bar = Math.floor((beat - a.firstDownbeat) / 4) + 1;
     return `<rect x="${x(i)}" y="${y(b.low, "low")}" width="${w}" height="${(H - y(b.low, "low")).toFixed(1)}" fill="#3e63dd"><title>beat ${beat} · bar ${bar} · low ${b.low.toFixed(1)} mid ${b.mid.toFixed(1)} high ${b.high.toFixed(1)}</title></rect>`;
   }).join("");
-  const head = d.beat > 0 ? `<line x1="${(d.beat / total * 1000).toFixed(1)}" x2="${(d.beat / total * 1000).toFixed(1)}" y1="0" y2="${H}" stroke="#fff" stroke-width="2"/>` : "";
-  return `<svg class="wave" viewBox="0 0 1000 ${H}" preserveAspectRatio="none">${bars}
+  // short breaks (shaded), bass hits (ticks) and build steps (green lines) the show reacts to
+  const xb = beat => ((beat - 1) / total * 1000).toFixed(2);
+  const marks = (a.moments || []).map(m => m.kind === "HIT"
+    ? `<rect x="${xb(m.startBeat)}" y="0" width="${w}" height="6" fill="#f5a524"><title>bass hit · beat ${m.startBeat}</title></rect>`
+    : m.kind === "STEP"
+    ? `<rect x="${xb(m.startBeat)}" y="0" width="3" height="${H}" fill="#46a758"><title>build gets harder · beat ${m.startBeat}</title></rect>`
+    : `<rect x="${xb(m.startBeat)}" y="0" width="${(m.length / total * 1000).toFixed(2)}" height="${H}" fill="#ffffff" fill-opacity="0.22"><title>${m.kind === "STOP" ? "stop (silence)" : "break (no bass)"} · beat ${m.startBeat}, ${m.length} beats</title></rect>`).join("");
+  return `<div class="wave-wrap"><svg class="wave" viewBox="0 0 1000 ${H}" preserveAspectRatio="none">${bars}
       <polyline points="${line("mid")}" fill="none" stroke="#f5a524" stroke-width="1.2" vector-effect="non-scaling-stroke"/>
-      <polyline points="${line("high")}" fill="none" stroke="#ededed" stroke-width="1" vector-effect="non-scaling-stroke"/>${head}</svg>
-    <div class="wave-legend"><b style="color:#849dff">■ bass</b> · <b style="color:var(--accent)">— mid</b> · <b style="color:var(--text)">— high</b> per ${perBeat ? "beat" : "bar"} (hover for values)${!d.availableAnalyses.includes("phrase") && d.availableAnalyses.length ? ' · <span style="color:var(--accent)">no rekordbox phrase analysis for this track</span>' : ""}</div>`;
+      <polyline points="${line("high")}" fill="none" stroke="#ededed" stroke-width="1" vector-effect="non-scaling-stroke"/>${marks}</svg><div class="head" style="display:none"></div></div>
+    <div class="wave-legend"><b style="color:#849dff">■ bass</b> · <b style="color:var(--accent)">— mid</b> · <b style="color:var(--text)">— high</b> per ${perBeat ? "beat" : "bar"}${(a.moments || []).length ? ' · <span style="color:var(--muted)">▮ break</span> · <b style="color:var(--accent)">▴ bass hit</b> · <b style="color:#46a758">| build step</b>' : ""} (hover for values)${!d.availableAnalyses.includes("phrase") && d.availableAnalyses.length ? ' · <span style="color:var(--accent)">no rekordbox phrase analysis for this track</span>' : ""}</div>`;
 }
 
 const ctl = (action, value) => post("/api/control/" + action + (value !== undefined ? "?value=" + value : ""));
@@ -513,10 +583,8 @@ $("reloadBtn").onclick = () => {
   location.reload();
 };
 
-// downloads: inside the Mac app the page has no download support, the app saves the file instead
-function download(path, name) {
-  if (window.automa3Desktop) window.automa3Desktop.download(path, name);
-  else location.href = path;
+function download(path) {
+  location.href = path;
 }
 
 $("modeSel").onchange = async () => {
@@ -653,7 +721,7 @@ function renderLooks() {
 // ---------- look export / import (format: docs/looks-format.md)
 let importFile = null;
 
-$("exportLooks").onclick = () => download("/api/looks/export", "automa3-looks.json");
+$("exportLooks").onclick = () => download("/api/looks/export");
 
 $("importLooksFile").onchange = async ev => {
   const file = ev.target.files[0];
@@ -811,8 +879,10 @@ const SETTINGS = [
     latencyMs: "Send early by (ms) so light lands on the beat", rotateBarsGroove: "Change a look every N bars (groove)", rotateBarsPeak: "Change a look every N bars (drop/peak)",
     dropBars: "Bars that count as 'drop'", colorPerTrack: "Keep one colour per track", colorChangeOnDrop: "New colour on every drop",
     preDropBlackout: "Blackout on the beat before a drop", buildStrobeBeats: "Strobe the last N beats of a build", dropStrobeBeats: "Strobe N beats on the drop",
-    dropBlinderEveryBars: "Blinder hit every N bars in a drop", accentBeats: "Drop hit length (beats)", operatorLockBars: "Leave a layer alone after you touch it (bars)",
-    crossfadeOffDelayMs: "Delay before the old look goes off (ms)", releaseOnAutoOff: "Stop auto looks when AUTO goes off", bpmSyncWhenManual: "BPM sync also when AUTO is off"}],
+    dropBlinderEveryBars: "Blinder hit every N bars in a drop", accentBeats: "Drop hit length (beats)",
+    breakBlackout: "Blackout during short breaks (bass out for a few beats, or silence)", breakReturnAccent: "Accent when the kick comes back after a break",
+    bassHitFlash: "Accent flash on single bass hits in builds / breakdowns", bassHitBeats: "Bass hit flash length (beats)", operatorLockBars: "Leave a layer alone after you touch it (bars)",
+    crossfadeOffDelayMs: "Delay before the old look goes off (ms)", releaseWhenStoppedSec: "Stop the show's looks this many s after the music stops (0 = never)", releaseOnAutoOff: "Stop auto looks when AUTO goes off", bpmSyncWhenManual: "BPM sync also when AUTO is off"}],
   ["safety", "Safety", {
     strobeAllowedAtStart: "Strobe allowed at start", strobeMaxOnSec: "Strobe max on (s)", strobeMinGapSec: "Strobe min gap (s)",
     strobeMaxDutyPerMinute: "Strobe max share of a minute (0-1)", blinderMaxOnSec: "Blinder max on (s)", blinderMinGapSec: "Blinder min gap (s)"}],
@@ -980,7 +1050,7 @@ async function loadSetups() {
     const actions = document.createElement("td");
     const btn = (text, fn) => { const b = document.createElement("button"); b.className = "small"; b.textContent = text; b.onclick = fn; actions.append(b, " "); };
     btn("Load", () => loadSetup(e.name));
-    btn("Download", () => download("/api/configs/download?name=" + encodeURIComponent(e.name), e.name + ".json"));
+    btn("Download", () => download("/api/configs/download?name=" + encodeURIComponent(e.name)));
     btn("Delete", async () => {
       if (!confirm(`Delete setup "${e.name}"? The running config is not affected.`)) return;
       await post("/api/configs/delete?name=" + encodeURIComponent(e.name));
@@ -1036,7 +1106,7 @@ $("setupUpload").onchange = async ev => {
   ev.target.value = "";
 };
 
-$("downloadRunning").onclick = () => download("/api/configs/download", (setups.active || "automa3-config") + ".json");
+$("downloadRunning").onclick = () => download("/api/configs/download");
 
 $("setupBadge").onclick = () => document.querySelector('nav button[data-tab="setups"]').click();
 

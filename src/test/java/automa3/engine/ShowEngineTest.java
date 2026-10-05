@@ -129,6 +129,112 @@ class ShowEngineTest {
         assertStrobeSafe();
     }
 
+    /** February 7 (real CDJ data): blackout during the 1-bar breaks, accent when the kick returns, flash on the bass hits. */
+    @Test
+    void breaksAndBassHitsFromTheWaveform() throws Exception {
+        automa3.music.AnalysisDump d = automa3.music.AnalysisDump.load(
+                Path.of(ShowEngineTest.class.getResource("/tracks/february-7.json").toURI()));
+        TrackStructure st = automa3.music.WaveformAnalyzer.analyzeBeats(d.trackKey(), d.beatBands(), d.firstDownbeat(), 64);
+        // a second movement look for the loud parts, so there is something to change to
+        Config c = ConfigStore.copy(store.get());
+        Config.Look extra = ConfigStore.copy(store.get()).looks.stream().filter(l -> l.name.equals("Move fast")).findFirst().orElseThrow();
+        extra.id = "move-wild";
+        extra.name = "Move wild";
+        extra.exec = 199;
+        c.looks.add(extra);
+        store.replace(c);
+        play(d.trackKey(), st, 520);
+        long latencyNs = store.get().engine.latencyMs * 1_000_000L;
+        Config.Look bo = look(Role.BLACKOUT);
+        Config.Look accent = look(Role.ACCENT);
+
+        // the bar without bass from beat 162: dark for exactly that bar
+        long breakAt = beatTimes.get(162) - latencyNs;
+        Sent on = commandsFor(bo, Kind.FLASH_ON).stream().filter(s -> Math.abs(s.timeNanos - breakAt) < 2_000_000L).findFirst().orElseThrow();
+        Sent off = commandsFor(bo, Kind.FLASH_OFF).stream().filter(s -> s.timeNanos > on.timeNanos).findFirst().orElseThrow();
+        assertEquals(4 * periodMs, (off.timeNanos - on.timeNanos) / 1e6, 2, "blackout for the whole break");
+        // kick back on 166: accent
+        assertTrue(flashedAt(accent, 166), "accent when the kick returns");
+        // single bass hits in the build before the drop at 406: one flash each
+        for (int beat : new int[]{358, 362, 366, 370, 374, 382, 390}) assertTrue(flashedAt(accent, beat), "bass hit at " + beat);
+        // the kick running in the peak: no accents in between
+        for (int beat = 167; beat < 194; beat++) assertFalse(flashedAt(accent, beat), "no accent at " + beat);
+        // something changes when the kick comes back, and on each step of the build (beats 86 and 118)
+        for (int beat : new int[]{166, 198, 230, 86, 118}) assertTrue(newLookAt(beat), "look change at " + beat);
+        // the build ends in a silent bar (130): dark there, the strobe waits for the drop on 134
+        Config.Look strobe = look(Role.STROBE);
+        assertFalse(flashedAt(strobe, 130), "no strobe into the stop");
+        assertTrue(flashedAt(strobe, 134), "strobe on the drop");
+        assertStrobeSafe();
+    }
+
+    /** A scene look started (Go) on this beat. */
+    private boolean newLookAt(int beat) {
+        long at = beatTimes.get(beat) - store.get().engine.latencyMs * 1_000_000L;
+        return sent.stream().anyMatch(s -> s.action.kind() == Kind.GO && Math.abs(s.timeNanos - at) < 2_000_000L);
+    }
+
+    private boolean flashedAt(Config.Look l, int beat) {
+        long at = beatTimes.get(beat) - store.get().engine.latencyMs * 1_000_000L;
+        return commandsFor(l, Kind.FLASH_ON).stream().anyMatch(s -> Math.abs(s.timeNanos - at) < 2_000_000L);
+    }
+
+    /** Deck stopped (or the track ran out) in a build: everything the show started stops, and comes back on play. */
+    @Test
+    void stopsItsLooksWhenTheMusicStopsAndRestoresThem() {
+        SimulatedSource.Template t = SimulatedSource.TEMPLATES.get(0);
+        TrackStructure st = SimulatedSource.exactStructure("track1", t, 64);
+        int build = st.segments().stream().filter(s -> s.section() == automa3.model.Section.BUILD).findFirst().orElseThrow().startBeat();
+        play("track1", st, build + 8);
+        // the player reports stopped; play() already ran 5 s without beats
+        engine.onDeck(new DeckState(1, "CDJ-3000", false, true, true, true, bpm, build + 8, 1, "track1", "Test", "Artist", sched.currentTimeMillis()));
+        sched.runUntil(sched.nanoTime() + 5_000_000_000L);
+
+        Map<String, Kind> lastByExec = new HashMap<>();
+        for (Sent x : sent) {
+            Kind k = x.action.kind();
+            if (k == Kind.GO || k == Kind.OFF) lastByExec.put(x.action.page() + "." + x.action.exec(), k);
+        }
+        assertFalse(lastByExec.isEmpty());
+        lastByExec.forEach((exec, k) -> assertEquals(Kind.OFF, k, "look " + exec + " stopped"));
+        Config.Look haze = look(Role.HAZE);
+        Sent lastHaze = commandsFor(haze, Kind.FADER).get(commandsFor(haze, Kind.FADER).size() - 1);
+        assertEquals(0, lastHaze.action.value(), 0.01, "haze off");
+
+        // play again: the scene, the riser of the build and the haze come back
+        int before = sent.size();
+        long start = sched.nanoTime() + 100_000_000L;
+        for (int beat = build + 9; beat <= build + 12; beat++) {
+            long bt = start + (long) ((beat - build - 9) * periodMs * 1_000_000L);
+            sched.runUntil(bt);
+            engine.onDeck(new DeckState(1, "CDJ-3000", true, true, true, true, bpm, beat, ((beat - 1) % 4) + 1, "track1", "Test", "Artist", sched.currentTimeMillis()));
+            engine.onBeat(new BeatEvent(1, beat, ((beat - 1) % 4) + 1, bpm, bt));
+            sched.runUntil(bt + 1);
+        }
+        sched.runUntil(sched.nanoTime() + 1_000_000_000L);
+        List<Sent> after = sent.subList(before, sent.size());
+        assertTrue(after.stream().filter(x -> x.action.kind() == Kind.GO).count() >= 3, "scene back");
+        Config.Look riser = look(Role.RISER);
+        assertTrue(after.stream().anyMatch(x -> x.action.kind() == Kind.GO && x.action.exec() == riser.exec), "riser back in the build");
+        assertTrue(after.stream().anyMatch(x -> x.action.kind() == Kind.FADER && x.action.exec() == haze.exec && x.action.value() > 0), "haze back");
+        assertSceneConsistent();
+    }
+
+    /** A groove after a long breakdown is a groove: no drop hit, strobe or blinder there. Full energy after it is a drop. */
+    @Test
+    void grooveAfterBreakdownIsNoDrop() {
+        List<TrackStructure.Segment> segs = List.of(
+                new TrackStructure.Segment(1, 65, automa3.model.Section.GROOVE, "bass running"),
+                new TrackStructure.Segment(65, 129, automa3.model.Section.BREAKDOWN, "no bass"),
+                new TrackStructure.Segment(129, 193, automa3.model.Section.GROOVE, "bass running"),
+                new TrackStructure.Segment(193, 257, automa3.model.Section.BREAKDOWN, "no bass"),
+                new TrackStructure.Segment(257, 321, automa3.model.Section.PEAK, "full energy"));
+        play("grooves", new TrackStructure("grooves", "waveform", segs, List.of(), 1), 320);
+        assertFalse(flashedAt(look(Role.ACCENT), 129), "no drop hit on the groove");
+        assertFalse(flashedAt(look(Role.STROBE), 129), "no strobe on the groove");
+        assertTrue(flashedAt(look(Role.ACCENT), 257), "kick back at full energy after a breakdown: drop");
+    }
+
     @Test
     void trackWithoutAnalysisStillRunsAScene() {
         play("plain", null, 64 * 4);

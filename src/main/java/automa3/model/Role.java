@@ -15,13 +15,13 @@ public enum Role {
     EFFECT(Mode.TOGGLE, true),
     /** Build-up riser, its fader is ramped up over the build. */
     RISER(Mode.TOGGLE, false),
-    /** Accent / hit on the drop beat. */
+    /** Accent / hit on the drop beat, when the kick returns after a break, and on single bass hits. */
     ACCENT(Mode.FLASH, false),
     /** Strobe. Safety limited. */
     STROBE(Mode.FLASH, false),
     /** Audience blinder. Safety limited. */
     BLINDER(Mode.FLASH, false),
-    /** Blackout right before the drop. */
+    /** Blackout right before the drop and during short breaks. */
     BLACKOUT(Mode.FLASH, false),
     /** Hazer: level set by fader per section. */
     HAZE(Mode.FADER, false),

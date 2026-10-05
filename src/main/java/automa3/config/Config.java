@@ -128,10 +128,20 @@ public class Config {
         public int dropBlinderEveryBars = 8;
         /** Default flash length in beats for ACCENT looks. */
         public double accentBeats = 2;
+        /** Blackout during short breaks: the kick out for half a bar to two bars, or the music stopping. */
+        public boolean breakBlackout = true;
+        /** Accent hit when the kick comes back after a short break. */
+        public boolean breakReturnAccent = true;
+        /** Accent flash on each single bass hit in builds and breakdowns. */
+        public boolean bassHitFlash = true;
+        /** Length of a bass hit flash (beats). */
+        public double bassHitBeats = 1;
         /** Bars the engine keeps its hands off a layer the operator touched. */
         public int operatorLockBars = 16;
         /** Delay (ms) between starting a new look and stopping the old one on the same layer. */
         public int crossfadeOffDelayMs = 0;
+        /** Stop the show's looks (and haze) this many seconds after the music stopped (0 = never). */
+        public double releaseWhenStoppedSec = 3;
         /** Stop all auto looks when AUTO is switched off. */
         public boolean releaseOnAutoOff = false;
         /** Keep BPM sync running when AUTO is off. */

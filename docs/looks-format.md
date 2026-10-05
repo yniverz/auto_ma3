@@ -125,10 +125,10 @@ Aliases accepted on import: `page`, `exec`, `sequence` at the top level of the l
 | `MOVEMENT` | TOGGLE | movement | pan/tilt phasers |
 | `EFFECT` | TOGGLE | dimmer / beam / gobo effects; the layer goes dark when no effect fits | effect phasers or chases |
 | `RISER` | TOGGLE | build-up: started at the build, its fader master is ramped from 0 to `level` until the drop | something that grows with intensity (e.g. a sweep or chase that gets brighter) |
-| `ACCENT` | FLASH | hit on the drop beat | a full-intensity hit |
+| `ACCENT` | FLASH | hit on the drop beat, when the kick returns after a break, and on single bass hits in builds | a full-intensity hit |
 | `STROBE` | FLASH | strobe at the end of builds and on drops (safety limited) | strobe |
 | `BLINDER` | FLASH | audience blinder hits (safety limited) | blinders at full |
-| `BLACKOUT` | FLASH | blackout on the beat before a drop | everything at 0 (high priority) |
+| `BLACKOUT` | FLASH | blackout on the beat before a drop and during short breaks | everything at 0 (high priority) |
 | `HAZE` | FADER | hazer level per section | the hazer; its fader master sets the output |
 | `FOG` | FLASH | fog bursts before drops (cooldown) | the fog machine |
 | `SPECIAL` | FLASH | CO2, sparkular, confetti… on drops, only when armed | the special effect |

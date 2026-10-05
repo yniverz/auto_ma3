@@ -14,7 +14,6 @@
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson.version>2.18.2</jackson.version>
-        <javafx.version>21.0.12</javafx.version>
         <!-- version the app reports; CI passes -Dapp.version=1.0.<build number> -->
         <app.version>${project.version}</app.version>
     </properties>
@@ -24,17 +23,6 @@
             <groupId>org.deepsymmetry</groupId>
             <artifactId>beat-link</artifactId>
             <version>8.0.0</version>
-        </dependency>
-        <!-- desktop window (WebView showing the web UI); the platform jar matches the build machine -->
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-            <version>${javafx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-web</artifactId>
-            <version>${javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
