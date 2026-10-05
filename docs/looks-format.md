@@ -170,7 +170,7 @@ applied when asked for (UI checkbox, or `context=true` in the API).
 | Field | Type | Meaning |
 |---|---|---|
 | `speedMaster` | integer 1..16 | Speed master AutoMA3 sets to the DJ's BPM (`Master 3.N`). Assign it to phasers and chases. On grandMA3 2.4+ master 16 is the audio BPM master and is not driven. |
-| `controlPrefix` | string | Address prefix of the operator controls, e.g. `/automa3`. Control macros on the console send `SendOSC <line> "<prefix>/<action>,N"` (toggle) or `"<prefix>/<action>,i,1"`; actions: `auto`, `hold`, `drop`, `next`, `strobe`, `arm`, `release`, `energy` (`,f,0..1`). |
+| `controlPrefix` | string | Address prefix of the operator controls, e.g. `/automa3`. Control macros on the console send `SendOSC <line> "<prefix>/<action>,N"` (toggle) or `"<prefix>/<action>,i,1"`; actions: `auto`, `hold`, `drop`, `next`, `strobe`, `arm`, `release`, `energy` (`,f,0..1`), `follow` (`,i,<player>`, 0 = automatic deck selection). |
 | `oscInPort` | integer | UDP port AutoMA3 listens on for feedback and controls (the console's OSC line that sends to AutoMA3). |
 | `controlSequences` | object | Sequence number (as string) → control action, for controls built as executors instead of macros (grandMA3 2.1+). `energy` on a fader sets the calmer/harder level. |
 

@@ -10,7 +10,8 @@ import java.util.Map;
  * Read-only view of the engine for the web UI, rebuilt every 40 ms and on every beat.
  */
 public record EngineSnapshot(boolean auto, boolean hold, boolean strobeAllowed, boolean specialsArmed,
-                             double energyBias, int primaryPlayer, String section, String sectionReason,
+                             double energyBias, int primaryPlayer, String primaryReason, int followPlayer,
+                             boolean mixerPresent, String section, String sectionReason,
                              double energy, double bpm, String nextSection, int beatsToNext,
                              Map<String, String> activeLooks, Map<String, Long> lockedLayersSec,
                              List<Deck> decks, List<String> events, AudioState audio) {
@@ -20,6 +21,6 @@ public record EngineSnapshot(boolean auto, boolean hold, boolean strobeAllowed, 
                        List<String> availableAnalyses, List<TrackStructure.Segment> segments, int lastBeat) {
     }
 
-    public static final EngineSnapshot EMPTY = new EngineSnapshot(true, false, true, false, 0, -1, null, "", 0, 0,
+    public static final EngineSnapshot EMPTY = new EngineSnapshot(true, false, true, false, 0, -1, "", 0, false, null, "", 0, 0,
             null, -1, Map.of(), Map.of(), List.of(), List.of(), AudioState.OFF);
 }

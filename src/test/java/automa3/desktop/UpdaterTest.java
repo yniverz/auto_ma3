@@ -51,9 +51,14 @@ class UpdaterTest {
         Thread.sleep(300);
         assertEquals("old", Files.readString(app.resolve("Contents/version")), "waits while the app still runs");
         assertTrue(running.waitFor(5, TimeUnit.SECONDS));
-        for (int i = 0; i < 50 && !Files.readString(app.resolve("Contents/version")).equals("new"); i++) Thread.sleep(100);
+        Path version = app.resolve("Contents/version");
+        // during the swap the old app is moved away briefly: wait for the new one to be complete
+        Path backup = dir.resolve("Apps/AutoMA3.app.update-backup");
+        for (int i = 0; i < 50 && !(Files.exists(version) && Files.readString(version).equals("new") && !Files.exists(backup)); i++) {
+            Thread.sleep(100);
+        }
         assertEquals("new", Files.readString(app.resolve("Contents/version")), "swapped after the app quit");
-        assertFalse(Files.exists(dir.resolve("Apps/AutoMA3.app.update-backup")), "backup removed");
+        assertFalse(Files.exists(backup), "backup removed");
     }
 
     @Test

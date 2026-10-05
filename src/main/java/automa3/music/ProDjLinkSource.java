@@ -55,6 +55,7 @@ public class ProDjLinkSource implements MusicSource {
     /** Track keys for which rekordbox phrase analysis was sent. */
     private final java.util.Set<String> phraseSent = ConcurrentHashMap.newKeySet();
     private final Map<Integer, Boolean> lastPlaying = new ConcurrentHashMap<>();
+    private final Map<Integer, Boolean> lastOnAir = new ConcurrentHashMap<>();
     private final java.util.Set<Integer> analysisPending = ConcurrentHashMap.newKeySet();
     private final java.util.Set<String> loggedProblems = ConcurrentHashMap.newKeySet();
     private final java.util.Set<String> noPhraseLogged = ConcurrentHashMap.newKeySet();
@@ -194,6 +195,11 @@ public class ProDjLinkSource implements MusicSource {
         if (was == null || was != s.isPlaying()) {
             log.info("Player {} ({}): {}", player, s.getDeviceName(), s.isPlaying() ? "playing" : "stopped");
         }
+        boolean mixer = mixerPresent();
+        Boolean wasOnAir = lastOnAir.put(player, s.isOnAir());
+        if (mixer && (wasOnAir == null || wasOnAir != s.isOnAir())) {
+            log.info("Player {}: {} (the mixer reports channel {})", player, s.isOnAir() ? "on air" : "off air", player);
+        }
         String key = s.isTrackLoaded() && s.getRekordboxId() != 0
                 ? s.getTrackSourcePlayer() + ":" + s.getTrackSourceSlot() + ":" + s.getRekordboxId() : null;
         String previous = key == null ? trackKeys.remove(player) : trackKeys.put(player, key);
@@ -211,7 +217,7 @@ public class ProDjLinkSource implements MusicSource {
         int beat = s.getBeatNumber();
         BeatGrid grid = BeatGridFinder.getInstance().isRunning() ? BeatGridFinder.getInstance().getLatestBeatGridFor(player) : null;
         int beatWithinBar = grid != null && beat > 0 && beat <= grid.beatCount ? grid.getBeatWithinBar(beat) : s.getBeatWithinBar();
-        l.onDeck(new DeckState(player, s.getDeviceName(), s.isPlaying(), s.isOnAir(), mixerPresent(),
+        l.onDeck(new DeckState(player, s.getDeviceName(), s.isPlaying(), s.isOnAir(), mixer,
                 s.isTempoMaster(), s.getEffectiveTempo(), beat > 0 && beat < 100000 ? beat : -1, beatWithinBar,
                 key, title, artist, System.currentTimeMillis()));
     }
@@ -376,7 +382,8 @@ public class ProDjLinkSource implements MusicSource {
     /** Average band heights per beat (beat 1 = index 0) from the waveform detail, using the beat grid for timing. */
     static List<WaveformAnalyzer.BarBands> beatBands(WaveformDetail detail, BeatGrid grid) {
         List<WaveformAnalyzer.BarBands> out = new ArrayList<>();
-        int frames = detail.getFrameCount();
+        ThreeBandWaveform threeBand = ThreeBandWaveform.of(detail);
+        int frames = threeBand != null ? threeBand.frames() : detail.getFrameCount();
         ByteBuffer data = detail.getData();
         for (int b = 1; b < grid.beatCount; b++) {
             int f0 = Util.timeToHalfFrame(grid.getTimeWithinTrack(b));
@@ -388,9 +395,9 @@ public class ProDjLinkSource implements MusicSource {
             for (int f = f0; f < f1; f++) {
                 switch (detail.style) {
                     case THREE_BAND -> {
-                        lo += detail.segmentHeight(f, 1, WaveformFinder.ThreeBandLayer.LOW);
-                        mid += detail.segmentHeight(f, 1, WaveformFinder.ThreeBandLayer.MID);
-                        hi += detail.segmentHeight(f, 1, WaveformFinder.ThreeBandLayer.HIGH);
+                        lo += threeBand.low(f);
+                        mid += threeBand.mid(f);
+                        hi += threeBand.high(f);
                     }
                     case RGB -> {
                         int bits = ((data.get(f * 2) & 0xff) << 8) | (data.get(f * 2 + 1) & 0xff);

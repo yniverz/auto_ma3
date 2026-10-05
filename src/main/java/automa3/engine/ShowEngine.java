@@ -64,6 +64,8 @@ public class ShowEngine implements MusicListener {
     private final Map<Integer, Integer> lastBeatNumber = new HashMap<>();
     private final Map<Integer, Long> lastBeatMs = new HashMap<>();
     private int primary = -1;
+    /** Why the current deck drives the lights (or why none does), for the UI. */
+    private String primaryReason = "no players found";
     private String currentTrackKey;
     private long globalBeat;
     private double lastPeriodMs = 469;
@@ -170,18 +172,48 @@ public class ShowEngine implements MusicListener {
 
     // ------------------------------------------------------------------ deck selection
 
+    /**
+     * Pick the deck that drives the lights: the deck the operator chose, else a playing deck the mixer reports
+     * on air. Without a mixer any playing deck; with a mixer but every fader down, no deck ("mixer" mode) or any
+     * playing deck ("playing" mode).
+     */
     private void choosePrimary() {
         long now = sched.currentTimeMillis();
+        int forced = op.followPlayer;
+        if (forced > 0) {
+            if (decks.containsKey(forced)) {
+                setPrimary(forced, "chosen by the operator");
+                primaryReason = "chosen by the operator";
+            } else {
+                primaryReason = "player " + forced + " chosen, but not on the network";
+            }
+            return;
+        }
         boolean onAirKnown = decks.values().stream().anyMatch(DeckState::onAirKnown);
-        List<DeckState> candidates = new ArrayList<>();
+        List<DeckState> playing = new ArrayList<>();
         for (DeckState d : decks.values()) {
             boolean fresh = now - d.updatedMs() < 3000 || now - lastBeatMs.getOrDefault(d.player(), 0L) < 3000;
-            if (isPlaying(d, now) && fresh && (!onAirKnown || d.onAir())) candidates.add(d);
+            if (isPlaying(d, now) && fresh) playing.add(d);
         }
-        if (candidates.isEmpty()) return;
+        List<DeckState> onAir = playing.stream().filter(DeckState::onAir).toList();
+        boolean faderOnly = onAirKnown && "mixer".equalsIgnoreCase(configStore.get().djLink.deckSelection);
+        // with a mixer, decks on air come first; if it reports none (faders down, or players not numbered like
+        // their mixer channels), "playing" mode follows a playing deck anyway and "mixer" mode follows none
+        List<DeckState> candidates = onAirKnown && !onAir.isEmpty() ? onAir : faderOnly ? List.of() : playing;
+        if (candidates.isEmpty()) {
+            if (faderOnly && !playing.isEmpty()) {
+                primaryReason = "no deck on air: raise a fader, or use Follow";
+                clearPrimary(primaryReason);
+            } else if (!decks.containsKey(primary) || !isPlaying(decks.get(primary), now)) {
+                primaryReason = decks.isEmpty() ? "no players found" : "no deck playing";
+            }
+            return;
+        }
+        String basis = !onAirKnown ? "playing" : !onAir.isEmpty() ? "on air" : "playing; mixer reports no deck on air";
         DeckState current = decks.get(primary);
         boolean currentOk = current != null && candidates.stream().anyMatch(d -> d.player() == primary);
         if (currentOk) {
+            primaryReason = basis;
             // hand over during a mix once the current track is in its outro
             Section s = sectionOf(primary);
             if (s != Section.OUTRO || candidates.size() < 2) return;
@@ -193,7 +225,8 @@ public class ShowEngine implements MusicListener {
         }
         DeckState pick = candidates.stream().filter(DeckState::tempoMaster).findFirst()
                 .orElse(candidates.stream().min((a, b) -> Integer.compare(a.player(), b.player())).orElseThrow());
-        setPrimary(pick.player(), current == null ? "first deck playing" : "player " + primary + " stopped / off air");
+        primaryReason = basis;
+        setPrimary(pick.player(), (current == null ? "first deck " : "player " + primary + " stopped / off air, deck ") + basis);
     }
 
     /** Playing per the status flag, or beats arrived recently (beat packets are only sent while playing). */
@@ -205,6 +238,13 @@ public class ShowEngine implements MusicListener {
         if (player == primary) return;
         primary = player;
         event("Following player " + player + " (" + why + ")");
+    }
+
+    /** No deck drives the lights: the running looks stay, nothing new is triggered. */
+    private void clearPrimary(String why) {
+        if (primary < 0) return;
+        primary = -1;
+        event("Following no deck (" + why + ")");
     }
 
     private Section sectionOf(int player) {
@@ -743,6 +783,7 @@ public class ShowEngine implements MusicListener {
             lastBeatNumber.clear();
             lastBeatMs.clear();
             primary = -1;
+            primaryReason = "no players found";
             currentTrackKey = null;
             lastSource = null;
             needsRefresh = true;
@@ -825,6 +866,12 @@ public class ShowEngine implements MusicListener {
                 case "energy" -> {
                     if (value != null) op.setEnergyBias((value > 1 ? value / 100.0 : value) - 0.5);
                 }
+                case "follow" -> {
+                    // value = player number, 0 or none = automatic
+                    op.followPlayer = value == null ? 0 : Math.max(0, (int) Math.round(value));
+                    if (op.followPlayer == 0) primaryReason = "automatic";
+                    choosePrimary();
+                }
                 case "release" -> {
                     op.layerLocks.clear();
                     needsRefresh = true;
@@ -865,7 +912,8 @@ public class ShowEngine implements MusicListener {
         Map<String, Long> locks = new LinkedHashMap<>();
         op.layerLocks.forEach((k, v) -> locks.put(k, Math.max(0, (v - now) / 1000)));
         return new EngineSnapshot(op.auto, op.hold, op.strobeAllowed, op.specialsArmed, op.energyBias,
-                primary, currentSection == null ? null : currentSection.name(), sectionReason,
+                primary, primaryReason, op.followPlayer, decks.values().stream().anyMatch(DeckState::onAirKnown),
+                currentSection == null ? null : currentSection.name(), sectionReason,
                 Math.round(currentEnergy * 100) / 100.0, Math.round(lastBpm * 10) / 10.0,
                 upcomingSection == null ? null : upcomingSection.name(), beatsToUpcoming,
                 activeLabels, locks, deckList, new ArrayList<>(events), audio.get());

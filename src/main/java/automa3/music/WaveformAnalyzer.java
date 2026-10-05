@@ -27,13 +27,13 @@ public final class WaveformAnalyzer {
     }
 
     /** Bass level (relative to the track's loud bars) from which a bar counts as having bass / kick. */
-    static final double BASS_THRESHOLD = 0.5;
+    static final double BASS_THRESHOLD = 0.3;
     /** Energy (relative to the track's loudest bars) from which a bar with bass counts as HIGH. */
     static final double HIGH_THRESHOLD = 0.82;
     /** Energy increase over the preceding bars that makes a HIGH run a drop. */
     static final double DROP_JUMP = 0.12;
-    /** Increase of bass + mids (two bars after vs. two bars before) that marks a drop. */
-    static final double BODY_JUMP = 0.35;
+    /** Increase of the bass level (two bars after vs. two bars before) that marks a drop. */
+    static final double BASS_JUMP = 0.3;
     /** Runs shorter than this many bars are merged into a neighbour. */
     static final int MIN_RUN_BARS = 2;
 
@@ -98,19 +98,19 @@ public final class WaveformAnalyzer {
             double after = mean(energy, run.start, Math.min(n, run.start + 2));
             double before = mean(energy, Math.max(0, run.start - 4), run.start);
             // the phrase-grid snap can move a boundary by a bar, so also look one bar either side
-            double body = Math.max(bodyJump(low, mid, run.start),
-                    Math.max(bodyJump(low, mid, run.start - 1), bodyJump(low, mid, run.start + 1)));
-            drop[r] = after - before >= DROP_JUMP || body >= BODY_JUMP;
+            double bass = Math.max(bassJump(low, run.start),
+                    Math.max(bassJump(low, run.start - 1), bassJump(low, run.start + 1)));
+            drop[r] = after - before >= DROP_JUMP || bass >= BASS_JUMP;
         }
-        // Builds get loud a few bars early (kick comes in, snare rolls, risers). The drop itself is where
-        // bass AND mids jump together, so put each drop there. Highs are ignored: they rise in builds.
+        // Builds get loud a few bars early (kick comes in, snare rolls, risers in the mids and highs). The drop
+        // itself is where the bass jumps, so put each drop there.
         for (int r = 1; r < runs.size(); r++) {
             if (!drop[r]) continue;
             Run prev = runs.get(r - 1), run = runs.get(r);
             int best = run.start;
-            double bestJump = bodyJump(low, mid, run.start);
+            double bestJump = bassJump(low, run.start);
             for (int b = Math.max(prev.start + 1, run.start - 4); b <= Math.min(run.end - 1, run.start + 4); b++) {
-                double j = bodyJump(low, mid, b);
+                double j = bassJump(low, b);
                 if (j > bestJump + 1e-9) {
                     bestJump = j;
                     best = b;
@@ -118,7 +118,7 @@ public final class WaveformAnalyzer {
             }
             // prefer the 4-bar phrase grid when it is nearly as good
             int grid = Math.round(best / 4f) * 4;
-            if (grid != best && grid > prev.start && grid < run.end && bodyJump(low, mid, grid) >= 0.8 * bestJump) best = grid;
+            if (grid != best && grid > prev.start && grid < run.end && bassJump(low, grid) >= 0.8 * bestJump) best = grid;
             if (best != run.start) {
                 runs.set(r - 1, new Run(prev.start, best, prev.level));
                 runs.set(r, new Run(best, run.end, run.level));
@@ -225,11 +225,10 @@ public final class WaveformAnalyzer {
         return sorted[Math.min(sorted.length - 1, (int) Math.floor(sorted.length * p))];
     }
 
-    /** Bass + mid level of the two bars from {@code bar} minus the two bars before it. */
-    static double bodyJump(double[] low, double[] mid, int bar) {
+    /** Bass level of the two bars from {@code bar} minus the two bars before it. */
+    static double bassJump(double[] low, int bar) {
         if (bar <= 0 || bar >= low.length) return 0;
-        int to = Math.min(low.length, bar + 2), from = Math.max(0, bar - 2);
-        return mean(low, bar, to) - mean(low, from, bar) + mean(mid, bar, to) - mean(mid, from, bar);
+        return mean(low, bar, Math.min(low.length, bar + 2)) - mean(low, Math.max(0, bar - 2), bar);
     }
 
     private static double mean(double[] v, int from, int to) {

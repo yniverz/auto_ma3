@@ -191,6 +191,74 @@ class ShowEngineTest {
         assertEquals(List.of("phrase"), engine.snapshot().decks().get(0).availableAnalyses());
     }
 
+    private void deck(int player, boolean playing, boolean onAir, boolean mixer) {
+        engine.onDeck(new DeckState(player, "CDJ-3000", playing, onAir, mixer, false, bpm, 10, 2, "k" + player,
+                "T" + player, "A", sched.currentTimeMillis()));
+        sched.runUntil(sched.nanoTime() + 100_000_000L);
+    }
+
+    @Test
+    void withAMixerTheDeckOnAirDrivesTheLights() {
+        deck(3, true, false, true);
+        deck(4, true, true, true);
+        assertEquals(4, engine.snapshot().primaryPlayer());
+        assertEquals("on air", engine.snapshot().primaryReason());
+        assertTrue(engine.snapshot().mixerPresent());
+    }
+
+    private void deckSelection(String mode) throws Exception {
+        Config c = ConfigStore.copy(store.get());
+        c.djLink.deckSelection = mode;
+        store.replace(c);
+        sched.runUntil(sched.nanoTime() + 1);
+    }
+
+    @Test
+    void mixerModeFollowsOnlyDecksWithTheFaderUp() {
+        assertEquals("mixer", store.get().djLink.deckSelection, "default");
+        deck(3, true, false, true);
+        assertEquals(-1, engine.snapshot().primaryPlayer(), "playing but every fader down: no deck");
+        assertTrue(engine.snapshot().primaryReason().contains("no deck on air"));
+        deck(3, true, true, true);
+        assertEquals(3, engine.snapshot().primaryPlayer(), "fader up");
+        deck(3, true, false, true);
+        assertEquals(-1, engine.snapshot().primaryPlayer(), "fader down again");
+    }
+
+    @Test
+    void withoutAMixerThePlayingDeckDrivesTheLights() {
+        deck(3, true, false, false);
+        assertEquals(3, engine.snapshot().primaryPlayer());
+        assertEquals("playing", engine.snapshot().primaryReason());
+    }
+
+    @Test
+    void playingDeckDrivesTheLightsWhenTheMixerReportsNoneOnAir() throws Exception {
+        deckSelection("playing");
+        deck(3, true, false, true);
+        deck(4, false, false, true);
+        assertEquals(3, engine.snapshot().primaryPlayer(), "faders down / channel mismatch must not leave the lights dead");
+        assertTrue(engine.snapshot().primaryReason().contains("no deck on air"));
+    }
+
+    @Test
+    void operatorCanChooseTheDeck() {
+        deck(3, true, true, true);
+        deck(4, true, false, true);
+        assertEquals(3, engine.snapshot().primaryPlayer());
+        engine.control("follow", 4.0, "test");
+        sched.runUntil(sched.nanoTime() + 100_000_000L);
+        assertEquals(4, engine.snapshot().primaryPlayer(), "follows the chosen deck even though it is off air");
+        assertEquals(4, engine.snapshot().followPlayer());
+        deck(3, true, true, true);
+        assertEquals(4, engine.snapshot().primaryPlayer(), "stays on the chosen deck");
+        engine.control("follow", 0.0, "test");
+        sched.runUntil(sched.nanoTime() + 100_000_000L);
+        deck(3, true, true, true);
+        assertEquals(3, engine.snapshot().primaryPlayer(), "automatic again: the deck on air");
+        assertEquals(0, engine.snapshot().followPlayer());
+    }
+
     @Test
     void controlsFromConsole() {
         engine.onOsc(new OscCodec.Message("/automa3/auto", List.of(0)));

@@ -207,6 +207,12 @@ public class Config {
          */
         public String analysisMode = "auto";
         /**
+         * Which deck drives the lights when a mixer reports on-air state: "mixer" (only a deck whose fader is up;
+         * all faders down = no deck) or "playing" (decks on air first, else any playing deck). Without a mixer
+         * the playing deck is used in both modes; the Follow button overrides both.
+         */
+        public String deckSelection = "mixer";
+        /**
          * Read rekordbox data straight off the players' USB media over the network (beat-link "Crate Digger").
          * Off: everything is requested from the players directly. Some rekordbox 7 exports make the file route
          * fail with retries (several seconds delay per track), so it is off by default.

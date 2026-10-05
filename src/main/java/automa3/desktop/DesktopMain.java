@@ -17,8 +17,11 @@ public final class DesktopMain {
 
     public static void main(String[] args) throws Exception {
         Path dataDir = dataDir();
-        Files.createDirectories(dataDir.resolve("logs"));
-        System.setProperty("org.slf4j.simpleLogger.logFile", dataDir.resolve("logs").resolve("automa3.log").toString());
+        Path logs = Files.createDirectories(dataDir.resolve("logs"));
+        Path log = logs.resolve("automa3.log");
+        // keep the previous run's log, e.g. to see why a start failed
+        if (Files.exists(log)) Files.move(log, logs.resolve("automa3.previous.log"), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        System.setProperty("org.slf4j.simpleLogger.logFile", log.toString());
         System.setProperty("automa3.dataDir", dataDir.toString());
         // beat-link uses a few AWT classes; keep AWT headless so it never starts its GUI next to JavaFX
         System.setProperty("java.awt.headless", "true");

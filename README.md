@@ -11,6 +11,9 @@ It sends grandMA3 command-line commands over OSC (`/cmd`). You program the looks
 - **Events**: riser, drop accent, strobe, blinder, blackout, haze level per section, fog bursts, and specials (CO2 etc.) that only fire when armed.
 - **BPM**: the DJ's BPM goes to a speed master (`Master 3.N At BPM x`).
 - **Operator first**: AUTO / HOLD / DROP / NEXT / strobe / arm / energy controls from the console (SendOSC macros) or the web UI. When you touch an auto executor, the app backs off that layer for N bars (MA3 2.1+).
+- **Which deck drives the lights**: with a DJM mixer, the playing deck whose fader is up (on air). With every fader
+  down no deck drives the lights, or optionally a playing deck (Settings → CDJs); without a mixer the playing deck.
+  **Follow** on a deck (or `/automa3/follow,i,<player>` from the console) chooses it by hand.
 - **Multiple consoles, multiple MA3 versions**: each console gets commands in the syntax of its own version profile, with per-console overrides.
 - **Safety**: strobe and blinder max on-time, minimum gap and duty cycle. Specials are disarmed by default.
 

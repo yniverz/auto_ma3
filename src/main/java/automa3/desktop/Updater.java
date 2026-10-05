@@ -37,7 +37,7 @@ public class Updater {
 
     private final HttpClient http = HttpClient.newBuilder()
             .followRedirects(HttpClient.Redirect.NORMAL)
-            .connectTimeout(Duration.ofSeconds(10))
+            .connectTimeout(Duration.ofSeconds(5)) // club networks often have no internet: give up quickly
             .build();
 
     /** The latest release on GitHub, or empty if there is none (or no app for this Mac). */
@@ -46,7 +46,7 @@ public class Updater {
         HttpResponse<String> r = http.send(HttpRequest.newBuilder(URI.create(url))
                 .header("Accept", "application/vnd.github+json")
                 .header("User-Agent", "AutoMA3/" + Version.current())
-                .timeout(Duration.ofSeconds(20)).build(), HttpResponse.BodyHandlers.ofString());
+                .timeout(Duration.ofSeconds(10)).build(), HttpResponse.BodyHandlers.ofString());
         if (r.statusCode() == 404) return Optional.empty();
         if (r.statusCode() != 200) throw new IOException("GitHub answered " + r.statusCode());
         return parse(ConfigStore.JSON.readTree(r.body()));

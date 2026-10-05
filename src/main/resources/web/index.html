@@ -397,7 +397,10 @@ function renderLive() {
   $("energyVal").textContent = e.energy.toFixed(2);
   $("bpm").textContent = (e.bpm || "-") + " BPM";
   $("next").textContent = e.nextSection ? `next: ${e.nextSection} in ${Math.ceil(e.beatsToNext / 4)} bars` : "next: -";
-  $("player").textContent = e.primaryPlayer > 0 ? "following player " + e.primaryPlayer : "no deck";
+  $("player").textContent = e.primaryPlayer > 0
+    ? `following player ${e.primaryPlayer} (${e.primaryReason})`
+    : `no deck drives the lights (${e.primaryReason})`;
+  $("player").classList.toggle("warn", e.primaryPlayer <= 0 || e.primaryReason.includes("no deck on air"));
   setCtl("c-auto", e.auto, "AUTO ON", "AUTO OFF");
   setCtl("c-hold", e.hold, "HOLDING", "HOLD");
   setCtl("c-strobe", e.strobeAllowed, "STROBE OK", "STROBE OFF");
@@ -436,8 +439,12 @@ function deckHtml(d) {
   return `<div class="deck ${d.primary ? "primary" : ""}">
     <div class="row"><b>Player ${d.player}</b>
       ${d.playing ? '<span class="badge ok">playing</span>' : '<span class="badge">stopped</span>'}
-      ${d.onAir ? '<span class="badge ok">on air</span>' : ""}${d.master ? '<span class="badge">master</span>' : ""}
+      ${d.onAir ? '<span class="badge ok">on air</span>' : state.engine.mixerPresent ? '<span class="badge" title="The mixer reports this channel faded out. The DJM uses the channel with the same number as the player.">off air</span>' : ""}
+      ${d.master ? '<span class="badge">master</span>' : ""}
       ${d.primary ? '<span class="badge warn">driving lights</span>' : ""}
+      ${state.engine.followPlayer === d.player
+        ? '<button class="small" data-follow="0" title="Back to automatic deck selection">Following · Auto</button>'
+        : `<button class="small" data-follow="${d.player}" title="Make this deck drive the lights">Follow</button>`}
       <span class="muted">${d.bpm} BPM · beat ${d.beat} · ${esc(d.section || "-")} · analysis: <b>${esc(analysisName(d.analysis))}</b>${d.availableAnalyses.length > 1 ? " (also available: " + d.availableAnalyses.filter(a => a !== d.analysis).map(analysisName).join(", ") + ")" : ""}</span></div>
     <div class="small">${esc(d.title || "")} <span class="muted">${esc(d.artist || "")}</span></div>
     <div class="timeline">${segs || '<div style="width:100%;background:var(--panel)"></div>'}${head}</div>
@@ -485,6 +492,10 @@ function waveSvg(d, total) {
 }
 
 const ctl = (action, value) => post("/api/control/" + action + (value !== undefined ? "?value=" + value : ""));
+$("decks").addEventListener("click", ev => {
+  const b = ev.target.closest("[data-follow]");
+  if (b) ctl("follow", b.dataset.follow);
+});
 $("c-auto").onclick = () => ctl("auto");
 $("c-hold").onclick = () => ctl("hold");
 $("c-drop").onclick = () => ctl("drop", 1);
@@ -811,7 +822,9 @@ const SETTINGS = [
     specialBurstSec: "Special burst (s)", specialCooldownSec: "Special cooldown (s)", specialMaxPerHour: "Specials max per hour"}],
   ["speed", "BPM / speed master", {enabled: "Sync BPM to speed master", master: "Speed master number (Master 3.N)", multiplier: "BPM multiplier (0.5 half time, 2 double)", minChange: "Min BPM change to resend"}],
   ["audio", "Live audio (optional)", {enabled: "Analyse audio input", device: "Input device (part of name)", sampleRate: "Sample rate"}],
-  ["djLink", "CDJs", {waveformAnalysis: "Detect sections from waveform when no phrase analysis",
+  ["djLink", "CDJs", {
+    deckSelection: ["Deck that drives the lights (with a mixer)", [["mixer", "Mixer faders only"], ["playing", "Faders, else a playing deck"]]],
+    waveformAnalysis: "Detect sections from waveform when no phrase analysis",
     readUsbFiles: "Read rekordbox files off the USB over the network (restart needed; can fail with rekordbox 7)"}],
   ["oscIn", "OSC from console", {enabled: "Listen for OSC", port: "Listen port", controlPrefix: "Control address prefix"}],
 ];
@@ -825,11 +838,20 @@ function renderSettings() {
     p.innerHTML = `<h2>${title}</h2>`;
     const g = document.createElement("div"); g.className = "form-grid";
     const obj = draft[key];
-    Object.entries(fields).forEach(([f, label]) => {
+    Object.entries(fields).forEach(([f, spec]) => {
+      // spec: label, or [label, [[value, text], ...]] for a dropdown
+      const [label, options] = Array.isArray(spec) ? spec : [spec, null];
       const l = document.createElement("label");
       const s = document.createElement("span"); s.textContent = label;
       const v = obj[f];
-      const el = typeof v === "boolean" ? input(obj, f, "bool") : typeof v === "number" ? input(obj, f, "number") : input(obj, f);
+      let el;
+      if (options) {
+        el = select(obj, f, options.map(o => o[0]));
+        [...el.options].forEach((o, i) => { o.textContent = options[i][1]; });
+        el.value = v;
+      } else {
+        el = typeof v === "boolean" ? input(obj, f, "bool") : typeof v === "number" ? input(obj, f, "number") : input(obj, f);
+      }
       if (key === "audio" && f === "device") { el.setAttribute("list", "audioDevices"); loadAudioDevices(); }
       l.append(s, el); g.append(l);
     });
@@ -914,6 +936,7 @@ SendOSC 2 "${prefix}/drop,i,1"          drop on the next bar
 SendOSC 2 "${prefix}/next,i,1"          change a look now
 SendOSC 2 "${prefix}/strobe,N"          toggle strobe allowed
 SendOSC 2 "${prefix}/arm,N"             toggle specials armed
+SendOSC 2 "${prefix}/follow,i,3"        player 3 drives the lights (,i,0 = automatic)
 SendOSC 2 "${prefix}/release,i,1"       give all layers back to auto
 SendOSC 2 "${prefix}/energy,f,0.8"      energy 0..1 (0.5 = neutral)</pre>
   <p class="muted small">"2" is the OSC line number from step 1. ",N" (no value) toggles. With a value: "${prefix}/auto,i,1" = on, "${prefix}/auto,i,0" = off.

@@ -22,6 +22,8 @@ public class OperatorState {
     public volatile boolean dropRequested = false;
     /** Request: change a look on the next beat. */
     public volatile boolean nextRequested = false;
+    /** Player the operator chose to drive the lights; 0 = automatic. */
+    public volatile int followPlayer = 0;
     /** layer -> time (ms) until which the engine leaves that layer alone. */
     public final Map<String, Long> layerLocks = new ConcurrentHashMap<>();
 

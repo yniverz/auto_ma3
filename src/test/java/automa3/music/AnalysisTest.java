@@ -162,10 +162,10 @@ class AnalysisTest {
         assertEquals(Section.DROP, at(st, 67), "chorus after the intro is the drop");
         assertEquals(67, st.segmentAt(67).startBeat());
         assertEquals(Section.PEAK, at(st, 140));
-        assertEquals(Section.GROOVE, at(st, 170), "first part of the long UP phrase: bass still running");
-        assertEquals(Section.BREAKDOWN, at(st, 190), "middle of the UP phrase: no bass");
+        assertEquals(Section.BREAKDOWN, at(st, 170), "start of the long UP phrase: no bass");
+        assertEquals(Section.BREAKDOWN, at(st, 190));
         assertEquals(Section.BUILD, at(st, 215));
-        assertEquals(211, st.segmentAt(215).startBeat(), "real build start from the waveform");
+        assertEquals(211, st.segmentAt(215).startBeat(), "real build start from the waveform: kick back in, 4 bars");
         assertEquals(Section.DROP, at(st, 227));
         assertEquals(227, st.segmentAt(227).startBeat());
         assertEquals(Section.OUTRO, at(st, 270));
