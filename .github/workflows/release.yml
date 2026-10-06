@@ -31,10 +31,14 @@ jobs:
 
       - name: Version
         id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          # major.minor from pom.xml; the patch counts the releases already published for it (1.1.0, 1.1.1, ...)
           base=$(sed -n 's:.*<version>\([0-9][0-9]*\.[0-9][0-9]*\)\.[0-9][0-9]*</version>.*:\1:p' pom.xml | head -1)
-          echo "version=${base}.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
-          echo "Building AutoMA3 ${base}.${{ github.run_number }}"
+          patch=$(gh release list --limit 1000 --json tagName -q '.[].tagName' | grep -c "^v${base//./\\.}\.[0-9][0-9]*$" || true)
+          echo "version=${base}.${patch}" >> "$GITHUB_OUTPUT"
+          echo "Building AutoMA3 ${base}.${patch}"
 
       - name: Tests
         run: mvn -B -q clean verify

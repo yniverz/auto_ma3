@@ -6,7 +6,7 @@
 
     <groupId>automa3</groupId>
     <artifactId>auto-ma3</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <name>AutoMA3</name>
     <description>Automatic grandMA3 lighting driven by Pioneer CDJs (Pro DJ Link)</description>
 

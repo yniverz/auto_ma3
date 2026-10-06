@@ -47,6 +47,7 @@ public class App {
         this.recorder = new SessionRecorder(recordingsDir);
         this.engine = new ShowEngine(config, scheduler, hub::send, new OperatorState(),
                 () -> audio == null ? AudioAnalyzer.AudioState.OFF : audio.state(), new Random());
+        engine.setSectionEdits(new automa3.music.SectionEdits(dataDir(config).resolve("section-edits.json")));
         this.web = new WebServer(this);
         hub.onOsc((m, from) -> engine.onOsc(m));
         config.onChange(c -> updateAudio());

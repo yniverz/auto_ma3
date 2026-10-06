@@ -68,6 +68,8 @@ public class ShowEngine implements MusicListener {
     private final Map<Integer, Map<String, TrackStructure>> structures = new java.util.concurrent.ConcurrentHashMap<>();
     /** player -> breaks and bass hits of its track. Concurrent: also read by the web UI. */
     private final Map<Integer, TrackMoments> moments = new java.util.concurrent.ConcurrentHashMap<>();
+    /** Sections corrected by hand, per song; they replace the analysis. Read by the web UI too (synchronized). */
+    private volatile automa3.music.SectionEdits sectionEdits = new automa3.music.SectionEdits();
     /** player -> number of analyses received, so the UI knows when to fetch the graph again. */
     private final Map<Integer, Integer> analysisRevision = new java.util.concurrent.ConcurrentHashMap<>();
     /** "player|analysis source" -> build steps (they depend on where that analysis puts the builds). */
@@ -284,8 +286,74 @@ public class ShowEngine implements MusicListener {
         return seg == null ? null : seg.section();
     }
 
-    /** The analysis of the player's current track selected by the analysis mode (auto / phrase / waveform). */
+    /**
+     * The sections of the player's current track: the operator's correction if there is one (on top of the
+     * analysis' waveform data), else the analysis selected by the analysis mode.
+     */
     private TrackStructure structureFor(int player) {
+        TrackStructure st = analysisFor(player);
+        automa3.music.SectionEdits.Edit edit = editFor(player);
+        if (edit == null) return st;
+        DeckState d = decks.get(player);
+        return st == null
+                ? new TrackStructure(d.trackKey(), "edited", edit.segments(), List.of(), 1)
+                : new TrackStructure(st.trackKey(), st.source(), edit.segments(), st.barEnergy(), st.firstDownbeat(), st.bands(), st.beatBands());
+    }
+
+    private automa3.music.SectionEdits.Edit editFor(int player) {
+        DeckState d = decks.get(player);
+        return d == null ? null : sectionEdits.get(automa3.music.SectionEdits.songKey(d.title(), d.artist(), d.trackKey()));
+    }
+
+    public void setSectionEdits(automa3.music.SectionEdits edits) {
+        this.sectionEdits = edits;
+    }
+
+    /**
+     * Replace the sections of the track on a player (dragged transitions, changed types). Applies from the next
+     * beat and to the same song on any player, also next time. Returns the stored sections.
+     */
+    public java.util.concurrent.CompletableFuture<List<TrackStructure.Segment>> editSections(int player, List<TrackStructure.Segment> segments) {
+        return onEngine(() -> {
+            DeckState d = decks.get(player);
+            if (d == null || d.trackKey() == null) throw new IllegalArgumentException("no track on player " + player);
+            TrackStructure base = analysisFor(player);
+            List<TrackStructure.Segment> stored = sectionEdits.put(automa3.music.SectionEdits.songKey(d.title(), d.artist(), d.trackKey()),
+                    d.title(), d.artist(), base == null ? null : base.source(), segments);
+            analysisRevision.merge(player, 1, Integer::sum);
+            event("Player " + player + ": sections edited by hand (" + stored.size() + " sections)");
+            return stored;
+        });
+    }
+
+    /** Forget the hand-made sections of the track on a player: back to the analysis. */
+    public java.util.concurrent.CompletableFuture<Boolean> resetSections(int player) {
+        return onEngine(() -> {
+            DeckState d = decks.get(player);
+            if (d == null) return false;
+            boolean had = sectionEdits.remove(automa3.music.SectionEdits.songKey(d.title(), d.artist(), d.trackKey()));
+            if (had) {
+                analysisRevision.merge(player, 1, Integer::sum);
+                event("Player " + player + ": sections back to the analysis");
+            }
+            return had;
+        });
+    }
+
+    private <T> java.util.concurrent.CompletableFuture<T> onEngine(java.util.concurrent.Callable<T> task) {
+        java.util.concurrent.CompletableFuture<T> f = new java.util.concurrent.CompletableFuture<>();
+        sched.execute(() -> {
+            try {
+                f.complete(task.call());
+            } catch (Throwable t) {
+                f.completeExceptionally(t);
+            }
+        });
+        return f;
+    }
+
+    /** The analysis of the player's current track selected by the analysis mode (auto / phrase / waveform). */
+    private TrackStructure analysisFor(int player) {
         Map<String, TrackStructure> bySource = structures.get(player);
         DeckState d = decks.get(player);
         if (bySource == null || d == null) return null;
@@ -400,7 +468,7 @@ public class ShowEngine implements MusicListener {
         String reason;
         if (seg != null) {
             section = seg.section();
-            reason = st.source() + ": " + seg.label();
+            reason = "edited".equals(seg.label()) ? "edited by hand" : st.source() + ": " + seg.label();
         } else if (st != null && next > 0 && !st.segments().isEmpty()) {
             section = next < st.segments().get(0).startBeat() ? Section.INTRO : Section.OUTRO;
             reason = st.source() + ": outside analysed range";
@@ -1123,7 +1191,7 @@ public class ShowEngine implements MusicListener {
                     d.player() == primary, Math.round(d.bpm() * 10) / 10.0, beat == null ? -1 : beat,
                     d.title(), d.artist(), d.trackKey(), s == null ? null : s.name(), st == null ? "none" : st.source(),
                     availableAnalyses(d.player()), st == null ? List.of() : st.segments(), st == null ? 0 : st.lastBeat(),
-                    analysisRevision.getOrDefault(d.player(), 0)));
+                    analysisRevision.getOrDefault(d.player(), 0), editFor(d.player()) != null));
         });
         Map<String, String> activeLabels = new LinkedHashMap<>();
         active.forEach((k, v) -> activeLabels.put(k, v.label()));

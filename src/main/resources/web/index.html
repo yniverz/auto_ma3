@@ -84,6 +84,10 @@
   /* buttons on a nested surface need one more step of contrast */
   .deck button.small { background: var(--hover); }
   .deck button.small:hover { background: #333; }
+  .deck button.deck-btn { text-align: center; padding: 0 6px; }
+  .deck button.deck-btn.follow { width: 120px; }
+  .deck button.deck-btn.sections { width: 104px; }
+  .deck button.deck-btn:disabled { opacity: .4; cursor: default; background: var(--hover); }
   button.primary { background: var(--accent); color: #1a1100; border: none; border-radius: 6px; height: 32px; padding: 0 16px;
                    font-weight: 700; cursor: pointer; }
   button.primary:hover { filter: brightness(1.08); }
@@ -93,11 +97,32 @@
   .deck { border-radius: var(--radius); padding: 12px; margin-bottom: 8px; background: var(--panel2); }
   .deck:last-child { margin-bottom: 0; }
   .deck.primary { box-shadow: inset 3px 0 0 var(--accent); }
-  .timeline { position: relative; height: 16px; display: flex; border-radius: 4px; overflow: hidden; margin-top: 8px; background: #0c0c0c; }
-  .timeline > div { height: 100%; border-right: 1px solid rgba(0,0,0,.35); }
-  .timeline .head { position: absolute; top: -2px; bottom: -2px; width: 2px; background: #fff; border: none; }
+  .timeline { position: relative; height: 16px; border-radius: 4px; overflow: hidden; margin-top: 8px; background: #0c0c0c; }
+  .timeline .seg { position: absolute; top: 0; bottom: 0; border-right: 1px solid rgba(0,0,0,.35); overflow: hidden;
+                   white-space: nowrap; font-size: 10px; font-weight: 700; color: rgba(0,0,0,.7); padding-left: 4px; box-sizing: border-box; }
+  .timeline .head { position: absolute; top: -2px; bottom: -2px; width: 2px; background: #fff; border: none; z-index: 3; pointer-events: none; }
+  .timeline.editing { height: 26px; box-shadow: 0 0 0 1px var(--accent); }
+  .timeline.editing .seg { cursor: pointer; line-height: 26px; }
+  .timeline.editing .seg:hover { filter: brightness(1.15); }
+  .timeline .seam { position: absolute; top: 0; bottom: 0; width: 14px; margin-left: -7px; cursor: ew-resize; z-index: 2; touch-action: none; }
+  .timeline .seam::after { content: ""; position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: #fff; opacity: .65; }
+  .timeline .seam:hover::after, .timeline .seam.active::after { opacity: 1; background: var(--accent); width: 3px; left: 5px; }
+  .sec-hint { display: flex; align-items: center; gap: 8px; margin-top: 8px; min-height: 28px; }
+  .sec-hint .help { flex: 1; min-width: 0; line-height: 1.35; }
+  .sec-hint .status { flex: none; width: 230px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sec-hint button { flex: none; margin: 0; }
+  .sec-hint button:disabled, .sec-hint button:disabled:hover { opacity: .4; cursor: default; background: var(--hover); }
+  @media (max-width: 760px) { .sec-hint { flex-wrap: wrap; } .sec-hint .help { flex-basis: 100%; } .sec-hint .status { flex: 1; width: auto; text-align: left; } }
+  .sec-menu { position: fixed; z-index: 50; background: var(--panel2); border: 1px solid #333; border-radius: 8px; padding: 8px;
+              box-shadow: 0 8px 24px rgba(0,0,0,.5); display: flex; flex-direction: column; gap: 4px; min-width: 190px; }
+  .sec-menu .types { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .sec-menu button { text-align: left; height: 26px; }
+  .sec-menu button .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+  .sec-menu button.cur { box-shadow: inset 0 0 0 1px var(--accent); }
   .wave { display: block; width: 100%; height: 48px; margin-top: 4px; background: #0c0c0c; border-radius: 4px; }
   .wave-wrap { position: relative; overflow: hidden; }
+  /* the gap between bars: an outline in the graph's background colour, in screen pixels whatever the zoom */
+  svg.wave rect.b { stroke: #0c0c0c; stroke-width: var(--gap, 0); vector-effect: non-scaling-stroke; }
   #recBtn.recording { color: var(--bad); }
   .wave-wrap .head { position: absolute; top: 4px; bottom: 0; width: 2px; margin-left: -1px; background: #fff; }
   .wave-legend { font-size: 11px; color: var(--faint); margin-top: 4px; }
@@ -563,45 +588,334 @@ function renderDecks(decks) {
   const players = decks.map(d => d.player).join(",");
   if (box.dataset.players !== players) {
     box.dataset.players = players;
-    setHtml(box, decks.map(() => '<div class="deck"><div></div><div></div></div>').join(""));
+    setHtml(box, decks.map(() => '<div class="deck"><div></div><div></div><div></div><div></div></div>').join(""));
   }
   decks.forEach((d, i) => {
     const el = box.children[i];
-    const total = d.lastBeat || 1;
+    secSync(d);
+    const segs = deckSegments(d);
+    const total = Math.max(d.lastBeat, segs.length ? segs[segs.length - 1].endBeat : 0) || 1;
     el.classList.toggle("primary", d.primary);
     setHtml(el.children[0], deckInfoHtml(d));
     setHtml(el.children[1], deckGraphHtml(d, total));
+    setHtml(el.children[2], waveSvg(d, total)); // separate: zooming must not rebuild the graph
+    setHtml(el.children[3], secHintHtml(d, total));
+    const v = viewOf(d.player, total);
+    const at = (d.beat - 1 - v.start) / v.len * 100;
     const tl = el.querySelector(".timeline .head");
     if (tl) {
-      setStyle(tl, "display", d.beat > 0 && d.segments.length ? "" : "none");
-      setStyle(tl, "left", Math.min(100, d.beat / total * 100) + "%");
+      setStyle(tl, "display", d.beat > 0 && segs.length && at >= 0 && at <= 100 ? "" : "none");
+      setStyle(tl, "left", Math.min(100, at) + "%");
     }
     const wh = el.querySelector(".wave-wrap .head");
     if (wh) {
-      setStyle(wh, "display", d.beat > 0 ? "" : "none");
-      setStyle(wh, "left", (d.beat / total * 100) + "%");
+      setStyle(wh, "display", d.beat > 0 && at >= 0 && at <= 100 ? "" : "none");
+      setStyle(wh, "left", at + "%");
+    }
+    // the graph is drawn for the whole track; zooming only moves its viewBox
+    const svg = el.querySelector("svg.wave");
+    if (svg) {
+      const vb = `${(v.start / total * 1000).toFixed(3)} 0 ${(v.len / total * 1000).toFixed(3)} ${svg.viewBox.baseVal.height}`;
+      if (svg.getAttribute("viewBox") !== vb) svg.setAttribute("viewBox", vb);
+      // gaps between the bars once they are wide enough to tell apart: none in the overview, up to 3 px zoomed in
+      const barPx = svg.clientWidth / v.len * (+svg.dataset.step || 1);
+      const gap = barPx < 6 ? "0" : Math.min(3, 0.6 + (barPx - 6) * 0.08).toFixed(2) + "px";
+      if (svg.style.getPropertyValue("--gap") !== gap) svg.style.setProperty("--gap", gap);
     }
   });
 }
 
 function deckInfoHtml(d) {
+  // the buttons first, at a fixed width: they stay in place when the badges after them change
   return `<div class="row"><b>Player ${d.player}</b>
+      ${state.engine.followPlayer === d.player
+        ? '<button class="small deck-btn follow" data-follow="0" title="Back to automatic deck selection">Following · Auto</button>'
+        : `<button class="small deck-btn follow" data-follow="${d.player}" title="Make this deck drive the lights">Follow</button>`}
+      <button class="small deck-btn sections" data-secedit="${d.player}"${d.segments.length ? "" : " disabled"}
+        title="${d.segments.length ? "Move the transitions between sections and change their types" : "No sections for this track yet"}">${secEditing.has(d.player) ? "Done editing" : "✎ Sections"}</button>
       ${d.playing ? '<span class="badge ok">playing</span>' : '<span class="badge">stopped</span>'}
       ${d.onAir ? '<span class="badge ok">on air</span>' : state.engine.mixerPresent ? '<span class="badge" title="The mixer reports this channel faded out. The DJM uses the channel with the same number as the player.">off air</span>' : ""}
       ${d.master ? '<span class="badge">master</span>' : ""}
       ${d.primary ? '<span class="badge warn">driving lights</span>' : ""}
-      ${state.engine.followPlayer === d.player
-        ? '<button class="small" data-follow="0" title="Back to automatic deck selection">Following · Auto</button>'
-        : `<button class="small" data-follow="${d.player}" title="Make this deck drive the lights">Follow</button>`}
+      ${d.edited ? '<span class="badge warn" title="The sections of this song were set by hand; they replace the analysis">edited</span>' : ""}
       <span class="muted">${d.bpm} BPM · beat ${d.beat} · ${esc(d.section || "-")} · analysis: <b>${esc(analysisName(d.analysis))}</b>${d.availableAnalyses.length > 1 ? " (also available: " + d.availableAnalyses.filter(a => a !== d.analysis).map(analysisName).join(", ") + ")" : ""}</span></div>
     <div class="small">${esc(d.title || "")} <span class="muted">${esc(d.artist || "")}</span></div>`;
 }
 
-/** Section timeline and waveform graph, without the playheads (those are moved by renderDecks). */
+/** Section timeline, without the playhead (moved by renderDecks). */
 function deckGraphHtml(d, total) {
-  const segs = d.segments.map(s => `<div title="${s.section} (${esc(s.label)})" style="width:${(s.endBeat - s.startBeat) / total * 100}%;background:var(--${s.section})"></div>`).join("");
-  return `<div class="timeline">${segs || '<div style="width:100%;background:var(--panel)"></div>'}<div class="head" style="display:none"></div></div>
-    ${waveSvg(d, total)}`;
+  const list = deckSegments(d);
+  const editing = secEditing.has(d.player);
+  const v = viewOf(d.player, total);
+  const x = beat => (beat - 1 - v.start) / v.len * 100;
+  const segs = list.filter(s => s.endBeat - 1 > v.start && s.startBeat - 1 < v.start + v.len).map(s => {
+    const i = list.indexOf(s);
+    const l = Math.max(0, x(s.startBeat)), r = Math.min(100, x(s.endBeat)); // cut at the edges: labels stay readable
+    return `<div class="seg" data-i="${i}" title="${s.section} · beats ${s.startBeat}–${s.endBeat - 1} (${esc(s.label)})${editing ? " · click to change" : ""}"
+      style="left:${l}%;width:${r - l}%;background:var(--${s.section})">${editing && r - l > 5 ? s.section : ""}</div>`;
+  }).join("");
+  const seams = editing ? list.slice(1).map((s, k) => ({s, i: k + 1})).filter(({s}) => x(s.startBeat) >= 0 && x(s.startBeat) <= 100)
+      .map(({s, i}) => `<div class="seam${secDrag && secDrag.player === d.player && secDrag.i === i ? " active" : ""}" data-i="${i}"
+      style="left:${x(s.startBeat)}%" title="Drag to move this transition"></div>`).join("") : "";
+  return `<div class="timeline${editing ? " editing" : ""}" data-player="${d.player}" data-total="${total}">${segs || '<div class="seg" style="left:0;width:100%;background:var(--panel)"></div>'}${seams}<div class="head" style="display:none"></div></div>`;
+}
+
+/** Below the graph while editing: help, what is shown / dragged, Zoom out and Reset (always there: the row keeps its size). */
+function secHintHtml(d, total) {
+  if (!secEditing.has(d.player)) return "";
+  const v = viewOf(d.player, total), list = deckSegments(d);
+  const zoomed = v.len < total;
+  const dragging = secDrag && secDrag.player === d.player;
+  const status = dragging
+    ? `transition at <b>beat ${list[secDrag.i].startBeat}</b> (bar ${barOf(d, list[secDrag.i].startBeat)}) · Esc cancels`
+    : zoomed ? `bars ${barOf(d, Math.floor(v.start) + 1)}–${barOf(d, Math.ceil(v.start + v.len))}` : "whole track";
+  return `<div class="sec-hint small">
+    <span class="muted help">Drag a white line to move a transition (snaps to bars; to beats when zoomed in or with Alt/Option).
+      Click a section to change its type, split or merge it. Scroll or pinch to zoom, swipe sideways to pan.</span>
+    <span class="status">${status}</span>
+    <button class="small" data-secfit="${d.player}"${zoomed ? "" : " disabled"}>Zoom out</button>
+    <button class="small" data-secreset="${d.player}"${d.edited ? "" : " disabled"} title="Forget the hand-made sections of this song">Reset to analysis</button>
+  </div>`;
+}
+
+// ---------- editing the sections by hand (dragged transitions, other types)
+const secDraft = {};          // player -> {segs, savedAt}: shown instead of the engine's sections while editing / saving
+const secEditing = new Map(); // player -> track key being edited
+let secDrag = null;           // {player, i, rect, total, segs, before}
+const secView = {};           // player -> {start, len}: the zoomed part of the track in beats (start 0 = beat 1)
+const SEC_MIN_BEATS = 8;      // zoom in to two bars at most
+
+/** The part of the track shown: zoomed only while editing. */
+function viewOf(player, total) {
+  const v = secEditing.has(player) ? secView[player] : null;
+  if (!v || v.len >= total) return {start: 0, len: total};
+  const len = Math.max(SEC_MIN_BEATS, v.len);
+  return {start: Math.max(0, Math.min(total - len, v.start)), len};
+}
+
+function deckSegments(d) {
+  return secDraft[d.player] ? secDraft[d.player].segs : d.segments;
+}
+
+function sameSegs(a, b) {
+  return a.length === b.length && a.every((s, i) => s.startBeat === b[i].startBeat && s.endBeat === b[i].endBeat && s.section === b[i].section);
+}
+
+/** Drop drafts the engine has caught up with, and editing of a track that is gone. */
+function secSync(d) {
+  if (secEditing.has(d.player) && secEditing.get(d.player) !== d.trackKey) {
+    secEditing.delete(d.player);
+    delete secView[d.player];
+    delete secDraft[d.player];
+    secCloseMenu();
+  }
+  const dr = secDraft[d.player];
+  if (dr && dr.savedAt && !(secDrag && secDrag.player === d.player) && (sameSegs(dr.segs, d.segments) || Date.now() - dr.savedAt > 3000)) {
+    delete secDraft[d.player];
+  }
+}
+
+function firstDownbeat(player) {
+  const c = analysisCache[player];
+  return c && c.data && c.data.firstDownbeat > 0 ? c.data.firstDownbeat : 1;
+}
+
+function barOf(d, beat) {
+  return Math.floor((beat - firstDownbeat(d.player)) / 4) + 1;
+}
+
+function deckOf(player) {
+  return state ? state.engine.decks.find(d => d.player === player) : null;
+}
+
+function rerenderDecks() {
+  if (state) renderDecks(state.engine.decks);
+}
+
+function copySegs(segs) {
+  return segs.map(s => ({startBeat: s.startBeat, endBeat: s.endBeat, section: s.section, label: s.label || "edited"}));
+}
+
+async function secSave(player, segs) {
+  secDraft[player] = {segs};
+  rerenderDecks();
+  try {
+    const r = await api("/api/sections?player=" + player, {method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({segments: copySegs(segs)})});
+    secDraft[player] = {segs: r.segments, savedAt: Date.now()};
+  } catch (e) {
+    delete secDraft[player];
+    alert("Could not save the sections: " + e.message);
+  }
+  rerenderDecks();
+}
+
+/** Beat under the pointer, on a bar line (firstDownbeat + 4n) unless Alt is held. */
+function secBeatAt(clientX, rect, total, player, fine) {
+  const v = viewOf(player, total);
+  const raw = 1 + v.start + (clientX - rect.left) / rect.width * v.len;
+  if (fine || rect.width / v.len >= 14) return Math.round(raw); // a beat is wide enough to hit
+  // (14 px per beat: about 60 bars across a laptop-wide panel)
+  const fd = firstDownbeat(player);
+  return fd + Math.round((raw - fd) / 4) * 4;
+}
+
+$("decks").addEventListener("pointerdown", ev => {
+  const seam = ev.target.closest(".seam");
+  if (!seam) return;
+  const tl = seam.closest(".timeline");
+  const player = +tl.dataset.player, d = deckOf(player);
+  if (!d) return;
+  ev.preventDefault();
+  secCloseMenu();
+  const segs = copySegs(deckSegments(d));
+  secDrag = {player, i: +seam.dataset.i, rect: tl.getBoundingClientRect(), total: +tl.dataset.total, segs, before: JSON.stringify(segs),
+             hadDraft: secDraft[player]};
+  secDraft[player] = {segs};
+  rerenderDecks();
+});
+
+document.addEventListener("pointermove", ev => {
+  if (!secDrag) return;
+  const {segs, i} = secDrag;
+  const lo = segs[i - 1].startBeat + 1, hi = segs[i].endBeat - 1;
+  let beat = secBeatAt(ev.clientX, secDrag.rect, secDrag.total, secDrag.player, ev.altKey);
+  beat = Math.max(lo, Math.min(hi, beat));
+  if (beat === segs[i].startBeat) return;
+  segs[i - 1].endBeat = beat;
+  segs[i].startBeat = beat;
+  secDrag.moved = true;
+  rerenderDecks();
+});
+
+function secEndDrag(cancel) {
+  const drag = secDrag;
+  secDrag = null;
+  if (!drag) return;
+  if (cancel || JSON.stringify(drag.segs) === drag.before) {
+    if (drag.hadDraft) secDraft[drag.player] = drag.hadDraft; else delete secDraft[drag.player];
+    rerenderDecks();
+  } else {
+    secSave(drag.player, drag.segs);
+  }
+  secJustDragged = !!drag.moved;
+  setTimeout(() => { secJustDragged = false; }, 0);
+}
+let secJustDragged = false;
+document.addEventListener("pointerup", () => secEndDrag(false));
+document.addEventListener("pointercancel", () => secEndDrag(true));
+document.addEventListener("keydown", ev => {
+  if (ev.key !== "Escape") return;
+  if (secDrag) secEndDrag(true);
+  secCloseMenu();
+});
+
+// zoom like a map while editing: scroll / pinch zooms around the pointer, sideways swipe (or Shift + wheel) pans
+let secWheelFrame = 0;
+$("decks").addEventListener("wheel", ev => {
+  const deckEl = ev.target.closest(".deck");
+  const tl = deckEl && deckEl.querySelector(".timeline.editing");
+  if (!tl || !ev.target.closest(".timeline, .wave-wrap") || secDrag) return;
+  ev.preventDefault();
+  const player = +tl.dataset.player, total = +tl.dataset.total;
+  const rect = tl.getBoundingClientRect();
+  const v = viewOf(player, total);
+  const unit = ev.deltaMode === 1 ? 16 : ev.deltaMode === 2 ? rect.width : 1; // lines / pages (mouse wheels) to pixels
+  let dx = ev.deltaX * unit, dy = ev.deltaY * unit;
+  if (ev.shiftKey && !dx) { dx = dy; dy = 0; }
+  // trackpads send both axes at once: follow the main direction so a zoom does not drift sideways
+  if (Math.abs(dx) > Math.abs(dy) * 1.5) dy = 0; else if (Math.abs(dy) > Math.abs(dx) * 1.5) dx = 0;
+  let {start, len} = v;
+  if (dy) {
+    const frac = Math.max(0, Math.min(1, (ev.clientX - rect.left) / rect.width));
+    const anchor = start + frac * len;                       // the beat under the pointer stays put
+    len = Math.max(SEC_MIN_BEATS, Math.min(total, len * Math.exp(dy * (ev.ctrlKey ? 0.01 : 0.003))));
+    start = anchor - frac * len;
+  }
+  if (dx) start += dx / rect.width * len;
+  start = Math.max(0, Math.min(total - len, start));
+  if (len >= total) delete secView[player]; else secView[player] = {start, len};
+  if (!secWheelFrame) secWheelFrame = requestAnimationFrame(() => { secWheelFrame = 0; rerenderDecks(); });
+}, {passive: false});
+
+// click on a section while editing: change its type, split it, merge it
+let secMenu = null;
+
+function secCloseMenu() {
+  if (secMenu) secMenu.remove();
+  secMenu = null;
+}
+
+document.addEventListener("pointerdown", ev => {
+  if (secMenu && !secMenu.contains(ev.target)) secCloseMenu();
+}, true);
+
+$("decks").addEventListener("click", ev => {
+  const edit = ev.target.closest("[data-secedit]");
+  if (edit) {
+    const player = +edit.dataset.secedit, d = deckOf(player);
+    if (secEditing.has(player)) { secEditing.delete(player); delete secView[player]; } else if (d) secEditing.set(player, d.trackKey);
+    secCloseMenu();
+    rerenderDecks();
+    return;
+  }
+  const fit = ev.target.closest("[data-secfit]");
+  if (fit) {
+    delete secView[+fit.dataset.secfit];
+    rerenderDecks();
+    return;
+  }
+  const reset = ev.target.closest("[data-secreset]");
+  if (reset) {
+    if (!confirm("Forget the hand-made sections of this song and use the analysis again?")) return;
+    const player = +reset.dataset.secreset;
+    delete secDraft[player];
+    post("/api/sections/reset?player=" + player).catch(e => alert(e.message));
+    return;
+  }
+  const seg = ev.target.closest(".timeline.editing .seg[data-i]");
+  if (!seg || secJustDragged) return;
+  const tl = seg.closest(".timeline");
+  const player = +tl.dataset.player, d = deckOf(player);
+  if (!d) return;
+  secOpenMenu(d, +seg.dataset.i, secBeatAt(ev.clientX, tl.getBoundingClientRect(), +tl.dataset.total, player, ev.altKey), ev.clientX, ev.clientY);
+});
+
+function secOpenMenu(d, i, beat, cx, cy) {
+  secCloseMenu();
+  const segs = copySegs(deckSegments(d));
+  const s = segs[i];
+  const canSplit = beat > s.startBeat && beat < s.endBeat;
+  const m = document.createElement("div");
+  m.className = "sec-menu";
+  m.innerHTML = `<div class="small muted">${s.section} · bar ${barOf(d, s.startBeat)}–${barOf(d, s.endBeat - 1)} (beats ${s.startBeat}–${s.endBeat - 1})</div>
+    <div class="types">${SECTIONS.map(t => `<button class="small${t === s.section ? " cur" : ""}" data-type="${t}"><span class="sw" style="background:var(--${t})"></span>${t}</button>`).join("")}</div>
+    ${canSplit ? `<button class="small" data-act="split">Split at bar ${barOf(d, beat)} (beat ${beat})</button>` : ""}
+    ${i > 0 ? `<button class="small" data-act="prev">Merge into the previous section</button>` : ""}
+    ${i < segs.length - 1 ? `<button class="small" data-act="next">Merge into the next section</button>` : ""}`;
+  m.addEventListener("click", ev => {
+    const b = ev.target.closest("button");
+    if (!b) return;
+    if (b.dataset.type) {
+      if (b.dataset.type === s.section) return secCloseMenu();
+      segs[i] = {...s, section: b.dataset.type};
+    } else if (b.dataset.act === "split") {
+      segs.splice(i, 1, {...s, endBeat: beat}, {...s, startBeat: beat});
+    } else if (b.dataset.act === "prev") {
+      segs[i - 1].endBeat = s.endBeat;
+      segs.splice(i, 1);
+    } else if (b.dataset.act === "next") {
+      segs[i + 1].startBeat = s.startBeat;
+      segs.splice(i, 1);
+    }
+    secCloseMenu();
+    secSave(d.player, segs);
+  });
+  document.body.appendChild(m);
+  const r = m.getBoundingClientRect();
+  m.style.left = Math.max(8, Math.min(cx - 20, innerWidth - r.width - 8)) + "px";
+  m.style.top = (cy + r.height + 16 > innerHeight ? cy - r.height - 10 : cy + 12) + "px";
+  secMenu = m;
 }
 
 // ---------- waveform bands per bar (what the analysis sees)
@@ -611,9 +925,14 @@ function wantAnalysis(d) {
   const key = d.trackKey + "|" + d.analysis + "|" + d.analysisRevision;
   const c = analysisCache[d.player];
   if (c && c.key === key) return c.data;
-  analysisCache[d.player] = {key, data: null};
-  api("/api/analysis?player=" + d.player).then(data => { if (analysisCache[d.player].key === key) analysisCache[d.player].data = data; }).catch(() => {});
-  return null;
+  // same track (e.g. sections edited): keep showing the graph until the new one is there
+  const keep = c && c.trackKey === d.trackKey;
+  analysisCache[d.player] = keep ? {...c, key} : {key, trackKey: d.trackKey, data: null};
+  api("/api/analysis?player=" + d.player).then(data => {
+    const n = analysisCache[d.player];
+    if (n.key === key) { n.data = data; n.svgKey = null; }
+  }).catch(() => {});
+  return analysisCache[d.player].data;
 }
 
 function waveSvg(d, total) {
@@ -647,7 +966,7 @@ function buildWaveSvg(d, a, total) {
   const bars = pts.map((b, i) => {
     const beat = beatOf(i);
     const bar = Math.floor((beat - a.firstDownbeat) / 4) + 1;
-    return `<rect x="${x(i)}" y="${y(b.low, "low")}" width="${w}" height="${(H - y(b.low, "low")).toFixed(1)}" fill="#3e63dd"><title>beat ${beat} · bar ${bar} · low ${b.low.toFixed(1)} mid ${b.mid.toFixed(1)} high ${b.high.toFixed(1)}</title></rect>`;
+    return `<rect class="b" x="${x(i)}" y="${y(b.low, "low")}" width="${w}" height="${(H - y(b.low, "low")).toFixed(1)}" fill="#3e63dd"><title>beat ${beat} · bar ${bar} · low ${b.low.toFixed(1)} mid ${b.mid.toFixed(1)} high ${b.high.toFixed(1)}</title></rect>`;
   }).join("");
   // short breaks (shaded), bass hits (ticks) and build steps (green lines) the show reacts to
   const xb = beat => ((beat - 1) / total * 1000).toFixed(2);
@@ -656,7 +975,7 @@ function buildWaveSvg(d, a, total) {
     : m.kind === "STEP"
     ? `<rect x="${xb(m.startBeat)}" y="0" width="3" height="${H}" fill="#46a758"><title>build gets harder · beat ${m.startBeat}</title></rect>`
     : `<rect x="${xb(m.startBeat)}" y="0" width="${(m.length / total * 1000).toFixed(2)}" height="${H}" fill="#ffffff" fill-opacity="0.22"><title>${m.kind === "STOP" ? "stop (silence)" : "break (no bass)"} · beat ${m.startBeat}, ${m.length} beats</title></rect>`).join("");
-  return `<div class="wave-wrap"><svg class="wave" viewBox="0 0 1000 ${H}" preserveAspectRatio="none">${bars}
+  return `<div class="wave-wrap"><svg class="wave" data-step="${step}" viewBox="0 0 1000 ${H}" preserveAspectRatio="none">${bars}
       <polyline points="${line("mid")}" fill="none" stroke="#f5a524" stroke-width="1.2" vector-effect="non-scaling-stroke"/>
       <polyline points="${line("high")}" fill="none" stroke="#ededed" stroke-width="1" vector-effect="non-scaling-stroke"/>${marks}</svg><div class="head" style="display:none"></div></div>
     <div class="wave-legend"><b style="color:#849dff">■ bass</b> · <b style="color:var(--accent)">— mid</b> · <b style="color:var(--text)">— high</b> per ${perBeat ? "beat" : "bar"}${(a.moments || []).length ? ' · <span style="color:var(--muted)">▮ break</span> · <b style="color:var(--accent)">▴ bass hit</b> · <b style="color:#46a758">| build step</b>' : ""} (hover for values)${!d.availableAnalyses.includes("phrase") && d.availableAnalyses.length ? ' · <span style="color:var(--accent)">no rekordbox phrase analysis for this track</span>' : ""}</div>`;

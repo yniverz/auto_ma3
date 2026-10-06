@@ -75,6 +75,16 @@ public class WebServer {
         if (server != null) server.stop(0);
     }
 
+    /** Waits for the engine thread; its IllegalArgumentException becomes a 400 like any other bad request. */
+    private static <T> T engineResult(java.util.concurrent.CompletableFuture<T> f) throws Exception {
+        try {
+            return f.get(5, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (java.util.concurrent.ExecutionException e) {
+            if (e.getCause() instanceof Exception c) throw c;
+            throw e;
+        }
+    }
+
     private void handle(HttpExchange ex) throws IOException {
         try {
             String path = ex.getRequestURI().getPath();
@@ -136,6 +146,17 @@ public class WebServer {
                     body.put("moments", app.engine().moments(player));
                     json(ex, 200, body);
                 }
+            } else if (path.equals("/api/sections") && method.equals("POST")) {
+                // the operator's correction of the sections of the track on a player: {"segments": [...]}
+                int player = Integer.parseInt(query.getOrDefault("player", "0"));
+                JsonNode body = ConfigStore.JSON.readTree(ex.getRequestBody());
+                List<automa3.music.TrackStructure.Segment> segs = ConfigStore.JSON.convertValue(body.path("segments"),
+                        new com.fasterxml.jackson.core.type.TypeReference<>() {
+                        });
+                json(ex, 200, Map.of("segments", engineResult(app.engine().editSections(player, segs))));
+            } else if (path.equals("/api/sections/reset") && method.equals("POST")) {
+                int player = Integer.parseInt(query.getOrDefault("player", "0"));
+                json(ex, 200, Map.of("reset", engineResult(app.engine().resetSections(player))));
             } else if (path.equals("/api/looks/export")) {
                 byte[] body = ConfigStore.JSON.writeValueAsBytes(LookTransfer.export(app.config().get()));
                 ex.getResponseHeaders().set("Content-Type", "application/json");

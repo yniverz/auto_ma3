@@ -179,6 +179,15 @@ The **Analysis** dropdown in the header picks what drives the show: *Auto* (reko
 them), *rekordbox phrases* or *Waveform*. Both analyses are kept per track, so switching is instant. Each deck
 shows a per-beat graph of what the waveform analysis sees.
 
+**Correcting the sections by hand**: click **✎ Sections** on a deck. Drag a white line in the section bar to move a
+transition (it snaps to bars; to single beats when zoomed in or with Alt/Option). Scroll or pinch over the section bar
+or the graph to zoom in around the pointer (like a map; smooth on a Mac trackpad), swipe sideways to pan, **Zoom out**
+to see the whole track again. Or click a section to give it another type (e.g. a
+groove that should be a drop), split it at the clicked bar or merge it into its neighbour. The show follows the change
+from the next beat. Edits are kept per song (artist and title) in `section-edits.json` in the data folder, so they
+are used again next time the song is played, on any player; the deck then shows *edited*. **Reset to analysis**
+forgets them. Breaks and bass hits still come from the waveform.
+
 ## Development
 
 ```bash

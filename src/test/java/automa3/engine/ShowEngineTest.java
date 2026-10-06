@@ -168,6 +168,44 @@ class ShowEngineTest {
         assertStrobeSafe();
     }
 
+    /** The operator turns a groove into a drop by hand: the show treats it as a drop; reset brings the analysis back. */
+    @Test
+    void sectionsEditedByHandReplaceTheAnalysis() throws Exception {
+        SimulatedSource.Template t = SimulatedSource.TEMPLATES.get(0);
+        TrackStructure st = SimulatedSource.exactStructure("track1", t, 64);
+        TrackStructure.Segment groove = st.segments().stream().filter(s -> s.section() == automa3.model.Section.GROOVE)
+                .filter(s -> s.startBeat() > 1).findFirst().orElseThrow();
+        List<TrackStructure.Segment> edited = new ArrayList<>();
+        for (TrackStructure.Segment s : st.segments()) {
+            edited.add(s.equals(groove) ? new TrackStructure.Segment(s.startBeat(), s.endBeat(), automa3.model.Section.DROP, "x") : s);
+        }
+        // the deck with its track first, then the edit, then the track plays
+        engine.onDeck(new DeckState(1, "CDJ-3000", false, true, true, true, bpm, 1, 1, "track1", "Test", "Artist", sched.currentTimeMillis()));
+        engine.onStructure(1, st);
+        var f = engine.editSections(1, edited);
+        sched.runUntil(sched.nanoTime() + 1);
+        assertEquals(edited.size(), f.get().size());
+        assertThrows(java.util.concurrent.ExecutionException.class, () -> {
+            var bad = engine.editSections(9, edited);
+            sched.runUntil(sched.nanoTime() + 1);
+            bad.get();
+        }, "no track on that player");
+
+        play("track1", st, groove.startBeat() + 8);
+        assertTrue(flashedAt(look(Role.ACCENT), groove.startBeat()), "drop hit where the groove was");
+        var deck = engine.snapshot().decks().get(0);
+        assertTrue(deck.edited());
+        assertEquals(automa3.model.Section.DROP, deck.segments().stream().filter(s -> s.startBeat() == groove.startBeat()).findFirst().orElseThrow().section());
+        assertEquals("DROP", engine.snapshot().section());
+
+        var reset = engine.resetSections(1);
+        sched.runUntil(sched.nanoTime() + 1_000_000_000L);
+        assertTrue(reset.get());
+        var after = engine.snapshot().decks().get(0);
+        assertFalse(after.edited());
+        assertEquals(st.segments(), after.segments());
+    }
+
     /** A second copy of every scene look but the colours, so every layer has something to change to. */
     private void secondLookOnEveryLayer() throws Exception {
         Config c = ConfigStore.copy(store.get());
