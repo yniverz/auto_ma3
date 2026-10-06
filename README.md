@@ -5,6 +5,8 @@ Automatic grandMA3 lighting for techno and electronic music, driven by Pioneer /
 AutoMA3 reads the CDJs over Pro DJ Link (beat, BPM, on-air, rekordbox phrase analysis and waveforms) and decides, beat by beat, which of **your** executors run.
 It sends grandMA3 command-line commands over OSC (`/cmd`). You program the looks on the console. The app decides when to use them.
 
+![AutoMA3 live view: a drop on player 1 with its section bar and per-beat waveform analysis, the next track cued on player 2, the looks it runs and the grandMA3 commands it sent](docs/images/live.png)
+
 - **Sections**: intro, groove, build, breakdown, drop, peak and outro. They come from rekordbox phrase analysis, or from the app's own analysis of the CDJ waveform when there is none, with optional live audio as a safety net.
 - **Look-ahead**: it knows a drop is coming, so the fog goes 16 beats early, the riser ramps over the build, the strobe runs from the end of the build into the drop, there's a blackout on the beat before, and the hits land on the beat (sent `latencyMs` early).
 - **Layers**: one running look per layer (base, colour, movement, effect, or your own layers), chosen by section and energy with variety, and one colour per track.

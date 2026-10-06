@@ -107,6 +107,7 @@ public class SimulatedSource implements MusicSource {
         load(decks[0], trackCounter++);
         decks[0].playing = true;
         decks[0].onAir = true;
+        load(decks[1], trackCounter++); // like a DJ: the next track is cued on the other deck
         int active = 0;
         long nextBeatNanos = System.nanoTime() + 500_000_000L;
         long lastDeckUpdate = 0;
@@ -126,7 +127,7 @@ public class SimulatedSource implements MusicSource {
                 }
                 // transition: start the other deck at the outro of the active one
                 if (!b.playing && a.beat == a.outroStartBeat() - 1) {
-                    load(b, trackCounter++);
+                    if (b.track == null) load(b, trackCounter++);
                     b.playing = true;
                     b.onAir = true;
                     b.beat = 0;
@@ -135,6 +136,7 @@ public class SimulatedSource implements MusicSource {
                     a.playing = false;
                     a.onAir = false;
                     active = 1 - active;
+                    load(a, trackCounter++); // the finished deck gets the next track
                 }
                 nextBeatNanos += (long) periodNanos;
                 status = "playing \"" + decks[active].track.name() + "\" (" + decks[active].source + ") at "
